@@ -2,28 +2,48 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Heart, PieChart, Wallet, Settings, Menu } from "lucide-react";
+import { LayoutDashboard, Heart, List, CreditCard, Settings, X } from "lucide-react";
 import clsx from "clsx";
+import Image from "next/image";
 
-const NAV_ITEMS = [
+const MENU_ITEMS = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Donation Drives", href: "/drives", icon: Heart },
-    { name: "Categories", href: "/categories", icon: PieChart },
-    { name: "Donations", href: "/donations", icon: Wallet },
+    { name: "Categories", href: "/categories", icon: List },
+    { name: "Donations", href: "/donations", icon: CreditCard },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const pathname = usePathname();
 
     return (
-        <aside className="hidden md:flex flex-col w-64 bg-secondary-dark text-white h-screen fixed left-0 top-0 border-r border-gray-800">
-            <div className="p-6 flex items-center justify-center border-b border-gray-800">
-                <h1 className="text-2xl font-bold text-primary">JMC Admin</h1>
+        <aside className={clsx(
+            "fixed left-0 top-0 h-screen bg-secondary-dark text-white z-50 transition-transform duration-300 ease-in-out w-64 border-r border-gray-800 flex flex-col",
+            isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}>
+            <div className="p-6 flex items-center justify-center border-b border-gray-800 relative">
+                <div className="relative w-32 h-32">
+                    <Image
+                        src="/logo.png"
+                        alt="JMC Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
+                </div>
+                <button onClick={onClose} className="absolute top-4 right-4 md:hidden text-gray-400 hover:text-white">
+                    <X className="w-6 h-6" />
+                </button>
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
-                {NAV_ITEMS.map((item) => {
+                {MENU_ITEMS.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                         <Link

@@ -6,6 +6,8 @@ import { Download, Plus } from "lucide-react";
 
 import { exportToCSV } from "@/lib/utils";
 
+import Link from "next/link";
+
 export default function DrivesPage() {
     const handleExport = () => {
         exportToCSV(ACTIVE_DRIVES, "donation_drives");
@@ -23,10 +25,10 @@ export default function DrivesPage() {
                         <Download className="w-4 h-4" />
                         Export All
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze">
+                    <Link href="/drives/create" className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze">
                         <Plus className="w-4 h-4" />
                         New Drive
-                    </button>
+                    </Link>
                 </div>
             </div>
 

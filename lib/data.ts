@@ -108,8 +108,8 @@ export const RATINGS: RatingData[] = [
     { rating: 5, comment: "Great initiative", date: "2025-11-24", donorName: "Huda" },
 ];
 
-export const STATS = {
-    today: 45000,
-    thisWeek: 275000,
-    thisMonth: 1220000,
+export const DONATION_STATS = {
+    totalCollectedToday: 45000,
+    totalCollectedWeek: 275000,
+    totalCollectedMonth: 1220000,
 };

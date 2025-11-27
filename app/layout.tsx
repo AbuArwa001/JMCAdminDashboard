@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "JMC Admin Dashboard",
   description: "Admin dashboard for Jamia Mosque Donation Management",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
