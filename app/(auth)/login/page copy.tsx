@@ -7,11 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-// import api from "@/lib/api";
+import api from "@/lib/api";
 import Cookies from "js-cookie";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
-
 
 export default function LoginPage() {
     const router = useRouter();
@@ -24,51 +21,38 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            // Sign in with Firebase using the imported auth instance
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-
-            // Get Firebase ID token
-            const firebaseToken = await user.getIdToken();
-
-            // Store Firebase token in cookies for middleware
-            Cookies.set('firebaseToken', firebaseToken, {
-                expires: 1, // 1 day
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
+            // Call API to get JWT token
+            const response = await api.post("/auth/jwt/create/", {
+                email,
+                password,
             });
 
-            // Also store in localStorage for client-side use
-            localStorage.setItem('firebaseToken', firebaseToken);
-            localStorage.setItem('firebaseUser', JSON.stringify(user));
+            const { access, refresh } = response.data;
 
-            console.log("User signed in successfully:", user);
+            // Store tokens
+            localStorage.setItem("accessToken", access);
+            localStorage.setItem("refreshToken", refresh);
+
+            // Set cookies for middleware
+            Cookies.set("accessToken", access);
+            Cookies.set("refreshToken", refresh);
+
+            console.log(`Tokens stored successfully ${access} ${refresh}`);
+            // Fetch user details
+            const userResponse = await api.get("/auth/users/me/");
+            localStorage.setItem("user", JSON.stringify(userResponse.data));
+
             toast.success("Logged in successfully");
-
             router.push("/");
             router.refresh();
         } catch (error: any) {
             console.error("Login error:", error);
-            const errorCode = error.code;
-
-            // Better error messages
-            let userFriendlyError = "Invalid credentials";
-            if (errorCode === 'auth/user-not-found') {
-                userFriendlyError = "No account found with this email";
-            } else if (errorCode === 'auth/wrong-password') {
-                userFriendlyError = "Incorrect password";
-            } else if (errorCode === 'auth/invalid-email') {
-                userFriendlyError = "Invalid email address";
-            } else if (errorCode === 'auth/too-many-requests') {
-                userFriendlyError = "Too many failed attempts. Please try again later";
-            }
-
-            toast.error(userFriendlyError);
+            const errorMessage = error.response?.data?.detail || "Invalid credentials";
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
     };
-
 
     const handleSocialLogin = (provider: string) => {
         signIn(provider, { callbackUrl: "/" });
