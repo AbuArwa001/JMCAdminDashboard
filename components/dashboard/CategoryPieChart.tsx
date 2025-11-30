@@ -3,7 +3,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { CATEGORY_STATS } from "@/lib/data";
 
-export default function CategoryPieChart() {
+interface CategoryPieChartProps {
+    data: any[];
+}
+
+export default function CategoryPieChart({ data }: CategoryPieChartProps) {
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">
             <h3 className="font-bold text-gray-900 mb-6">Donations by Category</h3>
@@ -11,7 +15,7 @@ export default function CategoryPieChart() {
             <ResponsiveContainer width="100%" height="85%">
                 <PieChart>
                     <Pie
-                        data={CATEGORY_STATS}
+                        data={data}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -19,7 +23,7 @@ export default function CategoryPieChart() {
                         paddingAngle={5}
                         dataKey="value"
                     >
-                        {CATEGORY_STATS.map((entry, index) => (
+                        {data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
                         ))}
                     </Pie>

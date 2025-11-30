@@ -3,7 +3,11 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DONATION_TRENDS } from "@/lib/data";
 
-export default function DonationChart() {
+interface DonationChartProps {
+    data: any[];
+}
+
+export default function DonationChart({ data }: DonationChartProps) {
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">
             <div className="flex justify-between items-center mb-6">
@@ -16,7 +20,7 @@ export default function DonationChart() {
             </div>
 
             <ResponsiveContainer width="100%" height="85%">
-                <LineChart data={DONATION_TRENDS}>
+                <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                     <XAxis
                         dataKey="name"

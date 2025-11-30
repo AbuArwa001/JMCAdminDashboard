@@ -9,6 +9,8 @@ import RecentDonationsTable from "@/components/dashboard/RecentDonationsTable";
 import RatingAnalysis from "@/components/dashboard/RatingAnalysis";
 import { DollarSign, TrendingUp, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import api from "@/lib/api";
 
 const container = {
   hidden: { opacity: 0 },
@@ -26,6 +28,54 @@ const item = {
 };
 
 export default function Home() {
+  const [stats, setStats] = useState({
+    totalCollected: 0,
+    activeDrives: 0,
+  });
+  const [recentDonations, setRecentDonations] = useState([]);
+  const [categoryStats, setCategoryStats] = useState([]);
+  const [donationTrends, setDonationTrends] = useState([]); // We might need to fetch this or calculate it
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Summary
+        const summaryRes = await api.get("/api/v1/analytics/summary/");
+        setStats({
+          totalCollected: summaryRes.data.total_collected,
+          activeDrives: summaryRes.data.active_drives,
+        });
+
+        // Fetch Categories
+        const categoriesRes = await api.get("/api/v1/analytics/categories/");
+        // Map category data to chart format
+        const mappedCategories = categoriesRes.data.map((cat: any, index: number) => ({
+          name: cat.category_name,
+          value: cat.total_amount,
+          color: ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'][index % 4] // Example colors
+        }));
+        setCategoryStats(mappedCategories);
+
+        // Fetch Recent Transactions
+        const transactionsRes = await api.get("/api/v1/transactions/");
+        const mappedTransactions = transactionsRes.data.results.map((t: any) => ({
+          id: t.id,
+          donorName: t.user ? `User ${t.user}` : "Anonymous", // Ideally fetch user name
+          amount: t.amount,
+          category: "General", // Transaction doesn't have category directly
+          paymentMethod: t.payment_method,
+          status: t.status,
+          date: t.transaction_date,
+        }));
+        setRecentDonations(mappedTransactions);
+
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <motion.div
       variants={container}
@@ -35,36 +85,35 @@ export default function Home() {
     >
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Collected (Today)"
-          value={`KES ${DONATION_STATS.totalCollectedToday.toLocaleString()}`}
+          title="Total Collected (All Time)"
+          value={`KES ${stats.totalCollected.toLocaleString()}`}
           icon={DollarSign}
           trend={{ value: 12, isPositive: true }}
         />
+        {/* Placeholder for other stats until we have API support */}
         <StatCard
           title="Total Collected (Week)"
-          value={`KES ${DONATION_STATS.totalCollectedWeek.toLocaleString()}`}
+          value="-"
           icon={TrendingUp}
-          trend={{ value: 8, isPositive: true }}
         />
         <StatCard
           title="Total Collected (Month)"
-          value={`KES ${DONATION_STATS.totalCollectedMonth.toLocaleString()}`}
+          value="-"
           icon={DollarSign}
-          trend={{ value: 5, isPositive: true }}
         />
         <StatCard
           title="Active Drives"
-          value={ACTIVE_DRIVES.length.toString()}
+          value={stats.activeDrives.toString()}
           icon={Users}
         />
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <DonationChart />
+          <DonationChart data={donationTrends} />
         </motion.div>
         <motion.div variants={item}>
-          <CategoryPieChart />
+          <CategoryPieChart data={categoryStats} />
         </motion.div>
       </div>
 
@@ -79,7 +128,7 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <RecentDonationsTable />
+          <RecentDonationsTable donations={recentDonations} />
         </motion.div>
         <motion.div variants={item}>
           <RatingAnalysis />

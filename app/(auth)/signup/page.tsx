@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import api from "@/lib/api";
+import Cookies from "js-cookie";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -33,12 +35,54 @@ export default function SignupPage() {
         }
 
         try {
-            // Mock signup logic
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast.success("Account created successfully! Please sign in.");
-            router.push("/login");
-        } catch (error) {
-            toast.error("Something went wrong");
+            // Register user
+            await api.post("/auth/users/", {
+                email: formData.email,
+                name: formData.name,
+                password: formData.password,
+                re_password: formData.confirmPassword,
+            });
+
+            toast.success("Account created successfully! Logging you in...");
+
+            // Auto login
+            const loginResponse = await api.post("/auth/jwt/create/", {
+                email: formData.email,
+                password: formData.password,
+            });
+
+            const { access, refresh } = loginResponse.data;
+            localStorage.setItem("accessToken", access);
+            localStorage.setItem("refreshToken", refresh);
+
+            // Set cookies for middleware
+            Cookies.set("accessToken", access);
+            Cookies.set("refreshToken", refresh);
+
+            // Fetch user details
+            const userResponse = await api.get("/auth/users/me/");
+            localStorage.setItem("user", JSON.stringify(userResponse.data));
+
+            router.push("/");
+        } catch (error: any) {
+            console.error("Signup error:", error);
+            // Handle Djoser error format (usually object with field errors)
+            const errorData = error.response?.data;
+            let errorMessage = "Something went wrong";
+
+            if (errorData) {
+                if (typeof errorData === 'string') {
+                    errorMessage = errorData;
+                } else {
+                    // Get the first error message from the object
+                    const firstError = Object.values(errorData)[0];
+                    if (Array.isArray(firstError)) {
+                        errorMessage = firstError[0] as string;
+                    }
+                }
+            }
+
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }

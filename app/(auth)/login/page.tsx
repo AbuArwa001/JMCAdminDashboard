@@ -7,6 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import api from "@/lib/api";
+import Cookies from "js-cookie";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -19,21 +21,34 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const result = await signIn("credentials", {
+            // Call API to get JWT token
+            const response = await api.post("/auth/jwt/create/", {
                 email,
                 password,
-                redirect: false,
             });
 
-            if (result?.error) {
-                toast.error("Invalid credentials");
-            } else {
-                toast.success("Logged in successfully");
-                router.push("/");
-                router.refresh();
-            }
-        } catch (error) {
-            toast.error("Something went wrong");
+            const { access, refresh } = response.data;
+
+            // Store tokens
+            localStorage.setItem("accessToken", access);
+            localStorage.setItem("refreshToken", refresh);
+
+            // Set cookies for middleware
+            Cookies.set("accessToken", access);
+            Cookies.set("refreshToken", refresh);
+
+            console.log(`Tokens stored successfully ${access} ${refresh}`);
+            // Fetch user details
+            const userResponse = await api.get("/auth/users/me/");
+            localStorage.setItem("user", JSON.stringify(userResponse.data));
+
+            toast.success("Logged in successfully");
+            router.push("/");
+            router.refresh();
+        } catch (error: any) {
+            console.error("Login error:", error);
+            const errorMessage = error.response?.data?.detail || "Invalid credentials";
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -46,7 +61,7 @@ export default function LoginPage() {
     return (
         <>
             <div className="text-center space-y-2">
-                <div className="relative w-20 h-20 mx-auto">
+                <div className="relative w-20 h-20 mx-auto" style={{ width: '100px', height: '100px', position: 'relative' }}>
                     <Image src="/logo.png" alt="JMC Logo" fill className="object-contain" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>

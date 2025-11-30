@@ -3,8 +3,17 @@ import clsx from "clsx";
 import { CheckCircle } from "lucide-react";
 import { useState } from "react";
 
-export default function RecentDonationsTable() {
-    const [donations, setDonations] = useState(RECENT_DONATIONS);
+interface RecentDonationsTableProps {
+    donations: any[]; // Replace 'any' with proper type later
+}
+
+export default function RecentDonationsTable({ donations: initialDonations }: RecentDonationsTableProps) {
+    const [donations, setDonations] = useState(initialDonations);
+
+    // Sync state with props if needed, or just use initialDonations if we don't want to sync
+    // For now, let's just use the state initialized from props.
+    // Ideally we should use useEffect to update state when initialDonations changes
+    // useEffect(() => setDonations(initialDonations), [initialDonations]);
 
     const handleCompletePayment = (id: string) => {
         setDonations((prev) =>

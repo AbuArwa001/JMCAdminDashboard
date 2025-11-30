@@ -1,14 +1,42 @@
 "use client";
 
-import { RECENT_DONATIONS } from "@/lib/data";
+import { useState, useEffect } from "react";
 import RecentDonationsTable from "@/components/dashboard/RecentDonationsTable";
 import { Download, Filter } from "lucide-react";
-
 import { exportToCSV } from "@/lib/utils";
+import api from "@/lib/api";
+import { toast } from "sonner";
 
 export default function DonationsPage() {
+    const [donations, setDonations] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDonations = async () => {
+            try {
+                const response = await api.get("/api/v1/transactions/");
+                const mappedDonations = response.data.results.map((t: any) => ({
+                    id: t.id,
+                    donorName: t.user ? `User ${t.user}` : "Anonymous",
+                    amount: t.amount,
+                    category: "General",
+                    paymentMethod: t.payment_method,
+                    status: t.status,
+                    date: t.transaction_date,
+                }));
+                setDonations(mappedDonations);
+            } catch (error) {
+                console.error("Error fetching donations:", error);
+                toast.error("Failed to load donations");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDonations();
+    }, []);
+
     const handleExport = () => {
-        exportToCSV(RECENT_DONATIONS, "donations_report");
+        exportToCSV(donations, "donations_report");
     };
 
     return (
@@ -30,7 +58,7 @@ export default function DonationsPage() {
                 </div>
             </div>
 
-            <RecentDonationsTable />
+            <RecentDonationsTable donations={donations} />
         </div>
     );
 }
