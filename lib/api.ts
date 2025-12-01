@@ -15,7 +15,7 @@ api.interceptors.request.use(
         // Check for token in localStorage (or you could use next-auth session)
         // For now, let's assume we store it in localStorage after login
         if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('accessToken');
+            const token = localStorage.getItem('firebaseToken');
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -40,9 +40,8 @@ api.interceptors.response.use(
             // Try to refresh token here if you implement refresh logic
             // For now, we'll just logout
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
-                localStorage.removeItem('user');
+                localStorage.removeItem('firebaseToken');
+                localStorage.removeItem('firebaseUser');
                 window.location.href = '/login';
             }
         }

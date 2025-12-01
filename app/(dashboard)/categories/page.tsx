@@ -1,12 +1,26 @@
 "use client"
 import { useState, useEffect } from "react";
-import { CATEGORY_STATS } from "@/lib/data";
+import { CATEGORY_STATS, CategoryData } from "@/lib/data";
 import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
 import { Download, Plus, Pencil, Trash2 } from "lucide-react";
-import { exportToCSV } from "@/lib/utils";
+import { exportToCSV, getFallbackColor } from "@/lib/utils";
 import Link from "next/link";
 import api from "@/lib/api";
 import { toast } from "sonner";
+
+
+interface AnalyticsCategory {
+    category_name: string;
+    total_amount: number;
+}
+
+interface ApiCategory {
+    id: string;
+    category_name: string;
+    color: string;
+    created_at: string;
+    donations: any[];
+}
 
 export default function CategoriesPage() {
     const [stats, setStats] = useState<any[]>([]);
@@ -20,17 +34,37 @@ export default function CategoriesPage() {
     const fetchData = async () => {
         try {
             const [statsRes, categoriesRes] = await Promise.all([
-                api.get("/api/v1/analytics/categories/"),
-                api.get("/api/v1/categories/")
+                api.get<AnalyticsCategory[]>("/api/v1/analytics/categories/"),
+                api.get<{ results: ApiCategory[] }>("/api/v1/categories/")
             ]);
-
-            const mappedStats = statsRes.data.map((cat: any, index: number) => ({
+            const categoriesData = Array.isArray(categoriesRes.data)
+                ? categoriesRes.data
+                : categoriesRes.data.results || [];
+            // Create color mapping from categories
+            const colorMap = categoriesData.reduce((acc: Record<string, string>, category: ApiCategory) => {
+                acc[category.category_name] = category.color;
+                return acc;
+            }, {});
+            const mappedCategories = categoriesData.map((cat: ApiCategory, index: number) => ({
+                id: cat.id,
                 name: cat.category_name,
-                value: cat.total_amount,
-                color: ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'][index % 4]
+                color: cat.color || getFallbackColor(index),
+                createdAt: cat.created_at,
+                donations: cat.donations,
             }));
+            // Map stats with proper colors
+            const mappedStats: CategoryData[] = statsRes.data.map((cat: AnalyticsCategory, index: number) => {
+                const categoryColor = colorMap[cat.category_name] || getFallbackColor(index);
+
+                return {
+                    name: cat.category_name,
+                    value: Number(cat.total_amount), // Ensure it's a number
+                    color: categoryColor,
+                };
+            });
             setStats(mappedStats);
-            setCategories(categoriesRes.data);
+            // Handle both paginated and non-paginated responses
+            setCategories(categoriesData);
         } catch (error) {
             console.error("Error fetching categories:", error);
             toast.error("Failed to load categories");

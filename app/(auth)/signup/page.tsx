@@ -7,8 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/api";
 import Cookies from "js-cookie";
+import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -35,54 +36,59 @@ export default function SignupPage() {
         }
 
         try {
-            // Register user
-            await api.post("/auth/users/", {
-                email: formData.email,
-                name: formData.name,
-                password: formData.password,
-                re_password: formData.confirmPassword,
+            // Create user with Firebase
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password
+            );
+            const user = userCredential.user;
+
+            // Update user profile with display name
+            await updateProfile(user, {
+                displayName: formData.name,
             });
 
-            toast.success("Account created successfully! Logging you in...");
+            // Get Firebase ID token
+            const firebaseToken = await user.getIdToken();
 
-            // Auto login
-            const loginResponse = await api.post("/auth/jwt/create/", {
-                email: formData.email,
-                password: formData.password,
+            // Store Firebase token in cookies for middleware
+            Cookies.set('firebaseToken', firebaseToken, {
+                expires: 1, // 1 day
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
             });
 
-            const { access, refresh } = loginResponse.data;
-            localStorage.setItem("accessToken", access);
-            localStorage.setItem("refreshToken", refresh);
+            // Also store in localStorage for client-side use
+            localStorage.setItem('firebaseToken', firebaseToken);
+            localStorage.setItem('firebaseUser', JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                displayName: formData.name,
+            }));
 
-            // Set cookies for middleware
-            Cookies.set("accessToken", access);
-            Cookies.set("refreshToken", refresh);
-
-            // Fetch user details
-            const userResponse = await api.get("/auth/users/me/");
-            localStorage.setItem("user", JSON.stringify(userResponse.data));
+            console.log("User created successfully:", user);
+            toast.success("Account created successfully!");
 
             router.push("/");
+            router.refresh();
         } catch (error: any) {
             console.error("Signup error:", error);
-            // Handle Djoser error format (usually object with field errors)
-            const errorData = error.response?.data;
-            let errorMessage = "Something went wrong";
+            const errorCode = error.code;
 
-            if (errorData) {
-                if (typeof errorData === 'string') {
-                    errorMessage = errorData;
-                } else {
-                    // Get the first error message from the object
-                    const firstError = Object.values(errorData)[0];
-                    if (Array.isArray(firstError)) {
-                        errorMessage = firstError[0] as string;
-                    }
-                }
+            // Better error messages
+            let userFriendlyError = "Failed to create account";
+            if (errorCode === 'auth/email-already-in-use') {
+                userFriendlyError = "An account with this email already exists";
+            } else if (errorCode === 'auth/invalid-email') {
+                userFriendlyError = "Invalid email address";
+            } else if (errorCode === 'auth/weak-password') {
+                userFriendlyError = "Password should be at least 6 characters";
+            } else if (errorCode === 'auth/operation-not-allowed') {
+                userFriendlyError = "Email/password accounts are not enabled";
             }
 
-            toast.error(errorMessage);
+            toast.error(userFriendlyError);
         } finally {
             setIsLoading(false);
         }

@@ -29,3 +29,8 @@ export function exportToCSV(data: any[], filename: string) {
         document.body.removeChild(link);
     }
 }
+
+export function getFallbackColor(index: number): string {
+    const colors = ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'];
+    return colors[index % colors.length];
+}
