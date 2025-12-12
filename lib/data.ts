@@ -58,7 +58,7 @@ class Users(AbstractUser):
 */
 export interface User {
     id: string;
-    fullName: string;
+    full_name: string;
     email: string;
     phoneNumber?: string;
     role?: string;
@@ -101,6 +101,7 @@ export interface Transaction {
     status: string;
     transaction_date?: string;
     date: string;
+    user_name?: string;
 }
 
 export interface CategoryData {

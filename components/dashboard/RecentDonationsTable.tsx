@@ -44,7 +44,7 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
                     <tbody className="divide-y divide-gray-50">
                         {transactions.map((transaction) => (
                             <tr key={transaction.id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="py-3 pl-2 text-sm font-medium text-gray-900">{transaction.user?.fullName}</td>
+                                <td className="py-3 pl-2 text-sm font-medium text-gray-900">{transaction.user?.full_name}</td>
                                 <td className="py-3 text-sm font-bold text-gray-900">KES {transaction.amount.toLocaleString()}</td>
                                 <td className="py-3 text-sm text-gray-500">{transaction.category}</td>
                                 <td className="py-3 text-sm text-gray-500">{transaction.payment_method}</td>

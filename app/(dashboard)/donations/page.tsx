@@ -26,17 +26,14 @@ export default function DonationsPage() {
         const fetchDonations = async () => {
             try {
                 const response = await api.get("/api/v1/transactions/");
-                console.log("Fetched donations:", response.data.results);
                 
                 // Fetch categories in parallel for better performance
                 const transactions = response.data.results as Transaction[];
-                console.log("Transactions to process:", transactions);
                 // Create a set of unique category IDs to fetch
                 const categoryIds = [...new Set(transactions
                     .map((transaction: Transaction) => transaction.donation.category)
                     .filter((id): id is string => id !== undefined && id !== null)
                 )];
-                console.log("Unique category IDs to fetch:", categoryIds);
                 // Fetch all categories at once
                 const categoryPromises = categoryIds.map(async (id) => {
                     try {
@@ -49,12 +46,19 @@ export default function DonationsPage() {
 
                 
                 const categoryResponses = await Promise.all(categoryPromises);
-                console.log("Fetched categories:", categoryResponses);
+                const getUser = async (userId: string) => {
+                    try {
+                        const userRes = await api.get(`/api/v1/users/${userId}/`);
+                        return userRes.data;
+                    } catch (err) {
+                        console.log(`Failed to fetch user with ID: ${userId}`);
+                        return { id: userId, fullName: "Anonymous" };
+                    }
+                };
                 // Create a map of category ID to category name
                 const categoryMap: Record<string, string> = {};
                 categoryResponses.forEach((response, index) => {
                     const categoryId = categoryIds[index];
-                    console.log(`Fetched category for ID ${categoryId}:`, response.data);
                     // console.log(`Mapping category ID ${categoryId} to name:`, transactions.donation.category_name);
                     if (response.data?.category_name) {
                         categoryMap[categoryId] = response.data.category_name;
@@ -65,12 +69,12 @@ export default function DonationsPage() {
                 const mappedDonations = transactions.map((transaction: Transaction): Transaction => ({
                     ...transaction,
                     category: categoryMap[transaction.donation.category] || "General",
+                    user_name: transaction.user?.full_name
                     // Add any other required properties from your Transaction type
                 }));
                 
                 setDonations(mappedDonations);
             } catch (error) {
-                console.error("Error fetching donations:", error);
                 toast.error("Failed to load donations");
             } finally {
                 setIsLoading(false);
