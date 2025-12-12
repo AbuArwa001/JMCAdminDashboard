@@ -128,7 +128,7 @@ export default function Home() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <RecentDonationsTable donations={recentDonations} />
+          <RecentDonationsTable transactions={recentDonations} />
         </motion.div>
         <motion.div variants={item}>
           <RatingAnalysis />

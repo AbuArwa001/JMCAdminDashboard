@@ -6,24 +6,68 @@ import { Download, Filter } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { Donation, Transaction, CategoryData } from "@/lib/data";
+
+// interface TransactionResponse {
+//     id: string;
+//     user?: User;
+//     amount: number;
+//     category?: string;
+//     payment_method: string;
+//     status: string;
+//     date: string;
+// }
 
 export default function DonationsPage() {
-    const [donations, setDonations] = useState<any[]>([]);
+    const [donations, setDonations] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDonations = async () => {
             try {
                 const response = await api.get("/api/v1/transactions/");
-                const mappedDonations = response.data.results.map((t: any) => ({
-                    id: t.id,
-                    donorName: t.user ? `User ${t.user}` : "Anonymous",
-                    amount: t.amount,
-                    category: "General",
-                    paymentMethod: t.payment_method,
-                    status: t.status,
-                    date: t.transaction_date,
+                console.log("Fetched donations:", response.data.results);
+                
+                // Fetch categories in parallel for better performance
+                const transactions = response.data.results as Transaction[];
+                console.log("Transactions to process:", transactions);
+                // Create a set of unique category IDs to fetch
+                const categoryIds = [...new Set(transactions
+                    .map((transaction: Transaction) => transaction.donation.category)
+                    .filter((id): id is string => id !== undefined && id !== null)
+                )];
+                console.log("Unique category IDs to fetch:", categoryIds);
+                // Fetch all categories at once
+                const categoryPromises = categoryIds.map(async (id) => {
+                    try {
+                        return await api.get(`/api/v1/categories/${id}/`);
+                    } catch (err) {
+                        console.log(`Failed to fetch category with ID: ${id}`);
+                        return { data: { id, category_name: "General" } };
+                    }
+                });
+
+                
+                const categoryResponses = await Promise.all(categoryPromises);
+                console.log("Fetched categories:", categoryResponses);
+                // Create a map of category ID to category name
+                const categoryMap: Record<string, string> = {};
+                categoryResponses.forEach((response, index) => {
+                    const categoryId = categoryIds[index];
+                    console.log(`Fetched category for ID ${categoryId}:`, response.data);
+                    // console.log(`Mapping category ID ${categoryId} to name:`, transactions.donation.category_name);
+                    if (response.data?.category_name) {
+                        categoryMap[categoryId] = response.data.category_name;
+                    }
+                });
+                
+                // Map transactions with category names
+                const mappedDonations = transactions.map((transaction: Transaction): Transaction => ({
+                    ...transaction,
+                    category: categoryMap[transaction.donation.category] || "General",
+                    // Add any other required properties from your Transaction type
                 }));
+                
                 setDonations(mappedDonations);
             } catch (error) {
                 console.error("Error fetching donations:", error);
@@ -58,7 +102,11 @@ export default function DonationsPage() {
                 </div>
             </div>
 
-            <RecentDonationsTable donations={donations} />
+            {isLoading ? (
+                <div className="text-center py-8">Loading donations...</div>
+            ) : (
+                <RecentDonationsTable transactions={donations} />
+            )}
         </div>
     );
 }

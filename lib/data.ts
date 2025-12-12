@@ -2,6 +2,72 @@ import { LucideIcon, LayoutDashboard, Heart, PieChart, Settings, Users, FileText
 
 // Types
 export type DriveStatus = 'Completed' | 'Mid-progress' | 'Low-progress';
+/* 
+
+
+class Roles(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    role_name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.role_name
+
+
+class Users(AbstractUser):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Keep single token for simplicity, or create separate model for multiple devices
+    fcm_token = models.CharField(max_length=255, blank=True, null=True)
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    role = models.ForeignKey(
+        Roles, on_delete=models.SET_NULL, null=True, blank=True, default=None
+    )
+    is_admin = models.BooleanField(default=False)
+    ss_login = models.DateTimeField(null=True, blank=True)
+
+    # Add analytics fields
+    firebase_uid = models.CharField(
+        max_length=128, blank=True, null=True
+    )  # to store Firebase UID
+    last_analytics_sync = models.DateTimeField(null=True, blank=True)
+
+    # Profile fields
+    profile_image_url = models.CharField(max_length=500, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    default_donation_account = models.CharField(max_length=50, blank=True, null=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username", "full_name"]
+
+    def __str__(self):
+        return self.email
+
+    @property
+    def public_uuid(self):
+        """Public UUID for Firebase Analytics user identification"""
+        return str(self.id)
+
+    def save(self, *args, **kwargs):
+        if not self.role:
+            self.role, created = Roles.objects.get_or_create(role_name="User")
+        super().save(*args, **kwargs)
+
+
+*/
+export interface User {
+    id: string;
+    fullName: string;
+    email: string;
+    phoneNumber?: string;
+    role?: string;
+    isAdmin: boolean;
+    profileImageUrl?: string;
+    address?: string;
+    bio?: string;
+    defaultDonationAccount?: string;
+}
 
 export interface DonationDrive {
     id: string;
@@ -25,12 +91,22 @@ export interface Donation {
     date: string;
     paymentMethod: 'Mpesa' | 'Cash';
 }
+export interface Transaction {
+    id: string;
+    user?: User;
+    amount: number;
+    donation: DonationDrive;
+    category?: string;
+    payment_method: string;
+    status: string;
+    transaction_date?: string;
+    date: string;
+}
 
 export interface CategoryData {
-    name: string;
-    value: number; // Percentage or Total Amount
+    category_name: string;
     color: string;
-    [key: string]: any;
+    donations: Donation[];
 }
 
 export interface RatingData {
@@ -83,12 +159,12 @@ export const RECENT_DONATIONS: Donation[] = [
     { id: 'd5', donorName: 'Mariam Omar', amount: 500, category: 'Medical', status: 'Completed', date: '2025-11-25T18:20:00', paymentMethod: 'Mpesa' },
 ];
 
-export const CATEGORY_STATS: CategoryData[] = [
-    { name: 'Education', value: 42, color: '#BE9830' }, // Primary Gold
-    { name: 'Charity', value: 30, color: '#2E9C57' }, // Primary Green
-    { name: 'Medical', value: 18, color: '#9D7C3F' }, // Primary Bronze
-    { name: 'Maintenance', value: 10, color: '#757575' }, // Grey
-];
+// export const CATEGORY_STATS: CategoryData[] = [
+//     { name: 'Education', value: 42, color: '#BE9830' }, // Primary Gold
+//     { name: 'Charity', value: 30, color: '#2E9C57' }, // Primary Green
+//     { name: 'Medical', value: 18, color: '#9D7C3F' }, // Primary Bronze
+//     { name: 'Maintenance', value: 10, color: '#757575' }, // Grey
+// ];
 
 export const DONATION_TRENDS = [
     { name: 'Mon', amount: 12000 },
