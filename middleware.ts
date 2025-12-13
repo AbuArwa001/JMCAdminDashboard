@@ -1,8 +1,8 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-export function middleware(request: NextRequest) {
+// import { admin } from '@/firebase/admint';
+export async function middleware(request: NextRequest){
     const { pathname } = request.nextUrl;
 
     // Define paths that don't require authentication
@@ -30,8 +30,6 @@ export function middleware(request: NextRequest) {
             return NextResponse.redirect(new URL('/', request.url));
         }
     }
-
-    return NextResponse.next();
 }
 
 export const config = {

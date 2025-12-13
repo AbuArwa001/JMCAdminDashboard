@@ -1,24 +1,54 @@
+import api from "@/lib/api";
 import { RECENT_DONATIONS, Transaction } from "@/lib/data";
 import clsx from "clsx";
 import { CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface RecentTransactionsTableProps {
     transactions: Transaction[]; 
 }
 
 export default function RecentDonationsTable({ transactions }: RecentTransactionsTableProps) {
-    console.log("RecentDonationsTable transactions:", transactions);
-    // Sync state with props if needed, or just use initialDonations if we don't want to sync
-    // For now, let's just use the state initialized from props.
-    // Ideally we should use useEffect to update state when initialDonations changes
-    // useEffect(() => setDonations(initialDonations), [initialDonations]);
+    const [localTransactions, setLocalTransactions] = useState<Transaction[]>(transactions);
 
-    const handleCompletePayment = (id: string) => {
-        ((prev: Transaction[]) =>
-            prev.map((d) => (d.id === id ? { ...d, status: "Completed" } : d))
-        );
-        alert(`Payment for donation ${id} marked as Completed`);
+    // Sync localTransactions with props when they change
+    useEffect(() => {
+        setLocalTransactions(transactions);
+    }, [transactions]);
+
+    console.log("RecentDonationsTable transactions:", localTransactions);
+    
+    const handleCompletePayment = async (id: string) => {
+        try {
+            // Optimistic UI update
+            setLocalTransactions(prev =>
+                prev.map(t =>
+                    t.id === id
+                        ? { ...t, payment_status: "Completed" }
+                        : t
+                )
+            );
+
+            // API call
+            await api.put(`api/v1/transactions/${id}/`, {
+                payment_status: "Completed",
+            });
+
+            alert(`Payment for donation ${id} marked as Completed`);
+        } catch (error) {
+            console.error(error);
+
+            // Rollback if API fails
+            setLocalTransactions(prev =>
+                prev.map(t =>
+                    t.id === id
+                        ? { ...t, payment_status: "Pending" }
+                        : t
+                )
+            );
+
+            alert("Failed to update payment status");
+        }
     };
 
     return (
@@ -42,7 +72,7 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {transactions.map((transaction) => (
+                        {localTransactions.map((transaction) => (
                             <tr key={transaction.id} className="hover:bg-gray-50/50 transition-colors">
                                 <td className="py-3 pl-2 text-sm font-medium text-gray-900">{transaction.user?.full_name}</td>
                                 <td className="py-3 text-sm font-bold text-gray-900">KES {transaction.amount.toLocaleString()}</td>
@@ -59,13 +89,13 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
                                     {new Date(transaction.donated_at!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </td>
                                 <td className="py-3">
-                                    {transaction.status === 'Pending' && transaction.payment_method === 'Cash' && (
+                                    {transaction.payment_status === 'Pending' && transaction.payment_method === 'Cash' && (
                                         <button
                                             onClick={() => handleCompletePayment(transaction.id)}
                                             className="text-primary hover:text-primary-green transition-colors"
                                             title="Mark as Completed"
                                         >
-                                            <CheckCircle className="w-5 h-5" />
+                                            <CheckCircle className="w-5 h-5"/>
                                         </button>
                                     )}
                                 </td>
