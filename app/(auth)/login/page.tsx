@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -19,6 +19,22 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    // Handle session expired error
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') === 'session_expired') {
+            // Clear all auth data
+            Cookies.remove('firebaseToken');
+            localStorage.removeItem('firebaseToken');
+            localStorage.removeItem('firebaseUser');
+            auth.signOut();
+            toast.error("Session expired. Please log in again.");
+
+            // Remove the query param
+            router.replace('/login');
+        }
+    }, [router]);
+
     const handleCredentialsLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -27,6 +43,20 @@ export default function LoginPage() {
             // Sign in with Firebase using the imported auth instance
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            // Get ID token result to check claims
+            const idTokenResult = await user.getIdTokenResult();
+
+            // Check for admin claim or specific email
+            // TODO: In production, rely strictly on custom claims. For now, allowing specific email as fallback.
+            const isAdmin = idTokenResult.claims.admin === true || user.email === "admin@jmc.org";
+
+            if (!isAdmin) {
+                await auth.signOut();
+                toast.error("Access denied. Only administrators are allowed.");
+                setIsLoading(false);
+                return;
+            }
 
             // Get Firebase ID token
             const firebaseToken = await user.getIdToken();
@@ -42,7 +72,7 @@ export default function LoginPage() {
             localStorage.setItem('firebaseToken', firebaseToken);
             localStorage.setItem('firebaseUser', JSON.stringify(user));
 
-            console.log("User signed in successfully:", user);
+            console.log("Admin signed in successfully:", user.email);
             toast.success("Logged in successfully");
 
             router.push("/");

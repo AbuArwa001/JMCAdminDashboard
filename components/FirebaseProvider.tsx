@@ -25,9 +25,10 @@ export default function FirebaseProvider({
     const router = useRouter();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        // Use onIdTokenChanged to handle token refreshes automatically
+        const unsubscribe = auth.onIdTokenChanged(async (user) => {
             if (user) {
-                // User is signed in
+                // User is signed in or token refreshed
                 const token = await user.getIdToken();
                 Cookies.set('firebaseToken', token, {
                     expires: 1,
