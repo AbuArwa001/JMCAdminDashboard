@@ -15,8 +15,6 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
     useEffect(() => {
         setLocalTransactions(transactions);
     }, [transactions]);
-
-    console.log("RecentDonationsTable transactions:", localTransactions);
     
     const handleCompletePayment = async (id: string) => {
         try {

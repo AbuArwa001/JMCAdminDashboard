@@ -22,6 +22,17 @@ export default function DonationsPage() {
     const [donations, setDonations] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const filteredDonations = donations.map(item => ({
+        id: item.id,
+        username: item.user?.full_name,
+        donation_title: item.donation?.title,
+        amount: item.amount,
+        donated_at: item.donated_at,
+        payment_method: item.payment_method,
+        payment_status: item.payment_status,
+        category: item.category,
+    }));
+
     useEffect(() => {
         const fetchDonations = async () => {
             try {
@@ -84,7 +95,7 @@ export default function DonationsPage() {
     }, []);
 
     const handleExport = () => {
-        exportToCSV(donations, "donations_report");
+        exportToCSV(filteredDonations, "donations_report");
     };
 
     return (
