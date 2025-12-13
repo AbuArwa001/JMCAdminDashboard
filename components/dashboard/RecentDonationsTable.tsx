@@ -50,13 +50,13 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
                                 <td className="py-3 text-sm text-gray-500">{transaction.payment_method}</td>
                                 <td className="py-3">
                                     <span className={clsx("text-xs font-medium px-2 py-1 rounded-full",
-                                        transaction.status === 'Completed' ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                                        transaction.payment_status === 'Completed' ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
                                     )}>
-                                        {transaction.status}
+                                        {transaction.payment_status}
                                     </span>
                                 </td>
                                 <td className="py-3 text-xs text-gray-400">
-                                    {new Date(transaction.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {new Date(transaction.donated_at!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </td>
                                 <td className="py-3">
                                     {transaction.status === 'Pending' && transaction.payment_method === 'Cash' && (

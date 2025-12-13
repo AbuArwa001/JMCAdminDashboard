@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
-import { CATEGORY_STATS, CategoryData } from "@/lib/data";
+import { CATEGORY_STATS, CategoryData, CategoryStat } from "@/lib/data";
 import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
 import { Download, Plus, Pencil, Trash2 } from "lucide-react";
 import { exportToCSV, getFallbackColor } from "@/lib/utils";
@@ -53,7 +53,7 @@ export default function CategoriesPage() {
                 donations: cat.donations,
             }));
             // Map stats with proper colors
-            const mappedStats: CategoryData[] = statsRes.data.map((cat: AnalyticsCategory, index: number) => {
+            const mappedStats: CategoryStat[] = statsRes.data.map((cat: AnalyticsCategory, index: number) => {
                 const categoryColor = colorMap[cat.category_name] || getFallbackColor(index);
 
                 return {

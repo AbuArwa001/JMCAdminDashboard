@@ -70,7 +70,7 @@ export default function CreateDrivePage() {
                             >
                                 <option value="">Select Category</option>
                                 {CATEGORY_STATS.map((cat) => (
-                                    <option key={cat.name} value={cat.name}>{cat.name}</option>
+                                    <option key={cat.category_name} value={cat.category_name}>{cat.category_name}</option>
                                 ))}
                             </select>
                         </div>

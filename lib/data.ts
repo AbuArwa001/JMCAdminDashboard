@@ -98,8 +98,9 @@ export interface Transaction {
     donation: DonationDrive;
     category?: string;
     payment_method: string;
+    payment_status?: string;
     status: string;
-    transaction_date?: string;
+    donated_at?: Date;
     date: string;
     user_name?: string;
 }
@@ -159,13 +160,18 @@ export const RECENT_DONATIONS: Donation[] = [
     { id: 'd4', donorName: 'Yusuf Juma', amount: 10000, category: 'Education', driveId: '1', status: 'Completed', date: '2025-11-26T09:00:00', paymentMethod: 'Mpesa' },
     { id: 'd5', donorName: 'Mariam Omar', amount: 500, category: 'Medical', status: 'Completed', date: '2025-11-25T18:20:00', paymentMethod: 'Mpesa' },
 ];
+export interface CategoryStat {
+  name: string;
+  value: number;
+  color: string;
+}
 
-// export const CATEGORY_STATS: CategoryData[] = [
-//     { name: 'Education', value: 42, color: '#BE9830' }, // Primary Gold
-//     { name: 'Charity', value: 30, color: '#2E9C57' }, // Primary Green
-//     { name: 'Medical', value: 18, color: '#9D7C3F' }, // Primary Bronze
-//     { name: 'Maintenance', value: 10, color: '#757575' }, // Grey
-// ];
+export const CATEGORY_STATS: CategoryData[] = [
+    { category_name: 'Education', donations: [], color: '#BE9830' }, // Primary Gold
+    { category_name: 'Charity', donations: [], color: '#2E9C57' }, // Primary Green
+    { category_name: 'Medical', donations: [], color: '#9D7C3F' }, // Primary Bronze
+    { category_name: 'Maintenance', donations: [], color: '#757575' }, // Grey
+];
 
 export const DONATION_TRENDS = [
     { name: 'Mon', amount: 12000 },

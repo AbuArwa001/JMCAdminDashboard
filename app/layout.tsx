@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Toaster } from "sonner";
 import FirebaseProvider from "@/components/FirebaseProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+import localFont from "next/font/local";
+
+const inter = localFont({
+  src: [
+    {
+      path: "../public/fonts/Inter-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Inter-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "JMC Admin Dashboard",
