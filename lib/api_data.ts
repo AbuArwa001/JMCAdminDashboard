@@ -166,6 +166,47 @@ export const initiateTransfer = async (amount: number) => {
     }
 };
 
+export const getBankAccounts = async () => {
+    try {
+        const response = await api.get('api/v1/bank-accounts/');
+        return response.data.results;
+    } catch (error) {
+        console.error('Error fetching bank accounts:', error);
+        return [];
+    }
+};
+
+export const addBankAccount = async (data: any) => {
+    try {
+        const response = await api.post('api/v1/bank-accounts/', data);
+        return response.data;
+    } catch (error) {
+        console.error('Error adding bank account:', error);
+        throw error;
+    }
+};
+
+export const deleteBankAccount = async (id: string) => {
+    try {
+        await api.delete(`api/v1/bank-accounts/${id}/`);
+    } catch (error) {
+        console.error('Error deleting bank account:', error);
+        throw error;
+    }
+};
+
+export const getTransferHistory = async () => {
+    try {
+        const response = await api.get('api/v1/transactions/', {
+            params: { payment_method: 'Transfer' }
+        });
+        return response.data.results;
+    } catch (error) {
+        console.error('Error fetching transfer history:', error);
+        return [];
+    }
+};
+
 // User Data Fetching
 export const getUserById = async (userId: string) => {
     try {
