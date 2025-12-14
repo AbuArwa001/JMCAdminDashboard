@@ -1,13 +1,25 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { CATEGORY_STATS } from "@/lib/data";
+import { CategoryData } from "@/lib/data";
 
 interface CategoryPieChartProps {
-    data: any[];
+    data: CategoryData[];
 }
 
 export default function CategoryPieChart({ data }: CategoryPieChartProps) {
+    // Calculate total amount for each category
+    const chartData = data.map(category => {
+        const totalAmount = category.donations.reduce((sum, donation) => sum + donation.collected_amount, 0);
+        console.log("Category:", category.category_name, "Total Amount:", category.donations);
+        return {
+            name: category.category_name,
+            value: totalAmount,
+            color: category.color
+        };
+    }).filter(item => item.value > 0);
+    console.log("CategoryPieChart data:", data);
+
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">
             <h3 className="font-bold text-gray-900 mb-6">Donations by Category</h3>
@@ -15,7 +27,7 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
             <ResponsiveContainer width="100%" height="85%">
                 <PieChart>
                     <Pie
-                        data={data}
+                        data={chartData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
@@ -23,12 +35,12 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
                         paddingAngle={5}
                         dataKey="value"
                     >
-                        {data.map((entry, index) => (
+                        {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number) => [`${value}%`, 'Share']}
+                        formatter={(value: number) => [`KES ${value.toLocaleString()}`, 'Total Donated']}
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
                     <Legend

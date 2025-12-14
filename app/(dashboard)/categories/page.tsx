@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
-import { CATEGORY_STATS, CategoryData, CategoryStat } from "@/lib/data";
+import { CategoryData, CategoryStat } from "@/lib/data";
 import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
 import { Download, Plus, Pencil, Trash2 } from "lucide-react";
 import { exportToCSV, getFallbackColor } from "@/lib/utils";
@@ -87,7 +87,7 @@ export default function CategoriesPage() {
     };
 
     const handleExport = () => {
-        exportToCSV(stats.length > 0 ? stats : CATEGORY_STATS, "category_performance");
+        exportToCSV(stats.length > 0 ? stats : [], "category_performance");
     };
 
     return (

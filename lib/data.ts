@@ -135,7 +135,8 @@ export interface CategoryData {
     id?: string;
     category_name: string;
     color: string;
-    donations: Donation[];
+    donations: DonationDrive[];
+    created_at?: string;
 }
 
 export interface RatingData {
@@ -146,10 +147,10 @@ export interface RatingData {
 }
 // Actual Data from API
 export interface CategoriesResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: CategoryData[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: CategoryData[];
 }
 
 // const categories = api.getCategories();
@@ -197,17 +198,11 @@ export const RECENT_DONATIONS: Donation[] = [
     { id: 'd5', donorName: 'Mariam Omar', amount: 500, category: 'Medical', status: 'Completed', date: '2025-11-25T18:20:00', paymentMethod: 'Mpesa' },
 ];
 export interface CategoryStat {
-  name: string;
-  value: number;
-  color: string;
+    name: string;
+    value: number;
+    color: string;
 }
 
-export const CATEGORY_STATS: CategoryData[] = [
-    { category_name: 'Education', donations: [], color: '#BE9830' }, // Primary Gold
-    { category_name: 'Charity', donations: [], color: '#2E9C57' }, // Primary Green
-    { category_name: 'Medical', donations: [], color: '#9D7C3F' }, // Primary Bronze
-    { category_name: 'Maintenance', donations: [], color: '#757575' }, // Grey
-];
 
 export const DONATION_TRENDS = [
     { name: 'Mon', amount: 12000 },

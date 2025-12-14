@@ -1,6 +1,6 @@
 "use client";
 
-import { getCategoryById, getDonationDrives, getTransactions } from "@/lib/api_data";
+import { getCategories, getCategoryById, getDonationDrives, getTransactions } from "@/lib/api_data";
 import StatCard from "@/components/dashboard/StatCard";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import DonationChart from "@/components/dashboard/DonationChart";
@@ -11,7 +11,7 @@ import { DollarSign, TrendingUp, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import { DonationDrive } from "@/lib/data";
+import { CategoryData, DonationDrive } from "@/lib/data";
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,7 +34,7 @@ export default function Home() {
     activeDrives: 0,
   });
   const [recentDonations, setRecentDonations] = useState([]);
-  const [categoryStats, setCategoryStats] = useState([]);
+  const [categoryStats, setCategoryStats] = useState<CategoryData[]>([]);
   const [donationTrends, setDonationTrends] = useState([]);
   const [drives, setDrives] = useState<DonationDrive[]>([]);
 
@@ -56,56 +56,17 @@ export default function Home() {
         });
 
         // Fetch Categories
-        const categoriesRes = await api.get("/api/v1/analytics/categories/");
+        const categoriesRes = await getCategories();
         // Map category data to chart format
-        const mappedCategories = categoriesRes.data.map((cat: any, index: number) => ({
-          name: cat.category_name,
-          value: cat.total_amount,
-          color: ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'][index % 4] // Example colors
-        }));
-        setCategoryStats(mappedCategories);
+        // const mappedCategories = categoriesRes.map((cat: any, index: number) => ({
+        //   name: cat.category_name,
+        //   value: cat.total_amount,
+        //   color: ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'][index % 4] // Example colors
+        // }));
+        // console.log("Categories RES:", categoriesRes);
+        setCategoryStats(categoriesRes);
 
         // Fetch Recent Transactions
-        /* 
-        {
-        "id": "55555555-5555-5555-5555-555555550004",
-        "user": {
-            "id": "22222222-2222-2222-2222-222222220005",
-            "public_uuid": "22222222-2222-2222-2222-222222220005",
-            "email": "donor4@example.com",
-            "username": "donor4",
-            "full_name": "Bob Brown",
-            "phone_number": null,
-            "is_admin": false,
-            "role": "11111111-1111-1111-1111-111111110002",
-            "fcm_token": null,
-            "profile_image_url": null,
-            "address": null,
-            "bio": null,
-            "default_donation_account": null
-        },
-        "donation": {
-            "id": "44444444-4444-4444-4444-444444440002",
-            "title": "Health Camp Support",
-            "description": "Support our free health camps in rural areas.",
-            "created_at": "2024-01-05T08:00:00",
-            "account_name": "HealthCamp",
-            "target_amount": "10000.00",
-            "start_date": "2024-01-05T08:00:00",
-            "end_date": "2026-12-31T23:59:59",
-            "status": "Active",
-            "avg_rating": 4.5,
-            "paybill_number": "123457",
-            "category": "33333333-3333-3333-3333-333333330002",
-            "donor_count": 4,
-            "collected_amount": 1475
-        },
-        "amount": "250.00",
-        "donated_at": "2024-05-04T13:00:00",
-        "payment_method": "Cash",
-        "payment_status": "Pending"
-    }
-        */
         const getCategoryByIdCached = ((id) => {
           const cache: Record<string, string> = {};
           return async (id: string) => {
@@ -119,16 +80,16 @@ export default function Home() {
           };
         })();
         const transactionsRes = (await getTransactions()).slice(0, 5);
-        const mappedTransactions = transactionsRes.map((t: any) => ({
-          id: t.id,
-          donorName: t.user.full_name ? `${t.user.full_name}` : "Anonymous",
-          amount: t.amount,
-          category:  getCategoryByIdCached(t.donation.category) || "General",
-          paymentMethod: t.payment_method,
-          status: t.payment_status,
-          date: t.donated_at,
-        }));
-        console.log("Transactions RES:", transactionsRes);
+        // const mappedTransactions = transactionsRes.map((t: any) => ({
+        //   id: t.id,
+        //   donorName: t.user.full_name ? `${t.user.full_name}` : "Anonymous",
+        //   amount: t.amount,
+        //   category:  getCategoryByIdCached(t.donation.category) || "General",
+        //   paymentMethod: t.payment_method,
+        //   status: t.payment_status,
+        //   date: t.donated_at,
+        // }));
+        // console.log("Transactions RES:", transactionsRes);
         setRecentDonations(transactionsRes);
 
       } catch (error) {
