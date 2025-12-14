@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Heart, List, CreditCard, Settings, X } from "lucide-react";
+import { LayoutDashboard, Heart, List, CreditCard, Settings, X, ArrowRightLeft } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ const MENU_ITEMS = [
     { name: "Donation Drives", href: "/drives", icon: Heart },
     { name: "Categories", href: "/categories", icon: List },
     { name: "Donations", href: "/donations", icon: CreditCard },
+    { name: "Transfers", href: "/transfers", icon: ArrowRightLeft },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -23,35 +24,35 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const [formData, setFormData] = useState({
-            name: "Admin User",
-            email: "admin@jmc.org",
-            phone: "+254 700 000000",
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-        });
-    
-        useEffect(() => {
-            const fetchUserData = async () => {
-                try {
-                    const userData = await getMe();
-                    setFormData({
-                        name: userData.full_name || "Admin User",
-                        email: userData.email || "admin@jmc.org",
-                        phone: userData.phone || "+254 700 000000",
-                        currentPassword: "",
-                        newPassword: "",
-                        confirmPassword: "",
-                    });
-                    console.log("Fetched user data:", userData);
-                } catch (error) {
-                    console.error("Failed to fetch user data", error);
-                }
-            };
-    
-            fetchUserData();
-        }, []);
-    
+        name: "Admin User",
+        email: "admin@jmc.org",
+        phone: "+254 700 000000",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await getMe();
+                setFormData({
+                    name: userData.full_name || "Admin User",
+                    email: userData.email || "admin@jmc.org",
+                    phone: userData.phone || "+254 700 000000",
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                });
+                console.log("Fetched user data:", userData);
+            } catch (error) {
+                console.error("Failed to fetch user data", error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
     const pathname = usePathname();
 
     return (

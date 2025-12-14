@@ -155,6 +155,17 @@ export const getRatings = async () => {
     }
 };
 
+// Money Transfer
+export const initiateTransfer = async (amount: number) => {
+    try {
+        const response = await api.post('api/v1/transactions/transfer/', { amount });
+        return response.data;
+    } catch (error) {
+        console.error('Error initiating transfer:', error);
+        throw error;
+    }
+};
+
 // User Data Fetching
 export const getUserById = async (userId: string) => {
     try {
