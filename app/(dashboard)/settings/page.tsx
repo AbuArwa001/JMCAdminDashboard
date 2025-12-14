@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Save, User, Lock, Bell, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
+import { getMe } from "@/lib/api_data";
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState("profile");
@@ -15,6 +16,27 @@ export default function SettingsPage() {
         newPassword: "",
         confirmPassword: "",
     });
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await getMe();
+                setFormData({
+                    name: userData.full_name || "Admin User",
+                    email: userData.email || "admin@jmc.org",
+                    phone: userData.phone || "+254 700 000000",
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                });
+                console.log("Fetched user data:", userData);
+            } catch (error) {
+                console.error("Failed to fetch user data", error);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
