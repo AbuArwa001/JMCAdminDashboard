@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { RECENT_DONATIONS, Transaction } from "@/lib/data";
+import { Transaction } from "@/lib/data";
 import clsx from "clsx";
 import { CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
     useEffect(() => {
         setLocalTransactions(transactions);
     }, [transactions]);
-    
+    console.log("RecentDonationsTable transactions:", transactions);
     const handleCompletePayment = async (id: string) => {
         try {
             // Optimistic UI update
