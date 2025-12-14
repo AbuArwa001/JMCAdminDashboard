@@ -7,6 +7,7 @@ import { exportToCSV, getFallbackColor } from "@/lib/utils";
 import Link from "next/link";
 import api from "@/lib/api";
 import { toast } from "sonner";
+import { getCategories } from "@/lib/api_data";
 
 
 interface AnalyticsCategory {
@@ -27,6 +28,14 @@ export default function CategoriesPage() {
     const [categories, setCategories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const chartData = stats.map(category => {
+    const totalAmount = category.donations.reduce((sum: any, donation: { collected_amount: any; }) => sum + donation.collected_amount, 0);
+    return {
+        name: category.category_name,
+        value: totalAmount,
+        color: category.color
+    };
+    });
     useEffect(() => {
         fetchData();
     }, []);
@@ -45,24 +54,9 @@ export default function CategoriesPage() {
                 acc[category.category_name] = category.color;
                 return acc;
             }, {});
-            const mappedCategories = categoriesData.map((cat: ApiCategory, index: number) => ({
-                id: cat.id,
-                name: cat.category_name,
-                color: cat.color || getFallbackColor(index),
-                createdAt: cat.created_at,
-                donations: cat.donations,
-            }));
-            // Map stats with proper colors
-            const mappedStats: CategoryStat[] = statsRes.data.map((cat: AnalyticsCategory, index: number) => {
-                const categoryColor = colorMap[cat.category_name] || getFallbackColor(index);
 
-                return {
-                    name: cat.category_name,
-                    value: Number(cat.total_amount), // Ensure it's a number
-                    color: categoryColor,
-                };
-            });
-            setStats(mappedStats);
+            const categories = await getCategories();
+            setStats(categories);
             // Handle both paginated and non-paginated responses
             setCategories(categoriesData);
         } catch (error) {
@@ -115,7 +109,7 @@ export default function CategoriesPage() {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="font-bold text-gray-900 mb-6">Category Performance</h3>
                     <div className="space-y-4">
-                        {stats.map((cat) => (
+                        {chartData.map((cat) => (
                             <div key={cat.name} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                 <div className="flex items-center gap-3">
                                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></div>

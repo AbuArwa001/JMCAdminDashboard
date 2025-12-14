@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { Save, User, Lock, Bell, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
-import { getMe } from "@/lib/api_data";
+import { getMe, updateMe } from "@/lib/api_data";
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState("profile");
     const [formData, setFormData] = useState({
+        userId: "",
         name: "Admin User",
         email: "admin@jmc.org",
         phone: "+254 700 000000",
@@ -22,14 +23,15 @@ export default function SettingsPage() {
             try {
                 const userData = await getMe();
                 setFormData({
+                    userId: userData.id || "",
                     name: userData.full_name || "Admin User",
                     email: userData.email || "admin@jmc.org",
-                    phone: userData.phone || "+254 700 000000",
+                    phone: userData.phone_number || "+254 700 000000",
                     currentPassword: "",
                     newPassword: "",
                     confirmPassword: "",
                 });
-                console.log("Fetched user data:", userData);
+                // console.log("Fetched user data:", userData);
             } catch (error) {
                 console.error("Failed to fetch user data", error);
             }
@@ -41,9 +43,32 @@ export default function SettingsPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
-
-    const handleSubmit = (e: React.FormEvent) => {
+/* 
+{
+    "id": "22222222-2222-2222-2222-222222220001",
+    "public_uuid": "22222222-2222-2222-2222-222222220001",
+    "email": "admin@example.com",
+    "username": "admin",
+    "full_name": "khalfan Athman",
+    "phone_number": null,
+    "is_admin": true,
+    "role": "11111111-1111-1111-1111-111111110001",
+    "fcm_token": null,
+    "profile_image_url": null,
+    "address": null,
+    "bio": null,
+    "default_donation_account": null
+}
+*/
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const filledData: any = {
+            id: formData.userId,
+            full_name: formData.name,
+            email: formData.email,
+            phone_number: formData.phone,
+        };
+        await updateMe(filledData);
         alert("Settings updated successfully!");
     };
 

@@ -164,3 +164,13 @@ export const getMe = async () => {
         throw error;
     }
 };
+
+export const updateMe = async (userData: any) => {
+    try {
+        const response = await api.put(`api/v1/users/${userData.id}/`, userData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating current user:', error);
+        throw error;
+    }
+};

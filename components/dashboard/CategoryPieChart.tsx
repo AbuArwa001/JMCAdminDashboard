@@ -11,14 +11,13 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
     // Calculate total amount for each category
     const chartData = data.map(category => {
         const totalAmount = category.donations.reduce((sum, donation) => sum + donation.collected_amount, 0);
-        console.log("Category:", category.category_name, "Total Amount:", category.donations);
         return {
             name: category.category_name,
             value: totalAmount,
             color: category.color
         };
     }).filter(item => item.value > 0);
-    console.log("CategoryPieChart data:", data);
+    // console.log("CategoryPieChart data:", data);
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">
