@@ -1,21 +1,63 @@
 "use client";
 
-import { ACTIVE_DRIVES, RECENT_DONATIONS } from "@/lib/data";
+import { DonationDrive, RECENT_DONATIONS } from "@/lib/data";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import DonorsTable from "@/components/dashboard/DonorsTable";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getDonationDriveById } from "@/lib/api_data";
 
 export default function DriveDetailsPage({ params }: { params: { id: string } }) {
-    const drive = ACTIVE_DRIVES.find((d) => d.id === params.id);
+    // params is NOT a Promise - it's a regular object
+    const { id } = params;
+    
+    console.log("Drive ID:", id);
+    
+    const [drive, setDrive] = useState<DonationDrive | undefined>();
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        const fetchDrive = async () => {
+            try {
+                setLoading(true);
+                console.log("Fetching drive with ID:", id);
+                const driveData = await getDonationDriveById(id);
+                console.log("Drive data received:", driveData);
+                setDrive(driveData);
+            } catch (error) {
+                console.error("Error fetching drive:", error);
+                setDrive(undefined);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        if (id) {
+            fetchDrive();
+        }
+    }, [id]);
 
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading drive details...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Only show notFound after loading is complete and no drive data
     if (!drive) {
         return notFound();
     }
 
     // Filter donations for this drive
-    const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === params.id);
+    const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === id);
 
     return (
         <div className="space-y-6">
@@ -38,7 +80,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Start Date</span>
-                                <span className="font-medium">{drive.startDate}</span>
+                                <span className="font-medium">{drive.start_date}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Status</span>

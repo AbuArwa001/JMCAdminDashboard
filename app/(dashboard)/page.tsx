@@ -1,6 +1,6 @@
 "use client";
 
-import { ACTIVE_DRIVES, DONATION_STATS } from "@/lib/data";
+import { getDonationDrives } from "@/lib/api_data";
 import StatCard from "@/components/dashboard/StatCard";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import DonationChart from "@/components/dashboard/DonationChart";
@@ -11,6 +11,7 @@ import { DollarSign, TrendingUp, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { DonationDrive } from "@/lib/data";
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,8 +35,16 @@ export default function Home() {
   });
   const [recentDonations, setRecentDonations] = useState([]);
   const [categoryStats, setCategoryStats] = useState([]);
-  const [donationTrends, setDonationTrends] = useState([]); // We might need to fetch this or calculate it
+  const [donationTrends, setDonationTrends] = useState([]);
+  const [drives, setDrives] = useState<DonationDrive[]>([]);
 
+  useEffect(() => {
+        const fetchDrives = async () => {
+            const drives = await getDonationDrives();
+            setDrives(drives);
+        };
+        fetchDrives();
+    }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -120,7 +129,7 @@ export default function Home() {
       <motion.div variants={item}>
         <h2 className="text-xl font-bold text-gray-900 mb-4">Active Donation Drives</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ACTIVE_DRIVES.map((drive) => (
+          {drives.map((drive) => (
             <DriveProgressCard key={drive.id} drive={drive} />
           ))}
         </div>

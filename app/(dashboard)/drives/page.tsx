@@ -1,16 +1,28 @@
 "use client";
 
-import { ACTIVE_DRIVES } from "@/lib/data";
+import { DonationDrive } from "@/lib/data";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import { Download, Plus } from "lucide-react";
 
 import { exportToCSV } from "@/lib/utils";
 
 import Link from "next/link";
+import {useEffect, useState } from "react";
+import { get } from "http";
+import { getDonationDrives } from "@/lib/api_data";
 
 export default function DrivesPage() {
+    const [drives, setDrives] = useState<DonationDrive[]>([]);
+
+    useEffect(() => {
+        const fetchDrives = async () => {
+            const drives = await getDonationDrives();
+            setDrives(drives);
+        };
+        fetchDrives();
+    }, []);
     const handleExport = () => {
-        exportToCSV(ACTIVE_DRIVES, "donation_drives");
+        exportToCSV(drives, "donation_drives");
     };
 
     return (
@@ -33,7 +45,7 @@ export default function DrivesPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {ACTIVE_DRIVES.map((drive) => (
+                {drives.map((drive) => (
                     <DriveProgressCard key={drive.id} drive={drive} />
                 ))}
             </div>
