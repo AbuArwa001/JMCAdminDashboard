@@ -98,13 +98,13 @@ export interface CreateDriveData {
 export interface DonationDrive {
     id: string;
     title: string;
-    targetAmount: number;
-    collectedAmount: number;
+    target_amount: number;
+    collected_amount: number;
     category: string;
-    donorsCount: number;
+    donors_count: number;
     status: DriveStatus;
-    startDate: string;
-    endDate?: string;
+    start_date: string;
+    end_date?: string;
 }
 
 export interface Donation {
@@ -156,38 +156,38 @@ export interface CategoriesResponse {
 
 // Mock Data
 
-export const ACTIVE_DRIVES: DonationDrive[] = [
-    {
-        id: '1',
-        title: 'Education Fund 2025',
-        targetAmount: 500000,
-        collectedAmount: 210000,
-        category: 'Education',
-        donorsCount: 150,
-        status: 'Mid-progress',
-        startDate: '2025-01-01',
-    },
-    {
-        id: '2',
-        title: 'Mosque Maintenance',
-        targetAmount: 100000,
-        collectedAmount: 12000,
-        category: 'Maintenance',
-        donorsCount: 45,
-        status: 'Low-progress',
-        startDate: '2025-02-15',
-    },
-    {
-        id: '3',
-        title: 'Ramadan Food Drive',
-        targetAmount: 1000000,
-        collectedAmount: 1050000,
-        category: 'Charity',
-        donorsCount: 800,
-        status: 'Completed',
-        startDate: '2025-03-01',
-    },
-];
+// export const ACTIVE_DRIVES: DonationDrive[] = [
+//     {
+//         id: '1',
+//         title: 'Education Fund 2025',
+//         targetAmount: 500000,
+//         collectedAmount: 210000,
+//         category: 'Education',
+//         donorsCount: 150,
+//         status: 'Mid-progress',
+//         startDate: '2025-01-01',
+//     },
+//     {
+//         id: '2',
+//         title: 'Mosque Maintenance',
+//         targetAmount: 100000,
+//         collectedAmount: 12000,
+//         category: 'Maintenance',
+//         donorsCount: 45,
+//         status: 'Low-progress',
+//         startDate: '2025-02-15',
+//     },
+//     {
+//         id: '3',
+//         title: 'Ramadan Food Drive',
+//         targetAmount: 1000000,
+//         collectedAmount: 1050000,
+//         category: 'Charity',
+//         donorsCount: 800,
+//         status: 'Completed',
+//         startDate: '2025-03-01',
+//     },
+// ];
 
 export const RECENT_DONATIONS: Donation[] = [
     { id: 'd1', donorName: 'Ahmed Ali', amount: 5000, category: 'Education', driveId: '1', status: 'Completed', date: '2025-11-26T10:30:00', paymentMethod: 'Mpesa' },

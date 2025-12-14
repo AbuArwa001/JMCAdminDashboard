@@ -1,17 +1,33 @@
-import { DonationDrive, RECENT_DONATIONS } from "@/lib/data";
+import { CategoryData, DonationDrive, RECENT_DONATIONS } from "@/lib/data";
 import clsx from "clsx";
 import Link from "next/link";
 import { Download, Eye } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { getCategoryById } from "@/lib/api_data";
 
 export default function DriveProgressCard({ drive }: { drive: DonationDrive }) {
-    const progress = Math.min(100, Math.round((drive.collectedAmount / drive.targetAmount) * 100));
-
+    const [category, loadCategory] = useState<CategoryData | null>(null);
+    const progress = Math.min(100, Math.round((drive.collected_amount / drive.target_amount) * 100));
+    
     let progressColor = "bg-primary"; // Default Gold
     if (progress >= 100) progressColor = "bg-primary-green"; // Completed
     else if (progress < 20) progressColor = "bg-red-500"; // Low
     else progressColor = "bg-primary-bronze"; // Mid
 
+
+    useEffect(() => {
+        const load = async () => {
+            const cat = await getCategoryById(drive.category);
+            return cat;
+        }
+        const fetchCategory = async () => {
+            const cat = await load();
+            loadCategory(cat);
+        }
+        fetchCategory();
+    }, [category]);
+    // console.log('Loaded category:', category);
     const handleExport = () => {
         const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === drive.id);
         exportToCSV(driveDonations, `${drive.title.replace(/\s+/g, '_').toLowerCase()}_donations`);
@@ -23,7 +39,7 @@ export default function DriveProgressCard({ drive }: { drive: DonationDrive }) {
                 <div>
                     <h4 className="font-bold text-gray-900">{drive.title}</h4>
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full mt-1 inline-block">
-                        {drive.category}
+                        {category?.category_name || 'Loading...'}
                     </span>
                 </div>
                 <span className={clsx("text-xs font-bold px-2 py-1 rounded-lg bg-secondary text-primary-bronze")}>
@@ -34,14 +50,14 @@ export default function DriveProgressCard({ drive }: { drive: DonationDrive }) {
             <div className="mb-4">
                 <div className="flex justify-between text-sm mb-1">
                     <span className="text-gray-500">Collected</span>
-                    <span className="font-bold text-gray-900">KES {drive.collectedAmount.toLocaleString()}</span>
+                    <span className="font-bold text-gray-900">KES {drive.collected_amount.toLocaleString()}</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2.5">
                     <div className={clsx("h-2.5 rounded-full transition-all duration-500", progressColor)} style={{ width: `${progress}%` }}></div>
                 </div>
                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>Target: KES {drive.targetAmount.toLocaleString()}</span>
-                    <span>{drive.donorsCount} Donors</span>
+                    <span>Target: KES {drive.target_amount.toLocaleString()}</span>
+                    <span>{drive.donors_count} Donors</span>
                 </div>
             </div>
 

@@ -4,7 +4,7 @@ import { Donation } from "@/lib/data";
 import { clsx } from "clsx";
 import { Download, CheckCircle } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface DonorsTableProps {
     donations: Donation[];
@@ -12,12 +12,25 @@ interface DonorsTableProps {
 }
 
 export default function DonorsTable({ donations: initialDonations, driveTitle }: DonorsTableProps) {
-    const [donations, setDonations] = useState(initialDonations);
+    const [donations, setDonations] = useState<Donation[]>([...initialDonations]);
 
+    useEffect(() => {
+        setDonations([...initialDonations]);
+    }, [initialDonations]);
+    const filteredDonations = donations.map(item => ({
+        // id: item.id,
+        "Full Name": item.donorName || "Anonymous",
+        donation_title: driveTitle,
+        amount: item.amount,
+        donated_at: item.date,
+        payment_method: item.paymentMethod,
+        payment_status: item.status,
+        // category: item.,
+    }));
     const handleExport = () => {
-        exportToCSV(donations, `${driveTitle.replace(/\s+/g, '_').toLowerCase()}_donors`);
+        exportToCSV(filteredDonations, `${driveTitle.replace(/\s+/g, '_').toLowerCase()}_donors`);
     };
-
+    // console.log("Donations in DonorsTable:", donations);
     const handleCompletePayment = (id: string) => {
         setDonations((prev) =>
             prev.map((d) => (d.id === id ? { ...d, status: "Completed" } : d))

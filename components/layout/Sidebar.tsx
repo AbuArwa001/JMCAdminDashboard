@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Heart, List, CreditCard, Settings, X } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { getMe } from "@/lib/api_data";
 
 const MENU_ITEMS = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -20,6 +22,36 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+    const [formData, setFormData] = useState({
+            name: "Admin User",
+            email: "admin@jmc.org",
+            phone: "+254 700 000000",
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+        });
+    
+        useEffect(() => {
+            const fetchUserData = async () => {
+                try {
+                    const userData = await getMe();
+                    setFormData({
+                        name: userData.full_name || "Admin User",
+                        email: userData.email || "admin@jmc.org",
+                        phone: userData.phone || "+254 700 000000",
+                        currentPassword: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                    });
+                    console.log("Fetched user data:", userData);
+                } catch (error) {
+                    console.error("Failed to fetch user data", error);
+                }
+            };
+    
+            fetchUserData();
+        }, []);
+    
     const pathname = usePathname();
 
     return (
@@ -69,8 +101,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         A
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-white">Admin User</p>
-                        <p className="text-xs text-gray-500">admin@jmc.org</p>
+                        <p className="text-sm font-medium text-white">{formData.name}</p>
+                        <p className="text-xs text-gray-500">{formData.email}</p>
                     </div>
                 </div>
             </div>
