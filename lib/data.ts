@@ -1,4 +1,5 @@
 import { LucideIcon, LayoutDashboard, Heart, PieChart, Settings, Users, FileText, Star } from 'lucide-react';
+import api from './api';
 
 // Types
 export type DriveStatus = 'Completed' | 'Mid-progress' | 'Low-progress';
@@ -68,6 +69,31 @@ export interface User {
     bio?: string;
     defaultDonationAccount?: string;
 }
+/* 
+{
+    "title": "Student Bursary Fund",
+    "description": "Supporting underprivileged students with tuition, books, and exam fees.",
+    "created_at": "2025-12-08T07:15:00.000Z",
+    "account_name": "BursaryAccount1",
+    "target_amount": "150000.00",
+    "start_date": "2025-12-08T00:00:00Z",
+    "end_date": "2025-12-31T23:59:59Z",
+    "status": "Active",
+    "paybill_number": "987688",
+    "category": "61576472-6022-4992-b22c-35d672ae5dbb"
+}
+*/
+export interface CreateDriveData {
+    title: string;
+    target_amount: number;
+    account_name?: string;
+    description?: string;
+    status?: string;
+    paybill_number?: string;
+    category: string;
+    start_date: string;
+    end_date?: string;
+}
 
 export interface DonationDrive {
     id: string;
@@ -106,6 +132,7 @@ export interface Transaction {
 }
 
 export interface CategoryData {
+    id?: string;
     category_name: string;
     color: string;
     donations: Donation[];
@@ -117,6 +144,15 @@ export interface RatingData {
     date: string;
     donorName: string;
 }
+// Actual Data from API
+export interface CategoriesResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: CategoryData[];
+}
+
+// const categories = api.getCategories();
 
 // Mock Data
 

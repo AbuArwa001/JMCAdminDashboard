@@ -23,8 +23,8 @@ export default function DonationsPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     const filteredDonations = donations.map(item => ({
-        id: item.id,
-        username: item.user?.full_name,
+        // id: item.id,
+        "Full Name": item.user?.full_name,
         donation_title: item.donation?.title,
         amount: item.amount,
         donated_at: item.donated_at,

@@ -1,29 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CATEGORY_STATS } from "@/lib/data";
+import {CategoryData } from "@/lib/data";
+import { createDonationDrive, getCategories } from "@/lib/api_data";
 
 export default function CreateDrivePage() {
     const router = useRouter();
     const [paymentMethod, setPaymentMethod] = useState<"MPESA" | "BANK">("MPESA");
+    
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         title: "",
         category: "",
-        startDate: "",
-        endDate: "",
-        targetAmount: "",
+        start_date: "",
+        end_date: "",
+        target_amount: 0,
         description: "",
-        paybill: "",
-        accountName: "",
-        accountNumber: "",
+        paybill_number: "",
+        account_name: "",
+        account_number: "",
     });
+    const [categories, setCategories] = useState<CategoryData[]>([]);
+    console.log("Categories:", categories);
+    useEffect(() => {
+        const fetchCategories = async () => {
+        const cats: CategoryData[] = await getCategories();
+        setCategories(cats);
+        };
+        
+        fetchCategories();
+    }, []);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // API call would go here
+        createDonationDrive({ ...formData });
         console.log({ ...formData, paymentMethod });
         alert("Donation Drive created successfully!");
         router.push("/drives");
@@ -69,8 +83,8 @@ export default function CreateDrivePage() {
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
                             >
                                 <option value="">Select Category</option>
-                                {CATEGORY_STATS.map((cat) => (
-                                    <option key={cat.category_name} value={cat.category_name}>{cat.category_name}</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.category_name} value={cat.id}>{cat.category_name}</option>
                                 ))}
                             </select>
                         </div>
@@ -79,9 +93,9 @@ export default function CreateDrivePage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Target Amount (KES)</label>
                             <input
                                 type="number"
-                                name="targetAmount"
+                                name="target_amount"
                                 required
-                                value={formData.targetAmount}
+                                value={formData.target_amount}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                                 placeholder="0.00"
@@ -92,9 +106,9 @@ export default function CreateDrivePage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                             <input
                                 type="date"
-                                name="startDate"
+                                name="start_date"
                                 required
-                                value={formData.startDate}
+                                value={formData.start_date}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
@@ -104,8 +118,8 @@ export default function CreateDrivePage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                             <input
                                 type="date"
-                                name="endDate"
-                                value={formData.endDate}
+                                name="end_date"
+                                value={formData.end_date}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
@@ -166,8 +180,8 @@ export default function CreateDrivePage() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Paybill Number</label>
                                         <input
                                             type="text"
-                                            name="paybill"
-                                            value={formData.paybill}
+                                            name="paybill_number"
+                                            value={formData.paybill_number}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                                             placeholder="e.g. 247247"
@@ -177,8 +191,8 @@ export default function CreateDrivePage() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Account Name</label>
                                         <input
                                             type="text"
-                                            name="accountName"
-                                            value={formData.accountName}
+                                            name="account_name"
+                                            value={formData.account_name}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                                             placeholder="e.g. JMC Donation"
@@ -191,8 +205,8 @@ export default function CreateDrivePage() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Bank Paybill / Code</label>
                                         <input
                                             type="text"
-                                            name="paybill"
-                                            value={formData.paybill}
+                                            name="paybill_number"
+                                            value={formData.paybill_number}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                                             placeholder="Bank Code"
@@ -202,8 +216,8 @@ export default function CreateDrivePage() {
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
                                         <input
                                             type="text"
-                                            name="accountNumber"
-                                            value={formData.accountNumber}
+                                            name="account_number"
+                                            value={formData.account_number}
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
                                             placeholder="Account Number"
@@ -217,6 +231,7 @@ export default function CreateDrivePage() {
                     <div className="flex justify-end pt-4">
                         <button
                             type="submit"
+                            onClick={handleSubmit}
                             className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors font-medium"
                         >
                             <Save className="w-4 h-4" />
