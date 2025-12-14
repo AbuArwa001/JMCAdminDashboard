@@ -1,30 +1,28 @@
 "use client";
 
-import { DonationDrive, RECENT_DONATIONS } from "@/lib/data";
+import { CategoryData, Donation, DonationDrive, RECENT_DONATIONS, Transaction } from "@/lib/data";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import DonorsTable from "@/components/dashboard/DonorsTable";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { useEffect, useState } from "react";
-import { getDonationDriveById } from "@/lib/api_data";
+import { use, useEffect, useState } from "react";
+import { getCategoryById, getDonationDriveById, getDonationDrives, getTransactionsByDonationDrive } from "@/lib/api_data";
+import { get } from "http";
 
 export default function DriveDetailsPage({ params }: { params: { id: string } }) {
-    // params is NOT a Promise - it's a regular object
     const { id } = params;
-    
-    console.log("Drive ID:", id);
     
     const [drive, setDrive] = useState<DonationDrive | undefined>();
     const [loading, setLoading] = useState(true);
+    const [category, setCategory] = useState<CategoryData>();
+    const [donations, setDonations] = useState<Transaction[]>([]);
     
     useEffect(() => {
         const fetchDrive = async () => {
             try {
                 setLoading(true);
-                console.log("Fetching drive with ID:", id);
                 const driveData = await getDonationDriveById(id);
-                console.log("Drive data received:", driveData);
                 setDrive(driveData);
             } catch (error) {
                 console.error("Error fetching drive:", error);
@@ -38,7 +36,39 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
             fetchDrive();
         }
     }, [id]);
-
+    useEffect(() => {
+        const fetchCategory = async () => {
+            if (drive && drive.category) {
+                try {
+                    const categoryRes = await getCategoryById(drive.category);
+                    setCategory(categoryRes || undefined);
+                } catch (error) {
+                    console.error("Error fetching category:", error);
+                }
+            }
+        };
+        fetchCategory();
+    }, [drive]);
+    useEffect(() => {
+        const fetchTransactionsForDrive = async () => {
+            // fetching donations for the drive
+            const driveDonations = await getTransactionsByDonationDrive(id);
+            setDonations(driveDonations);
+        };
+        fetchTransactionsForDrive();
+    
+    }, [id]);
+    const driveDonations: Donation[] = donations.map(d=>({
+        id: d.id,
+        donorName: d.user?.full_name || "Anonymous",
+        amount: d.amount,
+        category: d.category || "General",
+        driveId: d.donation.id,
+        status: d.payment_status === "Completed" ? "Completed" : "Pending",
+        date: d.donated_at ? d.donated_at.toString() : d.date,
+        paymentMethod: d.payment_method === "Mpesa" ? "Mpesa" : "Cash",
+    }));
+    // console.log("Drive Donations:", driveDonations);
     // Show loading state
     if (loading) {
         return (
@@ -57,7 +87,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
     }
 
     // Filter donations for this drive
-    const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === id);
+    // const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === id);
 
     return (
         <div className="space-y-6">
@@ -76,7 +106,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Category</span>
-                                <span className="font-medium">{drive.category}</span>
+                                <span className="font-medium">{category ? category.category_name : "Loading..."}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-gray-500">Start Date</span>
