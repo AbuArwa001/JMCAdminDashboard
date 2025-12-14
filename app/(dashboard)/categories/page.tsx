@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { CategoryData, CategoryStat } from "@/lib/data";
 import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
-import { Download, Plus, Pencil, Trash2 } from "lucide-react";
+import { Download, Plus, Pencil, Trash2, Search } from "lucide-react";
 import { exportToCSV, getFallbackColor } from "@/lib/utils";
 import Link from "next/link";
 import api from "@/lib/api";
@@ -27,14 +27,15 @@ export default function CategoriesPage() {
     const [stats, setStats] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const chartData = stats.map(category => {
-    const totalAmount = category.donations.reduce((sum: any, donation: { collected_amount: any; }) => sum + donation.collected_amount, 0);
-    return {
-        name: category.category_name,
-        value: totalAmount,
-        color: category.color
-    };
+        const totalAmount = category.donations.reduce((sum: any, donation: { collected_amount: any; }) => sum + donation.collected_amount, 0);
+        return {
+            name: category.category_name,
+            value: totalAmount,
+            color: category.color
+        };
     });
     useEffect(() => {
         fetchData();
@@ -80,23 +81,38 @@ export default function CategoriesPage() {
         }
     };
 
+    const filteredCategories = categories.filter(category =>
+        category.category_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (category.description && category.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     const handleExport = () => {
         exportToCSV(stats.length > 0 ? stats : [], "category_performance");
     };
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3 w-full md:w-auto">
+                    <div className="relative flex-grow md:flex-grow-0">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search categories..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-64"
+                        />
+                    </div>
                     <button
                         onClick={handleExport}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 whitespace-nowrap"
                     >
                         <Download className="w-4 h-4" />
                         Export Report
                     </button>
-                    <Link href="/categories/create" className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze">
+                    <Link href="/categories/create" className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze whitespace-nowrap">
                         <Plus className="w-4 h-4" />
                         New Category
                     </Link>
@@ -141,7 +157,7 @@ export default function CategoriesPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {categories.map((category) => (
+                            {filteredCategories.map((category) => (
                                 <tr key={category.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {category.category_name}
@@ -167,7 +183,7 @@ export default function CategoriesPage() {
                                     </td>
                                 </tr>
                             ))}
-                            {categories.length === 0 && !isLoading && (
+                            {filteredCategories.length === 0 && !isLoading && (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
                                         No categories found
