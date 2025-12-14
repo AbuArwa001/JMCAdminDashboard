@@ -31,6 +31,8 @@ const item = {
 export default function Home() {
   const [stats, setStats] = useState({
     totalCollected: 0,
+    totalCollectedWeek: 0,
+    totalCollectedMonth: 0,
     activeDrives: 0,
   });
   const [recentDonations, setRecentDonations] = useState([]);
@@ -39,12 +41,12 @@ export default function Home() {
   const [drives, setDrives] = useState<DonationDrive[]>([]);
 
   useEffect(() => {
-        const fetchDrives = async () => {
-            const drives = await getDonationDrives();
-            setDrives(drives);
-        };
-        fetchDrives();
-    }, []);
+    const fetchDrives = async () => {
+      const drives = await getDonationDrives();
+      setDrives(drives);
+    };
+    fetchDrives();
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,8 +54,11 @@ export default function Home() {
         const summaryRes = await api.get("/api/v1/analytics/summary/");
         setStats({
           totalCollected: summaryRes.data.total_collected,
+          totalCollectedWeek: summaryRes.data.total_collected_week,
+          totalCollectedMonth: summaryRes.data.total_collected_month,
           activeDrives: summaryRes.data.active_drives,
         });
+        setDonationTrends(summaryRes.data.donation_trends);
 
         // Fetch Categories
         const categoriesRes = await getCategories();
@@ -113,15 +118,14 @@ export default function Home() {
           icon={DollarSign}
           trend={{ value: 12, isPositive: true }}
         />
-        {/* Placeholder for other stats until we have API support */}
         <StatCard
           title="Total Collected (Week)"
-          value="-"
+          value={`KES ${stats.totalCollectedWeek.toLocaleString()}`}
           icon={TrendingUp}
         />
         <StatCard
           title="Total Collected (Month)"
-          value="-"
+          value={`KES ${stats.totalCollectedMonth.toLocaleString()}`}
           icon={DollarSign}
         />
         <StatCard

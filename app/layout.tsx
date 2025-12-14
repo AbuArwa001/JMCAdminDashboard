@@ -27,8 +27,8 @@ export const metadata: Metadata = {
   description: "Admin dashboard for Jamia Mosque Donation Management",
   icons: {
     icon: "/logo.png",
-    // sizes: "16x16 32x32",
-    // type: "image/png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

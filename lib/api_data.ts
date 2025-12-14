@@ -144,6 +144,17 @@ export const updateTransaction = async (transactionId: string, transactionData: 
     }
 };
 
+// Ratings Data Fetching
+export const getRatings = async () => {
+    try {
+        const response = await api.get('api/v1/ratings/');
+        return response.data.results;
+    } catch (error) {
+        console.error('Error fetching ratings:', error);
+        return [];
+    }
+};
+
 // User Data Fetching
 export const getUserById = async (userId: string) => {
     try {
