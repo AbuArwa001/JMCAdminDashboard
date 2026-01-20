@@ -2,6 +2,7 @@
 
 import { CategoryData, Donation, DonationDrive, RECENT_DONATIONS, Transaction } from "@/lib/data";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
+import DriveImages from "@/components/dashboard/DriveImages";
 import DonorsTable from "@/components/dashboard/DonorsTable";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -12,27 +13,27 @@ import { get } from "http";
 
 export default function DriveDetailsPage({ params }: { params: { id: string } }) {
     const { id } = params;
-    
+
     const [drive, setDrive] = useState<DonationDrive | undefined>();
     const [loading, setLoading] = useState(true);
     const [category, setCategory] = useState<CategoryData>();
     const [donations, setDonations] = useState<Transaction[]>([]);
-    
+
+    const fetchDrive = async () => {
+        try {
+            const driveData = await getDonationDriveById(id);
+            setDrive(driveData);
+        } catch (error) {
+            console.error("Error fetching drive:", error);
+            setDrive(undefined);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchDrive = async () => {
-            try {
-                setLoading(true);
-                const driveData = await getDonationDriveById(id);
-                setDrive(driveData);
-            } catch (error) {
-                console.error("Error fetching drive:", error);
-                setDrive(undefined);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
         if (id) {
+            setLoading(true);
             fetchDrive();
         }
     }, [id]);
@@ -56,9 +57,9 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
             setDonations(driveDonations);
         };
         fetchTransactionsForDrive();
-    
+
     }, [id]);
-    const driveDonations: Donation[] = donations.map(d=>({
+    const driveDonations: Donation[] = donations.map(d => ({
         id: d.id,
         donorName: d.user?.full_name || "Anonymous",
         amount: d.amount,
@@ -85,9 +86,6 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
     if (!drive) {
         return notFound();
     }
-
-    // Filter donations for this drive
-    // const driveDonations = RECENT_DONATIONS.filter((d) => d.driveId === id);
 
     return (
         <div className="space-y-6">
@@ -120,9 +118,17 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                     </div>
                 </div>
 
-                <div className="lg:col-span-2">
-                    <DonorsTable donations={driveDonations} driveTitle={drive.title} />
+                <div className="mt-6">
+                    <DriveImages
+                        driveId={drive.id}
+                        initialImages={drive.images || []}
+                        onImagesUpdated={fetchDrive}
+                    />
                 </div>
+            </div>
+
+            <div className="lg:col-span-2">
+                <DonorsTable donations={driveDonations} driveTitle={drive.title} />
             </div>
         </div>
     );

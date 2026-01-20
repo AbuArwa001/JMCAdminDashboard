@@ -237,3 +237,30 @@ export const updateMe = async (userData: any) => {
         throw error;
     }
 };
+
+export const uploadDonationImage = async (donationId: string, imageFile: File) => {
+    try {
+        const formData = new FormData();
+        formData.append('donation', donationId);
+        formData.append('image', imageFile);
+
+        const response = await api.post('api/v1/donation-images/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error uploading donation image:', error);
+        throw error;
+    }
+};
+
+export const deleteDonationImage = async (imageId: string) => {
+    try {
+        await api.delete(`api/v1/donation-images/${imageId}/`);
+    } catch (error) {
+        console.error('Error deleting donation image:', error);
+        throw error;
+    }
+};

@@ -105,6 +105,7 @@ export interface DonationDrive {
     status: DriveStatus;
     start_date: string;
     end_date?: string;
+    images?: { id: string; image: string; created_at: string }[];
 }
 
 export interface Donation {
