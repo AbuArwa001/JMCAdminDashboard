@@ -96,6 +96,7 @@ export default function DriveImages({ driveId, initialImages, image_urls = [], o
                                 alt="Donation Image"
                                 fill
                                 className="object-cover"
+                                unoptimized
                             />
                             {img.type === 'legacy' && (
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
