@@ -1,5 +1,5 @@
 // Types
-export type DriveStatus = 'Completed' | 'Mid-progress' | 'Low-progress';
+export type DriveStatus = 'Active' | 'Closed' | 'Completed' | 'Mid-progress' | 'Low-progress';
 export interface User {
     id: string;
     full_name: string;

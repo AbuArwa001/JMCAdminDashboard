@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CategoryData } from "@/lib/data";
 import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
 import { Download, Plus, Pencil, Trash2, Search } from "lucide-react";
 import { exportToCSV, getFallbackColor } from "@/lib/utils";

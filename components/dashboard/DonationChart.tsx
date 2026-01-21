@@ -1,4 +1,3 @@
-import { LINE_CHART_PROPS } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from "react";
 import { getDonationTrends } from "@/lib/api_data";
