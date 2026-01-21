@@ -1,6 +1,11 @@
 "use client";
 
-import { getCategories, getCategoryById, getDonationDrives, getTransactions } from "@/lib/api_data";
+import {
+  getCategories,
+  getCategoryById,
+  getDonationDrives,
+  getTransactions,
+} from "@/lib/api_data";
 import StatCard from "@/components/dashboard/StatCard";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
 import DonationChart from "@/components/dashboard/DonationChart";
@@ -18,14 +23,14 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  show: { opacity: 1, y: 0 },
 };
 
 export default function Home() {
@@ -62,41 +67,11 @@ export default function Home() {
 
         // Fetch Categories
         const categoriesRes = await getCategories();
-        // Map category data to chart format
-        // const mappedCategories = categoriesRes.map((cat: any, index: number) => ({
-        //   name: cat.category_name,
-        //   value: cat.total_amount,
-        //   color: ['#BE9830', '#1F2937', '#E5E7EB', '#9CA3AF'][index % 4] // Example colors
-        // }));
-        // console.log("Categories RES:", categoriesRes);
         setCategoryStats(categoriesRes);
 
         // Fetch Recent Transactions
-        const getCategoryByIdCached = ((id) => {
-          const cache: Record<string, string> = {};
-          return async (id: string) => {
-            if (cache[id]) {
-              return cache[id];
-            }
-            const category = await getCategoryById(id);
-            const categoryName = category ? category.category_name : "General";
-            cache[id] = categoryName;
-            return categoryName;
-          };
-        })();
         const transactionsRes = (await getTransactions()).slice(0, 5);
-        // const mappedTransactions = transactionsRes.map((t: any) => ({
-        //   id: t.id,
-        //   donorName: t.user.full_name ? `${t.user.full_name}` : "Anonymous",
-        //   amount: t.amount,
-        //   category:  getCategoryByIdCached(t.donation.category) || "General",
-        //   paymentMethod: t.payment_method,
-        //   status: t.payment_status,
-        //   date: t.donated_at,
-        // }));
-        // console.log("Transactions RES:", transactionsRes);
         setRecentDonations(transactionsRes);
-
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
@@ -111,7 +86,10 @@ export default function Home() {
       animate="show"
       className="space-y-6"
     >
-      <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <motion.div
+        variants={item}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
         <StatCard
           title="Total Collected (All Time)"
           value={`KES ${stats.totalCollected.toLocaleString()}`}
@@ -145,7 +123,9 @@ export default function Home() {
       </div>
 
       <motion.div variants={item}>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Active Donation Drives</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          Active Donation Drives
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {drives.map((drive) => (
             <DriveProgressCard key={drive.id} drive={drive} />

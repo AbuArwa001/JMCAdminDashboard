@@ -83,12 +83,22 @@ export const getDonationDriveById = async (driveId: string) => {
     }
 };
 
+
 export const updateDonationDrive = async (driveId: string, driveData: Partial<CreateDriveData>) => {
     try {
         const response = await api.put(`api/v1/donations/${driveId}/`, driveData);
         return response.data;
     } catch (error) {
         console.error('Error updating donation drive:', error);
+        throw error;
+    }
+};
+
+export const deleteDonationDrive = async (driveId: string) => {
+    try {
+        await api.delete(`api/v1/donations/${driveId}/`);
+    } catch (error) {
+        console.error('Error deleting donation drive:', error);
         throw error;
     }
 };
@@ -244,7 +254,7 @@ export const uploadDonationImage = async (donationId: string, imageFile: File) =
         formData.append('donation', donationId);
         formData.append('image', imageFile);
 
-        const response = await api.post('api/v1/donation-images/', formData, {
+        const response = await api.post('api/v1/donations/', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -258,9 +268,19 @@ export const uploadDonationImage = async (donationId: string, imageFile: File) =
 
 export const deleteDonationImage = async (imageId: string) => {
     try {
-        await api.delete(`api/v1/donation-images/${imageId}/`);
+        await api.delete(`api/v1/donations/${imageId}/`);
     } catch (error) {
         console.error('Error deleting donation image:', error);
         throw error;
+    }
+};
+
+export const getAnalyticsCategories = async (): Promise<CategoryData[]>=> {
+    try {
+        const response = await api.get('api/v1/analytics/categories/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching analytics categories:', error);
+        return [];
     }
 };
