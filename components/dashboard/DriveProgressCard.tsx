@@ -22,10 +22,9 @@ export default function DriveProgressCard({
   drive,
   onUpdate,
 }: {
-  drive: DonationDrive;
+  drive: DonationDrive & { categoryName?: string };
   onUpdate?: () => void;
 }) {
-  const [category, loadCategory] = useState<CategoryData | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const progress = Math.min(
@@ -42,17 +41,7 @@ export default function DriveProgressCard({
     progressColor = "bg-red-500"; // Low
   else progressColor = "bg-primary-bronze"; // Mid
 
-  useEffect(() => {
-    const load = async () => {
-      const cat = await getCategoryById(drive.category);
-      return cat;
-    };
-    const fetchCategory = async () => {
-      const cat = await load();
-      loadCategory(cat);
-    };
-    fetchCategory();
-  }, [category, drive.category]);
+  // Category is now passed from parent or handled via props to avoid redundant API calls
 
   // console.log('Loaded category:', category);
   const handleExport = () => {
@@ -113,7 +102,7 @@ export default function DriveProgressCard({
             {drive.title}
           </h4>
           <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full mt-1 inline-block">
-            {category?.category_name || "Loading..."}
+            {drive.categoryName || "General"}
           </span>
         </div>
         <span

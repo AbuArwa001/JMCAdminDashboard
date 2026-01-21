@@ -8,11 +8,7 @@ import Link from "next/link";
 
 import { toast } from "sonner";
 import { getAnalyticsCategories, getCategories, deleteCategory } from "@/lib/api_data";
-
-interface AnalyticsCategory {
-  category_name: string;
-  total_amount: number;
-}
+import { AnalyticsCategory, CategoryData } from "@/lib/data";
 
 export default function CategoriesPage() {
   const [stats, setStats] = useState<CategoryData[]>([]);

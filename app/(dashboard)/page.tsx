@@ -46,17 +46,16 @@ export default function Home() {
   const [drives, setDrives] = useState<DonationDrive[]>([]);
 
   useEffect(() => {
-    const fetchDrives = async () => {
-      const drives = await getDonationDrives();
-      setDrives(drives);
-    };
-    fetchDrives();
-  }, []);
-  useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Summary
-        const summaryData = await getAnalyticsSummary();
+        // Fetch everything in parallel
+        const [summaryData, categoriesRes, allTransactions] = await Promise.all([
+          getAnalyticsSummary(),
+          getCategories(),
+          getTransactions(),
+        ]);
+
+        // 1. Set Stats & Trends
         setStats({
           totalCollected: summaryData.total_collected,
           totalCollectedWeek: summaryData.total_collected_week,
@@ -65,13 +64,31 @@ export default function Home() {
         });
         setDonationTrends(summaryData.donation_trends);
 
-        // Fetch Categories
-        const categoriesRes = await getCategories();
+        // 2. Set Categories
         setCategoryStats(categoriesRes);
 
-        // Fetch Recent Transactions
-        const transactionsRes = (await getTransactions()).slice(0, 5);
+        // 3. Create Category Map
+        const categoryMap = categoriesRes.reduce((acc: any, cat: any) => {
+          acc[cat.id] = cat.category_name;
+          return acc;
+        }, {});
+
+        // 4. Map and Set Transactions
+        const transactionsRes = allTransactions.slice(0, 5).map((t: any) => ({
+          ...t,
+          category: categoryMap[t.donation?.category] || "General",
+          user_name: t.user?.full_name || "Anonymous",
+        }));
         setRecentDonations(transactionsRes);
+
+        // 5. Fetch and Map Drives
+        const rawDrives = await getDonationDrives();
+        const mappedDrives = rawDrives.map(drive => ({
+          ...drive,
+          categoryName: categoryMap[drive.category] || "Loading..."
+        }));
+        setDrives(mappedDrives);
+
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       }
