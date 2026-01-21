@@ -1,7 +1,7 @@
-import { DONATION_TRENDS } from "@/lib/data";
+import { LINE_CHART_PROPS } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from "react";
-import api from "@/lib/api";
+import { getDonationTrends } from "@/lib/api_data";
 
 interface DonationChartProps {
     data: any[];
@@ -16,10 +16,8 @@ export default function DonationChart({ data: initialData }: DonationChartProps)
         const fetchTrends = async () => {
             setIsLoading(true);
             try {
-                const response = await api.get('/api/v1/analytics/trends/', {
-                    params: { period }
-                });
-                setFetchedData(response.data);
+                const trends = await getDonationTrends(period);
+                setFetchedData(trends);
             } catch (error) {
                 console.error('Error fetching trends:', error);
                 // Keep using initialData or fallback if fetch fails
@@ -31,10 +29,9 @@ export default function DonationChart({ data: initialData }: DonationChartProps)
         fetchTrends();
     }, [period]);
 
-    // Determine which data to show: fetched > initial > static fallback
     const displayData = fetchedData.length > 0
         ? fetchedData
-        : (initialData?.length > 0 ? initialData : DONATION_TRENDS);
+        : (initialData?.length > 0 ? initialData : []);
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">

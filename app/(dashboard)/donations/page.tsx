@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import RecentDonationsTable from "@/components/dashboard/RecentDonationsTable";
 import { Download, Filter, Search } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
-import api from "@/lib/api";
+
 import { toast } from "sonner";
+import { getTransactions, getCategories } from "@/lib/api_data";
 import { Donation, Transaction, CategoryData } from "@/lib/data";
 import { useSearchParams } from "next/navigation";
 
@@ -52,15 +53,11 @@ export default function DonationsPage() {
     const fetchDonations = async () => {
       try {
         // 1. Fetch Transactions AND Categories in parallel
-        const [transactionsRes, categoriesRes] = await Promise.all([
-          api.get("/api/v1/transactions/"),
-          api.get("/api/v1/categories/"),
+        // 1. Fetch Transactions AND Categories in parallel
+        const [transactions, categoriesData] = await Promise.all([
+          getTransactions(),
+          getCategories(),
         ]);
-
-        const transactions = transactionsRes.data.results || [];
-        const categoriesData = Array.isArray(categoriesRes.data)
-          ? categoriesRes.data
-          : categoriesRes.data.results || [];
 
         // 2. Create a lookup map: { "id": "Name" }
         const categoryMap = categoriesData.reduce((acc: any, cat: any) => {

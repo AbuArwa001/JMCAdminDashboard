@@ -1,6 +1,6 @@
 import { get } from "http";
 import api from "./api";
-import { CategoriesResponse, CategoryData, CreateDriveData, DonationDrive } from "./data";
+import { CategoriesResponse, CategoryData, CreateDriveData, DonationDrive, AnalyticsSummary, DonationTrend } from "./data";
 
 
 export const getCategories = async (): Promise<CategoryData[]> => {
@@ -276,7 +276,7 @@ export const deleteDonationImage = async (imageId: string) => {
     }
 };
 
-export const getAnalyticsCategories = async (): Promise<CategoryData[]>=> {
+export const getAnalyticsCategories = async (): Promise<CategoryData[]> => {
     try {
         console.log("Calling getAnalyticsCategories...");
         const response = await api.get('api/v1/analytics/categories/');
@@ -285,5 +285,27 @@ export const getAnalyticsCategories = async (): Promise<CategoryData[]>=> {
     } catch (error) {
         console.error('Error fetching analytics categories:', error);
         return [];
+    }
+};
+
+export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
+    try {
+        const response = await api.get<AnalyticsSummary>('api/v1/analytics/summary/');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching analytics summary:', error);
+        throw error;
+    }
+};
+
+export const getDonationTrends = async (period: string = 'week'): Promise<DonationTrend[]> => {
+    try {
+        const response = await api.get<DonationTrend[]>('api/v1/analytics/trends/', {
+            params: { period }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching donation trends:', error);
+        throw error;
     }
 };

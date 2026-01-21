@@ -5,9 +5,9 @@ import CategoryPieChart from "@/components/dashboard/CategoryPieChart";
 import { Download, Plus, Pencil, Trash2, Search } from "lucide-react";
 import { exportToCSV, getFallbackColor } from "@/lib/utils";
 import Link from "next/link";
-import api from "@/lib/api";
+
 import { toast } from "sonner";
-import { getAnalyticsCategories, getCategories } from "@/lib/api_data";
+import { getAnalyticsCategories, getCategories, deleteCategory } from "@/lib/api_data";
 
 interface AnalyticsCategory {
   category_name: string;
@@ -65,7 +65,7 @@ export default function CategoriesPage() {
     if (!confirm("Are you sure you want to delete this category?")) return;
 
     try {
-      await api.delete(`/api/v1/categories/${id}/`);
+      await deleteCategory(id);
       toast.success("Category deleted successfully");
       fetchData();
     } catch (error) {

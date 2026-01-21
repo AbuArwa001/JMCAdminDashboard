@@ -5,6 +5,7 @@ import {
   getCategoryById,
   getDonationDrives,
   getTransactions,
+  getAnalyticsSummary,
 } from "@/lib/api_data";
 import StatCard from "@/components/dashboard/StatCard";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
@@ -15,8 +16,7 @@ import RatingAnalysis from "@/components/dashboard/RatingAnalysis";
 import { DollarSign, TrendingUp, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import api from "@/lib/api";
-import { CategoryData, DonationDrive } from "@/lib/data";
+import { CategoryData, DonationDrive, DonationTrend } from "@/lib/data";
 
 const container = {
   hidden: { opacity: 0 },
@@ -42,7 +42,7 @@ export default function Home() {
   });
   const [recentDonations, setRecentDonations] = useState([]);
   const [categoryStats, setCategoryStats] = useState<CategoryData[]>([]);
-  const [donationTrends, setDonationTrends] = useState([]);
+  const [donationTrends, setDonationTrends] = useState<DonationTrend[]>([]);
   const [drives, setDrives] = useState<DonationDrive[]>([]);
 
   useEffect(() => {
@@ -56,14 +56,14 @@ export default function Home() {
     const fetchData = async () => {
       try {
         // Fetch Summary
-        const summaryRes = await api.get("/api/v1/analytics/summary/");
+        const summaryData = await getAnalyticsSummary();
         setStats({
-          totalCollected: summaryRes.data.total_collected,
-          totalCollectedWeek: summaryRes.data.total_collected_week,
-          totalCollectedMonth: summaryRes.data.total_collected_month,
-          activeDrives: summaryRes.data.active_drives,
+          totalCollected: summaryData.total_collected,
+          totalCollectedWeek: summaryData.total_collected_week,
+          totalCollectedMonth: summaryData.total_collected_month,
+          activeDrives: summaryData.active_drives,
         });
-        setDonationTrends(summaryRes.data.donation_trends);
+        setDonationTrends(summaryData.donation_trends);
 
         // Fetch Categories
         const categoriesRes = await getCategories();

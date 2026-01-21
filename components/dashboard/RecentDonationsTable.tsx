@@ -1,11 +1,11 @@
-import api from "@/lib/api";
+import { updateTransaction } from "@/lib/api_data";
 import { Transaction } from "@/lib/data";
 import clsx from "clsx";
 import { CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface RecentTransactionsTableProps {
-    transactions: Transaction[]; 
+    transactions: Transaction[];
 }
 
 export default function RecentDonationsTable({ transactions }: RecentTransactionsTableProps) {
@@ -27,7 +27,7 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
             );
 
             // API call
-            await api.put(`api/v1/transactions/${id}/`, {
+            await updateTransaction(id, {
                 payment_status: "Completed",
             });
 
@@ -92,7 +92,7 @@ export default function RecentDonationsTable({ transactions }: RecentTransaction
                                             className="text-primary hover:text-primary-green transition-colors"
                                             title="Mark as Completed"
                                         >
-                                            <CheckCircle className="w-5 h-5"/>
+                                            <CheckCircle className="w-5 h-5" />
                                         </button>
                                     )}
                                 </td>
