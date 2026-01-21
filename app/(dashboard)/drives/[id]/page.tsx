@@ -95,10 +95,10 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                 <h1 className="text-2xl font-bold text-gray-900">{drive.title}</h1>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full items-start">
+                <div className="lg:col-span-1 space-y-6">
                     <DriveProgressCard drive={drive} />
-                    <div className="mt-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                         <h4 className="font-bold text-gray-900 mb-4">Drive Details</h4>
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between">
@@ -115,9 +115,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="mt-6">
                     <DriveImages
                         driveId={drive.id}
                         initialImages={drive.images || []}
@@ -125,10 +123,10 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                         onImagesUpdated={fetchDrive}
                     />
                 </div>
-            </div>
 
-            <div className="lg:col-span-2">
-                <DonorsTable donations={driveDonations} driveTitle={drive.title} />
+                <div className="lg:col-span-2">
+                    <DonorsTable donations={driveDonations} driveTitle={drive.title} />
+                </div>
             </div>
         </div>
     );
