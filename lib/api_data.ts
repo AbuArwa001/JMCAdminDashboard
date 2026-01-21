@@ -299,10 +299,10 @@ export const updateMe = async (userData: any) => {
 export const uploadDonationImage = async (donationId: string, imageFile: File) => {
     try {
         const formData = new FormData();
-        formData.append('donation', donationId);
-        formData.append('image', imageFile);
+        // serializer expects 'uploaded_images'
+        formData.append('uploaded_images', imageFile);
 
-        const response = await api.post('api/v1/donations/', formData, {
+        const response = await api.patch(`api/v1/donations/${donationId}/`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
