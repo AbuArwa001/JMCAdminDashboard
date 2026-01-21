@@ -56,7 +56,31 @@ export const updateCategory = async (categoryId: string, categoryData: { categor
 // Donation Drive Interfaces
 export const createDonationDrive = async (driveData: CreateDriveData) => {
     try {
-        const response = await api.post('api/v1/donations/', driveData);
+        let data: any = driveData;
+        let config = {};
+
+        if (driveData.uploaded_images && driveData.uploaded_images.length > 0) {
+            const formData = new FormData();
+
+            (Object.keys(driveData) as Array<keyof CreateDriveData>).forEach(key => {
+                const value = driveData[key];
+                if (key === 'uploaded_images') {
+                    (value as File[]).forEach((file) => {
+                        formData.append('uploaded_images', file);
+                    });
+                } else if (value !== undefined && value !== null) {
+                    // Convert numbers/booleans to string for FormData
+                    formData.append(key, String(value));
+                }
+            });
+
+            data = formData;
+            config = {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            };
+        }
+
+        const response = await api.post('api/v1/donations/', data, config);
         return response.data;
     } catch (error) {
         console.error('Error creating donation drive:', error);
@@ -87,7 +111,30 @@ export const getDonationDriveById = async (driveId: string) => {
 
 export const updateDonationDrive = async (driveId: string, driveData: Partial<CreateDriveData>) => {
     try {
-        const response = await api.put(`api/v1/donations/${driveId}/`, driveData);
+        let data: any = driveData;
+        let config = {};
+
+        if (driveData.uploaded_images && driveData.uploaded_images.length > 0) {
+            const formData = new FormData();
+
+            (Object.keys(driveData) as Array<keyof CreateDriveData>).forEach(key => {
+                const value = driveData[key];
+                if (key === 'uploaded_images') {
+                    (value as File[]).forEach((file) => {
+                        formData.append('uploaded_images', file);
+                    });
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+
+            data = formData;
+            config = {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            };
+        }
+
+        const response = await api.patch(`api/v1/donations/${driveId}/`, data, config);
         return response.data;
     } catch (error) {
         console.error('Error updating donation drive:', error);

@@ -22,6 +22,7 @@ export interface CreateDriveData {
     category: string;
     start_date: string;
     end_date?: string;
+    uploaded_images?: File[];
 }
 
 export interface DonationDrive {
