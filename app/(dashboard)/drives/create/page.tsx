@@ -8,8 +8,8 @@ import { CategoryData } from "@/lib/data";
 import {
   createDonationDrive,
   getCategories,
-  uploadDonationImage,
 } from "@/lib/api_data";
+import { toast } from "sonner";
 
 export default function CreateDrivePage() {
   const router = useRouter();
@@ -43,22 +43,17 @@ export default function CreateDrivePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newDrive = await createDonationDrive({ ...formData });
-
-      if (newDrive && newDrive.id && selectedImages.length > 0) {
-        await Promise.all(
-          selectedImages.map((image) =>
-            uploadDonationImage(newDrive.id, image),
-          ),
-        );
-      }
+      await createDonationDrive({
+        ...formData,
+        uploaded_images: selectedImages
+      });
 
       console.log({ ...formData, paymentMethod });
-      alert("Donation Drive created successfully!");
+      toast.success("Donation Drive created successfully!");
       router.push("/drives");
     } catch (err) {
       console.error(err);
-      alert("Failed to create drive or upload images.");
+      toast.error("Failed to create drive.");
     }
   };
 
@@ -307,7 +302,6 @@ export default function CreateDrivePage() {
           <div className="flex justify-end pt-4">
             <button
               type="submit"
-              onClick={handleSubmit}
               className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors font-medium"
             >
               <Save className="w-4 h-4" />

@@ -9,7 +9,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { getCategoryById, getDonationDriveById, getDonationDrives, getTransactionsByDonationDrive } from "@/lib/api_data";
-import { get } from "http";
 
 export default function DriveDetailsPage({ params }: { params: { id: string } }) {
     const { id } = params;
@@ -122,6 +121,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                     <DriveImages
                         driveId={drive.id}
                         initialImages={drive.images || []}
+                        image_urls={drive.image_urls || []}
                         onImagesUpdated={fetchDrive}
                     />
                 </div>

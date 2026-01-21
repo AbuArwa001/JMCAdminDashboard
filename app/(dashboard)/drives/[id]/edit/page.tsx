@@ -9,7 +9,6 @@ import {
   updateDonationDrive,
   getCategories,
   getDonationDriveById,
-  uploadDonationImage,
 } from "@/lib/api_data";
 import { toast } from "sonner";
 
@@ -82,19 +81,16 @@ export default function EditDrivePage({ params }: { params: { id: string } }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateDonationDrive(params.id, { ...formData });
-
-      if (selectedImages.length > 0) {
-        await Promise.all(
-          selectedImages.map((image) => uploadDonationImage(params.id, image)),
-        );
-      }
+      await updateDonationDrive(params.id, {
+        ...formData,
+        uploaded_images: selectedImages
+      });
 
       toast.success("Donation Drive updated successfully!");
       router.push("/drives");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update drive or upload images.");
+      toast.error("Failed to update drive.");
     }
   };
 

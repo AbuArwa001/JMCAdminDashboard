@@ -26,6 +26,12 @@ const nextConfig = {
                 port: '443',
                 pathname: '/media/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'jmcdonations.s3.amazonaws.com',
+                port: '',
+                pathname: '/**',
+            },
         ],
     },
 };

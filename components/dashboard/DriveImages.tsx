@@ -9,10 +9,11 @@ import { uploadDonationImage, deleteDonationImage, getDonationDriveById } from "
 interface DriveImagesProps {
     driveId: string;
     initialImages: { id: string; image: string; created_at: string }[];
+    image_urls?: string[]; // New field
     onImagesUpdated: () => void;
 }
 
-export default function DriveImages({ driveId, initialImages, onImagesUpdated }: DriveImagesProps) {
+export default function DriveImages({ driveId, initialImages, image_urls = [], onImagesUpdated }: DriveImagesProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
@@ -56,6 +57,12 @@ export default function DriveImages({ driveId, initialImages, onImagesUpdated }:
         }
     };
 
+    // Combine legacy images and new URL strings
+    const allImages = [
+        ...initialImages.map(img => ({ ...img, type: 'legacy' })),
+        ...(image_urls || []).map((url, index) => ({ id: `url-${index}`, image: url, created_at: '', type: 'url' }))
+    ];
+
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-center mb-4">
@@ -76,13 +83,13 @@ export default function DriveImages({ driveId, initialImages, onImagesUpdated }:
                 </div>
             </div>
 
-            {initialImages.length === 0 ? (
+            {allImages.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                     <p className="text-gray-500 text-sm">No images attached yet.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {initialImages.map((img) => (
+                    {allImages.map((img) => (
                         <div key={img.id} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
                             <Image
                                 src={img.image}
@@ -90,15 +97,17 @@ export default function DriveImages({ driveId, initialImages, onImagesUpdated }:
                                 fill
                                 className="object-cover"
                             />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button
-                                    onClick={() => handleDelete(img.id)}
-                                    disabled={isDeleting === img.id}
-                                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
+                            {img.type === 'legacy' && (
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button
+                                        onClick={() => handleDelete(img.id)}
+                                        disabled={isDeleting === img.id}
+                                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
