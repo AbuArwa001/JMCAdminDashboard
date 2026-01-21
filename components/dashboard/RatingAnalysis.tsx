@@ -64,7 +64,7 @@ export default function RatingAnalysis() {
                             <span className="text-xs text-gray-400">{new Date(rating.created_at).toLocaleDateString()}</span>
                         </div>
                         <div className="flex text-yellow-400 mb-1">
-                            {[...Array(rating.rating)].map((_, i) => (
+                            {[...Array(Math.round(rating.rating))].map((_, i) => (
                                 <Star key={i} className="w-3 h-3 fill-current" />
                             ))}
                         </div>
