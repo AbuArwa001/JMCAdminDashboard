@@ -14,6 +14,7 @@ export const getCategories = async (): Promise<CategoryData[]> => {
 };
 export const getCategoryById = async (categoryId: string): Promise<CategoryData | null> => {
     try {
+        console.log(`Calling getCategoryById for ${categoryId}`);
         const response = await api.get<CategoryData>(`api/v1/categories/${categoryId}/`);
         return response.data;
     } catch (error) {
@@ -277,8 +278,10 @@ export const deleteDonationImage = async (imageId: string) => {
 
 export const getAnalyticsCategories = async (): Promise<CategoryData[]>=> {
     try {
+        console.log("Calling getAnalyticsCategories...");
         const response = await api.get('api/v1/analytics/categories/');
-        return response.data;
+        console.log("getAnalyticsCategories response:", response.status, Array.isArray(response.data) ? "Array" : typeof response.data);
+        return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error('Error fetching analytics categories:', error);
         return [];

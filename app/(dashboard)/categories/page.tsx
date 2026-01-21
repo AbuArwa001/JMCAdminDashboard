@@ -24,10 +24,10 @@ export default function CategoriesPage() {
     let totalAmount = 0;
     if (category.total_amount !== undefined) {
       totalAmount = category.total_amount;
-    } else if (category.donations) {
+    } else if (Array.isArray(category.donations)) {
       totalAmount = category.donations.reduce(
         (sum: any, donation: { collected_amount: any }) =>
-          sum + donation.collected_amount,
+          sum + (donation.collected_amount || 0),
         0,
       );
     }
