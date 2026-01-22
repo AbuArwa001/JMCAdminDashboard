@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { getAnalyticsCategories, getCategories, deleteCategory } from "@/lib/api_data";
 import { AnalyticsCategory, CategoryData } from "@/lib/data";
 
+import { Skeleton } from "@/components/ui/Skeleton";
+
 export default function CategoriesPage() {
   const [stats, setStats] = useState<CategoryData[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -113,29 +115,41 @@ export default function CategoriesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CategoryPieChart data={stats} />
+        <CategoryPieChart data={stats} isLoading={isLoading} />
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="font-bold text-gray-900 mb-6">Category Performance</h3>
           <div className="space-y-4">
-            {chartData.map((cat) => (
-              <div
-                key={cat.name}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: cat.color }}
-                  ></div>
-                  <span className="font-medium text-gray-900">{cat.name}</span>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-3 h-3 rounded-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <Skeleton className="h-4 w-24" />
                 </div>
-                <span className="font-bold text-gray-900">
-                  KES {cat.value?.toLocaleString()}
-                </span>
-              </div>
-            ))}
-            {stats.length === 0 && !isLoading && (
+              ))
+            ) : (
+              chartData.map((cat) => (
+                <div
+                  key={cat.name}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: cat.color }}
+                    ></div>
+                    <span className="font-medium text-gray-900">{cat.name}</span>
+                  </div>
+                  <span className="font-bold text-gray-900">
+                    KES {cat.value?.toLocaleString()}
+                  </span>
+                </div>
+              ))
+            )}
+            {!isLoading && stats.length === 0 && (
               <p className="text-gray-500 text-center py-4">
                 No data available
               </p>
@@ -168,37 +182,48 @@ export default function CategoriesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredCategories.map((category) => (
-                <tr key={category.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {category.category_name}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
-                    {category.description}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {category.created_at
-                      ? new Date(category.created_at).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end gap-2">
-                      <Link
-                        href={`/categories/${category.id}/edit`}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => category.id && handleDelete(category.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-64" /></td>
+                    <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                    <td className="px-6 py-4 text-right"><Skeleton className="h-4 w-12 ml-auto" /></td>
+                  </tr>
+                ))
+              ) : (
+                filteredCategories.map((category) => (
+                  <tr key={category.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {category.category_name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                      {category.description}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {category.created_at
+                        ? new Date(category.created_at).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end gap-2">
+                        <Link
+                          href={`/categories/${category.id}/edit`}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => category.id && handleDelete(category.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
               {filteredCategories.length === 0 && !isLoading && (
                 <tr>
                   <td

@@ -9,12 +9,14 @@ import {
   Legend,
 } from "recharts";
 import { CategoryData } from "@/lib/data";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface CategoryPieChartProps {
   data: CategoryData[];
+  isLoading?: boolean;
 }
 
-export default function CategoryPieChart({ data }: CategoryPieChartProps) {
+export default function CategoryPieChart({ data, isLoading }: CategoryPieChartProps) {
   // Calculate total amount for each category
   // console.log("CategoryPieChart data:", data);
   const chartData = (Array.isArray(data) ? data : [])
@@ -42,42 +44,53 @@ export default function CategoryPieChart({ data }: CategoryPieChartProps) {
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-[400px]">
       <h3 className="font-bold text-gray-900 mb-6">Donations by Category</h3>
 
-      <ResponsiveContainer width="100%" height="85%">
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            paddingAngle={5}
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(value: number) => [
-              `KES ${value.toLocaleString()}`,
-              "Total Donated",
-            ]}
-            contentStyle={{
-              borderRadius: "8px",
-              border: "none",
-              boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-            }}
-          />
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            iconType="circle"
-            formatter={(value, entry: any) => (
-              <span className="text-sm text-gray-500 ml-1">{value}</span>
-            )}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center h-[85%]">
+          <Skeleton className="w-48 h-48 rounded-full" />
+          <div className="mt-8 flex gap-4">
+            <Skeleton className="w-20 h-4" />
+            <Skeleton className="w-20 h-4" />
+            <Skeleton className="w-20 h-4" />
+          </div>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height="85%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={5}
+              dataKey="value"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value: number) => [
+                `KES ${value.toLocaleString()}`,
+                "Total Donated",
+              ]}
+              contentStyle={{
+                borderRadius: "8px",
+                border: "none",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+              }}
+            />
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              iconType="circle"
+              formatter={(value, entry: any) => (
+                <span className="text-sm text-gray-500 ml-1">{value}</span>
+              )}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

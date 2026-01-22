@@ -44,10 +44,12 @@ export default function Home() {
   const [categoryStats, setCategoryStats] = useState<CategoryData[]>([]);
   const [donationTrends, setDonationTrends] = useState<DonationTrend[]>([]);
   const [drives, setDrives] = useState<DonationDrive[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         // Fetch everything in parallel
         const [summaryData, categoriesRes, allTransactions] = await Promise.all([
           getAnalyticsSummary(),
@@ -91,6 +93,8 @@ export default function Home() {
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -112,30 +116,34 @@ export default function Home() {
           value={`KES ${stats.totalCollected.toLocaleString()}`}
           icon={DollarSign}
           trend={{ value: 12, isPositive: true }}
+          isLoading={isLoading}
         />
         <StatCard
           title="Total Collected (Week)"
           value={`KES ${stats.totalCollectedWeek.toLocaleString()}`}
           icon={TrendingUp}
+          isLoading={isLoading}
         />
         <StatCard
           title="Total Collected (Month)"
           value={`KES ${stats.totalCollectedMonth.toLocaleString()}`}
           icon={DollarSign}
+          isLoading={isLoading}
         />
         <StatCard
           title="Active Drives"
           value={stats.activeDrives.toString()}
           icon={Users}
+          isLoading={isLoading}
         />
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <DonationChart data={donationTrends} />
+          <DonationChart data={donationTrends} isLoading={isLoading} />
         </motion.div>
         <motion.div variants={item}>
-          <CategoryPieChart data={categoryStats} />
+          <CategoryPieChart data={categoryStats} isLoading={isLoading} />
         </motion.div>
       </div>
 
@@ -144,18 +152,24 @@ export default function Home() {
           Active Donation Drives
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {drives.map((drive) => (
-            <DriveProgressCard key={drive.id} drive={drive} />
-          ))}
+          {isLoading ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <DriveProgressCard key={i} isLoading={true} />
+            ))
+          ) : (
+            drives.map((drive) => (
+              <DriveProgressCard key={drive.id} drive={drive} />
+            ))
+          )}
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <RecentDonationsTable transactions={recentDonations} />
+          <RecentDonationsTable transactions={recentDonations} isLoading={isLoading} />
         </motion.div>
         <motion.div variants={item}>
-          <RatingAnalysis />
+          <RatingAnalysis isLoading={isLoading} />
         </motion.div>
       </div>
     </motion.div>

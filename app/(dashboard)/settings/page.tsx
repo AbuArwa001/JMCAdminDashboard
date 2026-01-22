@@ -5,9 +5,11 @@ import { Save, User, Lock, Bell, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { getMe, updateMe } from "@/lib/api_data";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState("profile");
+    const [isFetching, setIsFetching] = useState(true);
     const [formData, setFormData] = useState({
         userId: "",
         name: "Admin User",
@@ -21,6 +23,7 @@ export default function SettingsPage() {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
+                setIsFetching(true);
                 const userData = await getMe();
                 setFormData({
                     userId: userData.id || "",
@@ -31,9 +34,10 @@ export default function SettingsPage() {
                     newPassword: "",
                     confirmPassword: "",
                 });
-                // console.log("Fetched user data:", userData);
             } catch (error) {
                 console.error("Failed to fetch user data", error);
+            } finally {
+                setIsFetching(false);
             }
         };
 
@@ -43,23 +47,7 @@ export default function SettingsPage() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
-/* 
-{
-    "id": "22222222-2222-2222-2222-222222220001",
-    "public_uuid": "22222222-2222-2222-2222-222222220001",
-    "email": "admin@example.com",
-    "username": "admin",
-    "full_name": "khalfan Athman",
-    "phone_number": null,
-    "is_admin": true,
-    "role": "11111111-1111-1111-1111-111111110001",
-    "fcm_token": null,
-    "profile_image_url": null,
-    "address": null,
-    "bio": null,
-    "default_donation_account": null
-}
-*/
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const filledData: any = {
@@ -117,12 +105,25 @@ export default function SettingsPage() {
                         {activeTab === "profile" && (
                             <div className="p-6 md:p-8">
                                 <div className="flex items-center gap-4 mb-8">
-                                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold border-4 border-white shadow-sm">
-                                        {formData.name.charAt(0)}
-                                    </div>
+                                    {isFetching ? (
+                                        <Skeleton className="w-20 h-20 rounded-full" />
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold border-4 border-white shadow-sm">
+                                            {formData.name.charAt(0)}
+                                        </div>
+                                    )}
                                     <div>
-                                        <h2 className="text-xl font-bold text-gray-900">{formData.name}</h2>
-                                        <p className="text-sm text-gray-500">Administrator</p>
+                                        {isFetching ? (
+                                            <>
+                                                <Skeleton className="h-6 w-32 mb-2" />
+                                                <Skeleton className="h-4 w-24" />
+                                            </>
+                                        ) : (
+                                            <>
+                                                <h2 className="text-xl font-bold text-gray-900">{formData.name}</h2>
+                                                <p className="text-sm text-gray-500">Administrator</p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -130,40 +131,53 @@ export default function SettingsPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                                            <input
-                                                type="text"
-                                                name="name"
-                                                value={formData.name}
-                                                onChange={handleChange}
-                                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
-                                            />
+                                            {isFetching ? (
+                                                <Skeleton className="h-10 w-full rounded-lg" />
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    value={formData.name}
+                                                    onChange={handleChange}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
+                                                />
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                                            <input
-                                                type="email"
-                                                name="email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
-                                            />
+                                            {isFetching ? (
+                                                <Skeleton className="h-10 w-full rounded-lg" />
+                                            ) : (
+                                                <input
+                                                    type="email"
+                                                    name="email"
+                                                    value={formData.email}
+                                                    onChange={handleChange}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
+                                                />
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                                            <input
-                                                type="tel"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
-                                            />
+                                            {isFetching ? (
+                                                <Skeleton className="h-10 w-full rounded-lg" />
+                                            ) : (
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    value={formData.phone}
+                                                    onChange={handleChange}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-gray-50 focus:bg-white transition-colors"
+                                                />
+                                            )}
                                         </div>
                                     </div>
 
                                     <div className="flex justify-end pt-4 border-t border-gray-100">
                                         <button
                                             type="submit"
-                                            className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors font-medium shadow-sm hover:shadow"
+                                            disabled={isFetching}
+                                            className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors font-medium shadow-sm hover:shadow disabled:opacity-50"
                                         >
                                             <Save className="w-4 h-4" />
                                             Save Changes

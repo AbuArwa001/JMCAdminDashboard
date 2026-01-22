@@ -5,9 +5,12 @@ import { initiateTransfer, getBankAccounts, addBankAccount, deleteBankAccount, g
 import { toast } from "sonner";
 import { ArrowRight, Wallet, Building2, Loader2, Plus, Trash2, History } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/Skeleton";
+
 export default function TransfersPage() {
     const [amount, setAmount] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isFetching, setIsFetching] = useState(true);
     const [bankAccounts, setBankAccounts] = useState<any[]>([]);
     const [selectedBank, setSelectedBank] = useState("");
     const [showAddBank, setShowAddBank] = useState(false);
@@ -19,12 +22,19 @@ export default function TransfersPage() {
     }, []);
 
     const fetchData = async () => {
-        const banks = await getBankAccounts();
-        setBankAccounts(banks);
-        if (banks.length > 0) setSelectedBank(banks[0].id);
+        try {
+            setIsFetching(true);
+            const banks = await getBankAccounts();
+            setBankAccounts(banks);
+            if (banks.length > 0) setSelectedBank(banks[0].id);
 
-        const hist = await getTransferHistory();
-        setHistory(hist);
+            const hist = await getTransferHistory();
+            setHistory(hist);
+        } catch (error) {
+            console.error("Fetch error:", error);
+        } finally {
+            setIsFetching(false);
+        }
     };
 
     const handleTransfer = async (e: React.FormEvent) => {
@@ -128,7 +138,12 @@ export default function TransfersPage() {
                                 </button>
                             </div>
 
-                            {bankAccounts.length > 0 ? (
+                            {isFetching ? (
+                                <div className="space-y-2">
+                                    <Skeleton className="h-16 w-full rounded-lg" />
+                                    <Skeleton className="h-16 w-full rounded-lg" />
+                                </div>
+                            ) : bankAccounts.length > 0 ? (
                                 <div className="space-y-2">
                                     {bankAccounts.map((bank) => (
                                         <div
@@ -272,7 +287,16 @@ export default function TransfersPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {history.length > 0 ? (
+                                    {isFetching ? (
+                                        Array.from({ length: 3 }).map((_, i) => (
+                                            <tr key={i}>
+                                                <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                                                <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                                                <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                                                <td className="px-4 py-3"><Skeleton className="h-6 w-16 rounded-full" /></td>
+                                            </tr>
+                                        ))
+                                    ) : history.length > 0 ? (
                                         history.map((tx) => (
                                             <tr key={tx.id} className="hover:bg-gray-50">
                                                 <td className="px-4 py-3 text-gray-600">{new Date(tx.donated_at).toLocaleDateString()}</td>

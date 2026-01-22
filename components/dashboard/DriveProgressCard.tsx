@@ -17,16 +17,57 @@ import {
   updateDonationDrive,
 } from "@/lib/api_data";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/Skeleton";
+
+interface DriveProgressCardProps {
+  drive?: DonationDrive & { categoryName?: string };
+  onUpdate?: () => void;
+  isLoading?: boolean;
+}
 
 export default function DriveProgressCard({
   drive,
   onUpdate,
-}: {
-  drive: DonationDrive & { categoryName?: string };
-  onUpdate?: () => void;
-}) {
+  isLoading,
+}: DriveProgressCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  if (isLoading || !drive) {
+    return (
+      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-20 mt-2 rounded-full" />
+          </div>
+          <Skeleton className="h-6 w-16 rounded-lg" />
+        </div>
+        <div className="mb-4 space-y-3">
+          <div className="flex justify-between">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+          <Skeleton className="h-2.5 w-full rounded-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-3 w-32" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+        <div className="mt-auto pt-3 border-t border-gray-50 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+            <Skeleton className="h-8 flex-1 rounded-lg" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const progress = Math.min(
     100,
     Math.round((drive.collected_amount / drive.target_amount) * 100),

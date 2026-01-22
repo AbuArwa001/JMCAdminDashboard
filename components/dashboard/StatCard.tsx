@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import clsx from "clsx";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface StatCardProps {
     title: string;
@@ -10,15 +11,31 @@ interface StatCardProps {
         isPositive: boolean;
     };
     color?: "primary" | "green" | "bronze" | "blue";
+    isLoading?: boolean;
 }
 
-export default function StatCard({ title, value, icon: Icon, trend, color = "primary" }: StatCardProps) {
+export default function StatCard({ title, value, icon: Icon, trend, color = "primary", isLoading }: StatCardProps) {
     const colorClasses = {
         primary: "bg-primary/10 text-primary",
         green: "bg-primary-green/10 text-primary-green",
         bronze: "bg-primary-bronze/10 text-primary-bronze",
         blue: "bg-blue-500/10 text-blue-600",
     };
+
+    if (isLoading) {
+        return (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                    <Skeleton className="w-12 h-12 rounded-lg" />
+                    <Skeleton className="w-12 h-6 rounded-full" />
+                </div>
+                <div className="space-y-2">
+                    <Skeleton className="w-24 h-4" />
+                    <Skeleton className="w-32 h-8" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">

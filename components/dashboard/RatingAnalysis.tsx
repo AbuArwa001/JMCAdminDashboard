@@ -2,6 +2,7 @@ import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getRatings } from "@/lib/api_data";
 import { RatingData } from "@/lib/data";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface ApiRating {
     id: number;
@@ -11,9 +12,15 @@ interface ApiRating {
     created_at: string;
 }
 
-export default function RatingAnalysis() {
+interface RatingAnalysisProps {
+    isLoading?: boolean;
+}
+
+export default function RatingAnalysis({ isLoading: parentLoading }: RatingAnalysisProps) {
     const [ratings, setRatings] = useState<ApiRating[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingInternal, setIsLoadingInternal] = useState(true);
+
+    const isLoading = parentLoading || isLoadingInternal;
 
     useEffect(() => {
         const fetchRatings = async () => {
@@ -23,7 +30,7 @@ export default function RatingAnalysis() {
             } catch (error) {
                 console.error("Failed to fetch ratings:", error);
             } finally {
-                setIsLoading(false);
+                setIsLoadingInternal(false);
             }
         };
         fetchRatings();
@@ -34,7 +41,30 @@ export default function RatingAnalysis() {
         : 0;
 
     if (isLoading) {
-        return <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full flex items-center justify-center">Loading ratings...</div>;
+        return (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full">
+                <Skeleton className="h-6 w-48 mb-6" />
+                <div className="flex items-center gap-4 mb-8">
+                    <Skeleton className="h-10 w-12" />
+                    <div className="flex flex-col gap-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                    </div>
+                </div>
+                <div className="space-y-6">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="space-y-2">
+                            <div className="flex justify-between">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-3 w-16" />
+                            </div>
+                            <Skeleton className="h-3 w-20" />
+                            <Skeleton className="h-3 w-full" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
     }
 
     return (

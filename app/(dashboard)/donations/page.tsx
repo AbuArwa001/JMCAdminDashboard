@@ -129,11 +129,7 @@ export default function DonationsPage() {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="text-center py-8">Loading donations...</div>
-      ) : (
-        <RecentDonationsTable transactions={filteredDonations} />
-      )}
+      <RecentDonationsTable transactions={filteredDonations} isLoading={isLoading} />
     </div>
   );
 }

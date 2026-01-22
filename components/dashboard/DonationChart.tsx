@@ -1,19 +1,23 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from "react";
 import { getDonationTrends } from "@/lib/api_data";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface DonationChartProps {
     data: any[];
+    isLoading?: boolean;
 }
 
-export default function DonationChart({ data: initialData }: DonationChartProps) {
+export default function DonationChart({ data: initialData, isLoading: parentLoading }: DonationChartProps) {
     const [period, setPeriod] = useState('week');
     const [fetchedData, setFetchedData] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingInternal, setIsLoadingInternal] = useState(false);
+
+    const isLoading = parentLoading || isLoadingInternal;
 
     useEffect(() => {
         const fetchTrends = async () => {
-            setIsLoading(true);
+            setIsLoadingInternal(true);
             try {
                 const trends = await getDonationTrends(period);
                 setFetchedData(trends);
@@ -21,7 +25,7 @@ export default function DonationChart({ data: initialData }: DonationChartProps)
                 console.error('Error fetching trends:', error);
                 // Keep using initialData or fallback if fetch fails
             } finally {
-                setIsLoading(false);
+                setIsLoadingInternal(false);
             }
         };
 
@@ -47,36 +51,44 @@ export default function DonationChart({ data: initialData }: DonationChartProps)
                 </select>
             </div>
 
-            <ResponsiveContainer width="100%" height="85%">
-                <LineChart data={displayData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#9ca3af', fontSize: 12 }}
-                        dy={10}
-                    />
-                    <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#9ca3af', fontSize: 12 }}
-                        tickFormatter={(value) => `K${value / 1000}k`}
-                    />
-                    <Tooltip
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: number) => [`KES ${value.toLocaleString()}`, 'Amount']}
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#BE9830"
-                        strokeWidth={3}
-                        dot={{ fill: '#BE9830', strokeWidth: 2, r: 4, stroke: '#fff' }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+                <div className="w-full h-[85%] flex items-end justify-between gap-2 px-2">
+                    {Array.from({ length: 7 }).map((_, i) => (
+                        <Skeleton key={i} className="w-full" style={{ height: `${Math.random() * 60 + 20}%` }} />
+                    ))}
+                </div>
+            ) : (
+                <ResponsiveContainer width="100%" height="85%">
+                    <LineChart data={displayData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                        <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#9ca3af', fontSize: 12 }}
+                            dy={10}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#9ca3af', fontSize: 12 }}
+                            tickFormatter={(value) => `K${value / 1000}k`}
+                        />
+                        <Tooltip
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                            formatter={(value: number) => [`KES ${value.toLocaleString()}`, 'Amount']}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="amount"
+                            stroke="#BE9830"
+                            strokeWidth={3}
+                            dot={{ fill: '#BE9830', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
+            )}
         </div>
     );
 }

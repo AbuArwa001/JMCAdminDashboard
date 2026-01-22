@@ -15,10 +15,18 @@ export default function DrivesPage() {
   const [drives, setDrives] = useState<DonationDrive[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchDrives = async () => {
-    const drives = await getDonationDrives();
-    setDrives(drives);
+    try {
+      setIsLoading(true);
+      const drives = await getDonationDrives();
+      setDrives(drives);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -88,13 +96,19 @@ export default function DrivesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredDrives.map((drive) => (
-          <DriveProgressCard
-            key={drive.id}
-            drive={drive}
-            onUpdate={fetchDrives}
-          />
-        ))}
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <DriveProgressCard key={i} isLoading={true} />
+          ))
+        ) : (
+          filteredDrives.map((drive) => (
+            <DriveProgressCard
+              key={drive.id}
+              drive={drive}
+              onUpdate={fetchDrives}
+            />
+          ))
+        )}
       </div>
     </div>
   );
