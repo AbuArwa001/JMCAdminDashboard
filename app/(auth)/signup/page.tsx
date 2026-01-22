@@ -11,9 +11,12 @@ import Cookies from "js-cookie";
 import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
+import { AnimatePresence, motion } from "framer-motion";
+
 export default function SignupPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [signupSuccess, setSignupSuccess] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -68,6 +71,7 @@ export default function SignupPage() {
             }));
 
             console.log("User created successfully:", user);
+            setSignupSuccess(true);
             toast.success("Account created successfully!");
 
             router.push("/");
@@ -89,7 +93,6 @@ export default function SignupPage() {
             }
 
             toast.error(userFriendlyError);
-        } finally {
             setIsLoading(false);
         }
     };
@@ -100,6 +103,30 @@ export default function SignupPage() {
 
     return (
         <>
+            <AnimatePresence>
+                {signupSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1 }}
+                            className="flex flex-col items-center text-center p-6"
+                        >
+                            <div className="relative w-24 h-24 mb-6">
+                                <Image src="/logo.png" alt="JMC Logo" fill className="object-contain" />
+                                <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Creating Account...</h2>
+                            <p className="text-gray-500 max-w-xs">Setting up your profile. You will be redirected shortly.</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <div className="text-center space-y-2">
                 <div className="relative w-20 h-20 mx-auto">
                     <Image src="/logo.png" alt="JMC Logo" fill className="object-contain" />

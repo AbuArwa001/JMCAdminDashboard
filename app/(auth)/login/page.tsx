@@ -1,6 +1,6 @@
 "use client";
 
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -13,9 +13,12 @@ import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 
+import { AnimatePresence, motion } from "framer-motion";
+
 export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [loginSuccess, setLoginSuccess] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -48,7 +51,6 @@ export default function LoginPage() {
             const idTokenResult = await user.getIdTokenResult();
 
             // Check for admin claim or specific email
-            // TODO: In production, rely strictly on custom claims. For now, allowing specific email as fallback.
             const isAdmin = idTokenResult.claims.admin === true || user.email === "admin@jmc.org";
 
             if (!isAdmin) {
@@ -73,8 +75,10 @@ export default function LoginPage() {
             localStorage.setItem('firebaseUser', JSON.stringify(user));
 
             console.log("Admin signed in successfully:", user.email);
+            setLoginSuccess(true);
             toast.success("Logged in successfully");
 
+            // Navigate to dashboard
             router.push("/");
             router.refresh();
         } catch (error: any) {
@@ -94,7 +98,6 @@ export default function LoginPage() {
             }
 
             toast.error(userFriendlyError);
-        } finally {
             setIsLoading(false);
         }
     };
@@ -106,6 +109,31 @@ export default function LoginPage() {
 
     return (
         <>
+            <AnimatePresence>
+                {loginSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1 }}
+                            className="flex flex-col items-center"
+                        >
+                            <div className="relative w-24 h-24 mb-6">
+                                <Image src="/logo.png" alt="JMC Logo" fill className="object-contain" />
+                                <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Authenticating...</h2>
+                            <p className="text-gray-500">Welcome back to the JMC Admin Portal</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="text-center space-y-2">
                 <div className="relative w-20 h-20 mx-auto" style={{ width: '100px', height: '100px', position: 'relative' }}>
                     <Image src="/logo.png" alt="JMC Logo" fill className="object-contain" />
