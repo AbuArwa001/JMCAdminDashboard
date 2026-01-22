@@ -49,7 +49,7 @@ export default function CreateDrivePage() {
       });
 
       console.log({ ...formData, paymentMethod });
-      toast.success("Donation Drive created successfully!");
+      toast.success("Donation Drive created! Mobile users notified. 🔔");
       router.push("/drives");
     } catch (err) {
       console.error(err);
