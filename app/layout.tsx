@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Toaster } from "sonner";
 import FirebaseProvider from "@/components/FirebaseProvider";
 
@@ -44,6 +44,7 @@ export default function RootLayout({
           {children}
         </FirebaseProvider>
         <Toaster position="top-right" richColors />
+        <Analytics />
       </body>
     </html>
   );
