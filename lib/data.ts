@@ -61,6 +61,8 @@ export interface Transaction {
     donated_at?: Date;
     date: string;
     user_name?: string;
+    account_name?: string;
+    account_number?: string;
 }
 
 export interface CategoryData {
