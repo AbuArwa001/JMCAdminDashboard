@@ -66,7 +66,7 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
         driveId: d.donation.id,
         status: d.payment_status === "Completed" ? "Completed" : "Pending",
         date: d.donated_at ? d.donated_at.toString() : d.date,
-        paymentMethod: d.payment_method === "Mpesa" ? "Mpesa" : "Cash",
+        paymentMethod: d.payment_method === "M-Pesa" ? "M-Pesa" : "Cash",
     }));
     // console.log("Drive Donations:", driveDonations);
     // Show loading state
