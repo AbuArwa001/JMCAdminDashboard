@@ -224,6 +224,21 @@ export const initiateTransfer = async (amount: number) => {
     }
 };
 
+export const initiateSTKPush = async (phone_number: string, amount: number, account_name: string, donation_id: string) => {
+    try {
+        const response = await api.post('api/v1/transactions/initiate_stk_push/', {
+            phone_number,
+            amount,
+            account_name,
+            donation: donation_id
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error initiating STK push:', error);
+        throw error;
+    }
+};
+
 export const getBankAccounts = async () => {
     try {
         const response = await api.get('api/v1/bank-accounts/');
