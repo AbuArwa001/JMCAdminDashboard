@@ -26,6 +26,8 @@ export interface CreateDriveData {
 }
 
 export interface DonationDrive {
+    account_name: string;
+    account_number: string;
     id: string;
     title: string;
     target_amount: number;

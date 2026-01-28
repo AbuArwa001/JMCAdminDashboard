@@ -106,6 +106,14 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                                 <span className="font-medium">{category ? category.category_name : "Loading..."}</span>
                             </div>
                             <div className="flex justify-between">
+                                <span className="text-gray-500">Account Name    </span>
+                                <span className="font-medium">{drive.account_name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500">Account Number</span>
+                                <span className="font-medium">{drive.account_number}</span>
+                            </div>
+                            <div className="flex justify-between">
                                 <span className="text-gray-500">Start Date</span>
                                 <span className="font-medium">{drive.start_date}</span>
                             </div>
