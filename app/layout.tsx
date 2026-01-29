@@ -39,10 +39,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <FirebaseProvider>
-          {children}
-        </FirebaseProvider>
+      <body className={`${inter.variable} antialiased font-sans`}>
+        <FirebaseProvider>{children}</FirebaseProvider>
         <Toaster position="top-right" richColors />
         <Analytics />
       </body>
