@@ -35,34 +35,28 @@ export default function DriveProgressCard({
 
   if (isLoading || !drive) {
     return (
-      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-3">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100/50 flex flex-col h-full">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-5 w-32 rounded-lg" />
             <Skeleton className="h-4 w-20 mt-2 rounded-full" />
           </div>
-          <Skeleton className="h-6 w-16 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-full" />
         </div>
-        <div className="mb-4 space-y-3">
+        <div className="mb-6 space-y-4">
           <div className="flex justify-between">
             <Skeleton className="h-4 w-12" />
             <Skeleton className="h-4 w-24" />
           </div>
-          <Skeleton className="h-2.5 w-full rounded-full" />
+          <Skeleton className="h-3 w-full rounded-full" />
           <div className="flex justify-between">
             <Skeleton className="h-3 w-32" />
             <Skeleton className="h-3 w-16" />
           </div>
         </div>
-        <div className="mt-auto pt-3 border-t border-gray-50 flex flex-col gap-2">
-          <div className="flex gap-2">
-            <Skeleton className="h-8 flex-1 rounded-lg" />
-            <Skeleton className="h-8 flex-1 rounded-lg" />
-          </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-8 flex-1 rounded-lg" />
-            <Skeleton className="h-8 flex-1 rounded-lg" />
-          </div>
+        <div className="mt-auto flex gap-3">
+          <Skeleton className="h-10 flex-1 rounded-xl" />
+          <Skeleton className="h-10 flex-1 rounded-xl" />
         </div>
       </div>
     );
@@ -73,18 +67,19 @@ export default function DriveProgressCard({
     Math.round((drive.collected_amount / drive.target_amount) * 100),
   );
 
-  let progressColor = "bg-primary"; // Default Gold
-  if (drive.status === "Closed")
-    progressColor = "bg-gray-400"; // Grey for closed
-  else if (progress >= 100)
-    progressColor = "bg-primary-green"; // Completed
-  else if (progress < 20)
-    progressColor = "bg-red-500"; // Low
-  else progressColor = "bg-primary-bronze"; // Mid
+  let progressTrack = "bg-gray-100";
+  let progressFill = "bg-primary";
 
-  // Category is now passed from parent or handled via props to avoid redundant API calls
+  if (drive.status === "Closed") {
+    progressFill = "bg-gray-400";
+  } else if (progress >= 100) {
+    progressFill = "bg-green-500";
+    progressTrack = "bg-green-100";
+  } else if (progress < 20) {
+    progressFill = "bg-red-500";
+    progressTrack = "bg-red-100";
+  }
 
-  // console.log('Loaded category:', category);
   const handleExport = () => {
     const driveDonations = RECENT_DONATIONS.filter(
       (d) => d.driveId === drive.id,
@@ -133,105 +128,119 @@ export default function DriveProgressCard({
   };
 
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 transition-shadow hover:shadow-md flex flex-col h-full relative group">
-      <div className="flex justify-between items-start mb-3">
-        <div>
+    <div className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100/50 transition-all duration-300 hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] hover:-translate-y-1 flex flex-col h-full relative group overflow-hidden">
+      {/* Subtle Background Decoration */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 blur-2xl" />
+
+      <div className="flex justify-between items-start mb-6 relative z-10">
+        <div className="flex-1 mr-4">
           <h4
-            className="font-bold text-gray-900 line-clamp-1"
+            className="font-bold text-secondary-dark text-lg line-clamp-1 leading-tight"
             title={drive.title}
           >
             {drive.title}
           </h4>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full mt-1 inline-block">
+          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full mt-2 inline-block uppercase tracking-wider">
             {drive.categoryName || "General"}
           </span>
         </div>
         <span
           className={clsx(
-            "text-xs font-bold px-2 py-1 rounded-lg bg-secondary",
+            "text-xs font-bold px-3 py-1 rounded-full border",
             drive.status === "Closed"
-              ? "text-gray-500 bg-gray-200"
-              : "text-primary-bronze",
+              ? "text-gray-500 bg-gray-100 border-gray-200"
+              : "text-green-700 bg-green-50 border-green-100",
           )}
         >
           {drive.status}
         </span>
       </div>
 
-      <div className="mb-4">
-        <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-500">Collected</span>
-          <span className="font-bold text-gray-900">
-            KES {drive.collected_amount.toLocaleString()}
-          </span>
+      <div className="mb-6 relative z-10">
+        <div className="flex justify-between items-end mb-2">
+          <div>
+            <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+              Collected
+            </p>
+            <p className="text-2xl font-bold text-secondary-dark leading-none mt-1">
+              KES {drive.collected_amount.toLocaleString()}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-400 font-medium">
+              {progress}% Goal
+            </p>
+          </div>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2.5">
+
+        <div
+          className={clsx(
+            "w-full h-3 rounded-full overflow-hidden",
+            progressTrack,
+          )}
+        >
           <div
             className={clsx(
-              "h-2.5 rounded-full transition-all duration-500",
-              progressColor,
+              "h-full rounded-full transition-all duration-1000 ease-out",
+              progressFill,
             )}
             style={{ width: `${progress}%` }}
           ></div>
         </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-1">
-          <span>Target: KES {drive.target_amount.toLocaleString()}</span>
-          <span>{progress}% Reached</span>
+
+        <div className="mt-2 text-right">
+          <p className="text-xs text-gray-400">
+            Target:{" "}
+            <span className="font-mono text-gray-600">
+              KES {drive.target_amount.toLocaleString()}
+            </span>
+          </p>
         </div>
       </div>
 
-      <div className="mt-auto pt-3 border-t border-gray-50 space-y-2">
-        <div className="flex gap-2">
-          <Link
-            href={`/drives/${drive.id}`}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary-bronze transition-colors"
-          >
-            <Eye className="w-4 h-4" />
-            View
-          </Link>
+      <div className="mt-auto pt-4 border-t border-gray-50 flex gap-2 relative z-10">
+        <Link
+          href={`/drives/${drive.id}`}
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-secondary-dark text-white text-sm font-medium rounded-xl hover:bg-black transition-all shadow-lg shadow-black/10"
+        >
+          <Eye className="w-4 h-4" />
+          View
+        </Link>
+
+        <div className="flex gap-1">
           <Link
             href={`/drives/${drive.id}/edit`}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors"
+            className="p-2.5 text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors border border-transparent hover:border-primary/10"
+            title="Edit"
           >
             <Edit className="w-4 h-4" />
-            Edit
           </Link>
-        </div>
-        <div className="flex gap-2">
           <button
             onClick={handleToggleStatus}
             disabled={isUpdating}
             className={clsx(
-              "flex-1 flex items-center justify-center gap-2 px-3 py-2 border text-xs font-medium rounded-lg transition-colors",
+              "p-2.5 rounded-xl transition-colors border border-transparent",
               drive.status === "Active"
-                ? "bg-white border-green-200 text-green-700 hover:bg-green-50"
-                : "bg-white border-amber-200 text-amber-700 hover:bg-amber-50",
+                ? "text-amber-600 hover:bg-amber-50 hover:border-amber-100"
+                : "text-green-600 hover:bg-green-50 hover:border-green-100",
             )}
+            title={
+              drive.status === "Active" ? "Close Drive" : "Re-activate Drive"
+            }
           >
-            {isUpdating ? (
-              "..."
-            ) : drive.status === "Active" ? (
-              <>
-                <CheckCircle className="w-4 h-4" /> Close
-              </>
+            {drive.status === "Active" ? (
+              <XCircle className="w-4 h-4" />
             ) : (
-              <>
-                <CheckCircle className="w-4 h-4" /> Re-Activate
-              </>
+              <CheckCircle className="w-4 h-4" />
             )}
           </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white border border-red-200 text-red-600 text-xs font-medium rounded-lg hover:bg-red-50 transition-colors"
+            className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"
+            title="Delete"
           >
-            {isDeleting ? (
-              "..."
-            ) : (
-              <>
-                <Trash2 className="w-4 h-4" /> Delete
-              </>
-            )}
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>

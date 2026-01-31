@@ -213,10 +213,12 @@ export const getRatings = async () => {
     }
 };
 
+import { BankAccount, Transfer } from "./data";
+
 // Money Transfer
-export const initiateTransfer = async (amount: number) => {
+export const initiateTransfer = async (amount: number, destination_account: string, description?: string) => {
     try {
-        const response = await api.post('api/v1/transactions/transfer/', { amount });
+        const response = await api.post('api/v1/transfers/', { amount, destination_account, description });
         return response.data;
     } catch (error) {
         console.error('Error initiating transfer:', error);
@@ -239,13 +241,23 @@ export const initiateSTKPush = async (phone_number: string, amount: number, acco
     }
 };
 
-export const getBankAccounts = async () => {
+export const getBankAccounts = async (): Promise<BankAccount[]> => {
     try {
         const response = await api.get('api/v1/bank-accounts/');
         return response.data.results;
     } catch (error) {
         console.error('Error fetching bank accounts:', error);
         return [];
+    }
+};
+
+export const getBankAccountById = async (id: string): Promise<BankAccount> => {
+    try {
+        const response = await api.get(`api/v1/bank-accounts/${id}/`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching bank account:', error);
+        throw error;
     }
 };
 
@@ -259,6 +271,16 @@ export const addBankAccount = async (data: any) => {
     }
 };
 
+export const updateBankAccount = async (id: string, data: any) => {
+    try {
+        const response = await api.patch(`api/v1/bank-accounts/${id}/`, data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating bank account:', error);
+        throw error;
+    }
+};
+
 export const deleteBankAccount = async (id: string) => {
     try {
         await api.delete(`api/v1/bank-accounts/${id}/`);
@@ -268,11 +290,9 @@ export const deleteBankAccount = async (id: string) => {
     }
 };
 
-export const getTransferHistory = async () => {
+export const getTransferHistory = async (): Promise<Transfer[]> => {
     try {
-        const response = await api.get('api/v1/transactions/', {
-            params: { payment_method: 'Transfer' }
-        });
+        const response = await api.get('api/v1/transfers/');
         return response.data.results;
     } catch (error) {
         console.error('Error fetching transfer history:', error);

@@ -1,327 +1,437 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { initiateTransfer, getBankAccounts, addBankAccount, deleteBankAccount, getTransferHistory } from "@/lib/api_data";
-import { toast } from "sonner";
-import { ArrowRight, Wallet, Building2, Loader2, Plus, Trash2, History } from "lucide-react";
-
-import { Skeleton } from "@/components/ui/Skeleton";
+import { BankAccount, Transfer } from "@/lib/data";
+import {
+  getBankAccounts,
+  getTransferHistory,
+  initiateTransfer,
+} from "@/lib/api_data";
+import {
+  ArrowRight,
+  CheckCircle,
+  Clock,
+  XCircle,
+  ArrowRightLeft,
+  Search,
+  Download,
+  Wallet,
+  CreditCard,
+  Send,
+  Building,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { format } from "date-fns";
+import * as XLSX from "xlsx";
 
 export default function TransfersPage() {
-    const [amount, setAmount] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [isFetching, setIsFetching] = useState(true);
-    const [bankAccounts, setBankAccounts] = useState<any[]>([]);
-    const [selectedBank, setSelectedBank] = useState("");
-    const [showAddBank, setShowAddBank] = useState(false);
-    const [newBank, setNewBank] = useState({ bank_name: "", account_number: "", account_name: "" });
-    const [history, setHistory] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [history, setHistory] = useState<Transfer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-    const fetchData = async () => {
-        try {
-            setIsFetching(true);
-            const banks = await getBankAccounts();
-            setBankAccounts(banks);
-            if (banks.length > 0) setSelectedBank(banks[0].id);
+  const initialToObject = searchParams.get("to") || "";
 
-            const hist = await getTransferHistory();
-            setHistory(hist);
-        } catch (error) {
-            console.error("Fetch error:", error);
-        } finally {
-            setIsFetching(false);
-        }
-    };
+  const [formData, setFormData] = useState({
+    destination_account: initialToObject,
+    amount: "",
+    description: "Transfer from JMC Donation Account",
+  });
 
-    const handleTransfer = async (e: React.FormEvent) => {
-        e.preventDefault();
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const [accountsData, historyData] = await Promise.all([
+        getBankAccounts(),
+        getTransferHistory(),
+      ]);
+      setAccounts(accountsData);
+      setHistory(historyData);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        if (!amount || parseFloat(amount) <= 0) {
-            toast.error("Please enter a valid amount");
-            return;
-        }
-        if (!selectedBank) {
-            toast.error("Please select a bank account");
-            return;
-        }
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-        setIsLoading(true);
-        try {
-            await initiateTransfer(parseFloat(amount));
-            toast.success("Transfer initiated successfully");
-            setAmount("");
-            fetchData(); // Refresh history
-        } catch (error) {
-            toast.error("Failed to initiate transfer");
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !confirm(
+        `Are you sure you want to transfer KES ${formData.amount} to the selected account?`,
+      )
+    )
+      return;
 
-    const handleAddBank = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await addBankAccount(newBank);
-            toast.success("Bank account added");
-            setShowAddBank(false);
-            setNewBank({ bank_name: "", account_number: "", account_name: "" });
-            fetchData();
-        } catch (error) {
-            toast.error("Failed to add bank account");
-        }
-    };
+    setIsSubmitting(true);
+    try {
+      await initiateTransfer(
+        Number(formData.amount),
+        formData.destination_account,
+        formData.description,
+      );
+      alert("Transfer initiated successfully!");
+      setFormData({ ...formData, amount: "" });
+      fetchData(); // Refresh history
+    } catch (error: any) {
+      // Error handling matches api_data throw
+      alert(
+        "Transfer failed: " + (error.response?.data?.error || error.message),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-    const handleDeleteBank = async (id: string) => {
-        if (confirm("Are you sure you want to delete this bank account?")) {
-            try {
-                await deleteBankAccount(id);
-                toast.success("Bank account deleted");
-                fetchData();
-            } catch (error) {
-                toast.error("Failed to delete bank account");
-            }
-        }
-    };
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Completed":
+        return "text-green-700 bg-green-50 border-green-100";
+      case "Pending":
+        return "text-yellow-700 bg-yellow-50 border-yellow-100";
+      case "Failed":
+        return "text-red-700 bg-red-50 border-red-100";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-100";
+    }
+  };
 
-    return (
-        <div className="max-w-4xl mx-auto space-y-8">
-            <div className="flex justify-between items-center">
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-secondary-dark tracking-tight">
+          Fund Transfers
+        </h1>
+        <p className="text-gray-500 mt-1">
+          Move funds securely from JMC Donation Account to approved
+          beneficiaries.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Transfer Form Section */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-3xl shadow-sm border border-secondary/20 overflow-hidden relative">
+            {/* Decorative Header */}
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-primary-bronze" />
+
+            <div className="p-8">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                  <Send className="w-6 h-6" />
+                </div>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Money Transfer</h1>
-                    <p className="text-gray-500 mt-1">Manage transfers to bank accounts.</p>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Initiate Transfer
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Safe & Secure B2B Payment
+                  </p>
                 </div>
-                <div className="bg-green-50 px-4 py-2 rounded-lg border border-green-100 flex items-center gap-2">
-                    <Wallet className="w-5 h-5 text-green-600" />
-                    <div>
-                        <p className="text-xs text-green-600 font-medium">Available Balance</p>
-                        <p className="text-lg font-bold text-green-700">KES 450,000.00</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Source Account (Fixed) */}
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center gap-4 opacity-75 grayscale-[0.5]">
+                  <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <Wallet className="w-6 h-6 text-gray-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                      Source Account
+                    </p>
+                    <p className="font-bold text-gray-900 text-lg">
+                      JMC Paybill
+                    </p>
+                    <p className="text-sm text-gray-500 font-mono">150770</p>
+                  </div>
+                </div>
+
+                {/* Arrow Indicator */}
+                <div className="flex justify-center -my-4 relative z-10">
+                  <div className="bg-white p-2 rounded-full shadow border border-gray-100 text-primary">
+                    <ArrowRight className="w-5 h-5 transform rotate-90" />
+                  </div>
+                </div>
+
+                {/* Destination & Details */}
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Beneficiary
+                    </label>
+                    <div className="relative">
+                      <select
+                        required
+                        value={formData.destination_account}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            destination_account: e.target.value,
+                          })
+                        }
+                        className="w-full pl-5 pr-10 py-4 bg-white border border-gray-200 rounded-xl text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none transition-all shadow-sm"
+                      >
+                        <option value="">Choose an account...</option>
+                        {accounts.map((acc) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.account_name} — {acc.bank_name} (
+                            {acc.account_number})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                        <ArrowRightLeft className="w-5 h-5 opacity-50" />
+                      </div>
                     </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Transfer Form */}
-                <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 h-fit">
-                    <h2 className="font-bold text-gray-900 mb-6">Initiate Transfer</h2>
-                    <form onSubmit={handleTransfer} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">From</label>
-                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                    <Wallet className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900">M-Pesa Paybill</p>
-                                    <p className="text-xs text-gray-500">150777</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-center">
-                            <ArrowRight className="w-5 h-5 text-gray-400 rotate-90 lg:rotate-0" />
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <label className="block text-sm font-medium text-gray-700">To Bank Account</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAddBank(true)}
-                                    className="text-xs text-primary hover:underline flex items-center gap-1"
-                                >
-                                    <Plus className="w-3 h-3" /> Add New
-                                </button>
-                            </div>
-
-                            {isFetching ? (
-                                <div className="space-y-2">
-                                    <Skeleton className="h-16 w-full rounded-lg" />
-                                    <Skeleton className="h-16 w-full rounded-lg" />
-                                </div>
-                            ) : bankAccounts.length > 0 ? (
-                                <div className="space-y-2">
-                                    {bankAccounts.map((bank) => (
-                                        <div
-                                            key={bank.id}
-                                            onClick={() => setSelectedBank(bank.id)}
-                                            className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all ${selectedBank === bank.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-gray-200 hover:border-primary/50"}`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                                    <Building2 className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{bank.bank_name}</p>
-                                                    <p className="text-xs text-gray-500">{bank.account_number} - {bank.account_name}</p>
-                                                </div>
-                                            </div>
-                                            {selectedBank === bank.id && (
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => { e.stopPropagation(); handleDeleteBank(bank.id); }}
-                                                    className="text-red-400 hover:text-red-600 p-1"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
-                                    <p className="text-sm text-gray-500">No bank accounts added</p>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowAddBank(true)}
-                                        className="mt-2 text-sm text-primary font-medium"
-                                    >
-                                        Add your first bank account
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-                                Amount (KES)
-                            </label>
-                            <input
-                                id="amount"
-                                type="number"
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                min="1"
-                                step="0.01"
-                                required
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={isLoading || !selectedBank}
-                            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                        >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Transfer Funds"}
-                        </button>
-                    </form>
-                </div>
-
-                {/* History & Modal */}
-                <div className="space-y-8">
-                    {/* Add Bank Modal */}
-                    {showAddBank && (
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h3 className="font-bold text-gray-900 mb-4">Add New Bank Account</h3>
-                            <form onSubmit={handleAddBank} className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Bank Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                        value={newBank.bank_name}
-                                        onChange={e => setNewBank({ ...newBank, bank_name: e.target.value })}
-                                        placeholder="e.g. KCB, Equity"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Account Number</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                        value={newBank.account_number}
-                                        onChange={e => setNewBank({ ...newBank, account_number: e.target.value })}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Account Name</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
-                                        value={newBank.account_name}
-                                        onChange={e => setNewBank({ ...newBank, account_name: e.target.value })}
-                                    />
-                                </div>
-                                <div className="flex gap-2 justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowAddBank(false)}
-                                        className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-bronze"
-                                    >
-                                        Save Account
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    )}
-
-                    {/* History */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-                            <History className="w-4 h-4 text-gray-500" />
-                            <h3 className="font-bold text-gray-900">Recent Transfers</h3>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-gray-50 text-gray-500 font-medium">
-                                    <tr>
-                                        <th className="px-4 py-3">Date</th>
-                                        <th className="px-4 py-3">Reference</th>
-                                        <th className="px-4 py-3 text-right">Amount</th>
-                                        <th className="px-4 py-3">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {isFetching ? (
-                                        Array.from({ length: 3 }).map((_, i) => (
-                                            <tr key={i}>
-                                                <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
-                                                <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
-                                                <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
-                                                <td className="px-4 py-3"><Skeleton className="h-6 w-16 rounded-full" /></td>
-                                            </tr>
-                                        ))
-                                    ) : history.length > 0 ? (
-                                        history.map((tx) => (
-                                            <tr key={tx.id} className="hover:bg-gray-50">
-                                                <td className="px-4 py-3 text-gray-600">{new Date(tx.donated_at).toLocaleDateString()}</td>
-                                                <td className="px-4 py-3 text-gray-900 font-medium">{tx.transaction_reference}</td>
-                                                <td className="px-4 py-3 text-right font-medium">KES {parseFloat(tx.amount).toLocaleString()}</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                                        {tx.payment_status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                                                No transfers found
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/accounts/create")}
+                        className="text-sm text-primary font-medium hover:underline"
+                      >
+                        + Add New Beneficiary
+                      </button>
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Amount (KES)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">
+                        KES
+                      </span>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        value={formData.amount}
+                        onChange={(e) =>
+                          setFormData({ ...formData, amount: e.target.value })
+                        }
+                        placeholder="0.00"
+                        className="w-full pl-16 pr-5 py-4 bg-white border border-gray-200 rounded-xl text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm placeholder:text-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description / Remarks
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
+                    />
+                  </div>
                 </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={
+                      isSubmitting ||
+                      !formData.destination_account ||
+                      !formData.amount
+                    }
+                    className="w-full py-4 bg-gradient-to-r from-primary to-primary-bronze text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-3"
+                  >
+                    {isSubmitting
+                      ? "Processing Transaction..."
+                      : "Confirm Transfer"}
+                    {!isSubmitting && <ArrowRight className="w-6 h-6" />}
+                  </button>
+                  <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Secure 256-bit encrypted
+                    transaction
+                  </p>
+                </div>
+              </form>
             </div>
+          </div>
         </div>
-    );
+
+        {/* Side Panel / Summary / Stats could go here later */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-primary-bronze/5 rounded-3xl p-6 border border-primary/10">
+            <h3 className="text-primary-bronze font-bold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5" /> Recent Activity
+            </h3>
+            <div className="space-y-4">
+              {isLoading ? (
+                <p className="text-sm text-gray-500">Loading...</p>
+              ) : (
+                history.slice(0, 5).map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex gap-3 items-start pb-4 border-b border-primary/5 last:border-0 last:pb-0"
+                  >
+                    <div
+                      className={`p-2 rounded-full mt-0.5 shrink-0 ${tx.status === "Completed" ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"}`}
+                    >
+                      {tx.status === "Completed" ? (
+                        <CheckCircle className="w-3 h-3" />
+                      ) : (
+                        <Clock className="w-3 h-3" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                        {tx.destination_account_details?.account_name}
+                      </p>
+                      <p className="text-xs text-secondary-dark/60 font-mono">
+                        KES {Number(tx.amount).toLocaleString()}
+                      </p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {format(new Date(tx.created_at), "MMM dd, HH:mm")}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {history.length === 0 && !isLoading && (
+                <p className="text-sm text-gray-500 italic">
+                  No recent transfers.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Full History Table */}
+      <div className="bg-white rounded-3xl border border-secondary/20 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Transaction History
+            </h3>
+            <p className="text-sm text-gray-500">
+              Full log of all B2B transfers
+            </p>
+          </div>
+          <button className="px-5 py-2.5 bg-gray-50 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm border border-gray-200">
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="px-8 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50 first:pl-8">
+                  Date
+                </th>
+                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                  Beneficiary
+                </th>
+                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                  Amount
+                </th>
+                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                  Reference
+                </th>
+                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {isLoading ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-8 py-12 text-center text-gray-500"
+                  >
+                    Loading history...
+                  </td>
+                </tr>
+              ) : history.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-8 py-12 text-center text-gray-400 italic"
+                  >
+                    No transactions found
+                  </td>
+                </tr>
+              ) : (
+                history.map((tx) => (
+                  <tr
+                    key={tx.id}
+                    className="hover:bg-amber-50/30 transition-colors group"
+                  >
+                    <td className="px-8 py-6 text-gray-600 text-sm whitespace-nowrap">
+                      <div className="font-medium text-gray-900">
+                        {format(new Date(tx.created_at), "MMM dd, yyyy")}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {format(new Date(tx.created_at), "HH:mm aaa")}
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-500">
+                          {tx.destination_account_details?.paybill_number ? (
+                            <CreditCard className="w-4 h-4" />
+                          ) : (
+                            <Building className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {tx.destination_account_details?.account_name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {tx.destination_account_details?.bank_name} •{" "}
+                            {tx.destination_account_details?.account_number}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <span className="font-mono font-bold text-gray-900 text-lg">
+                        KES {Number(tx.amount).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-6">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 font-mono text-xs border border-gray-200">
+                        {tx.transaction_reference || "PENDING"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-6">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getStatusColor(tx.status)}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full bg-current`}
+                        />
+                        {tx.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }

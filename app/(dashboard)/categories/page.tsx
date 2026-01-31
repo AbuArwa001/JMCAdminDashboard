@@ -231,30 +231,35 @@ export default function CategoriesPage() {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+        className="bg-white rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] border border-gray-100/50 overflow-hidden hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] transition-all duration-300"
       >
-        <div className="p-7 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/5 rounded-lg">
-              <ListIcon className="w-5 h-5 text-primary" />
+            <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+              <ListIcon className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-gray-900 text-lg underline decoration-primary/20 underline-offset-8">
-              All Categories
-            </h3>
+            <div>
+              <h3 className="font-bold text-secondary-dark tracking-tight">
+                All Categories
+              </h3>
+              <p className="text-xs text-gray-400 font-medium">
+                Manage fund types
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-grow">
-              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative flex-grow group">
+              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11 pr-4 py-2.5 bg-gray-50/50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-full md:w-80 transition-all"
+                className="pl-11 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-full md:w-80 transition-all font-medium"
               />
             </div>
-            <button className="p-2.5 border border-gray-100 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors">
+            <button className="p-2.5 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
               <Filter className="w-5 h-5" />
             </button>
           </div>
@@ -263,14 +268,14 @@ export default function CategoriesPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50">
-                <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+              <tr className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-bold text-gray-400">
+                <th className="px-8 py-4 border-b border-gray-100">
                   Category Details
                 </th>
-                <th className="px-8 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                <th className="px-8 py-4 border-b border-gray-100">
                   Created Date
                 </th>
-                <th className="px-8 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                <th className="px-8 py-4 text-right border-b border-gray-100">
                   Quick Actions
                 </th>
               </tr>
@@ -298,12 +303,12 @@ export default function CategoriesPage() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group hover:bg-gray-50/80 transition-colors"
+                        className="group hover:bg-amber-50/30 transition-colors"
                       >
                         <td className="px-8 py-5">
                           <div className="flex items-center gap-4">
                             <div
-                              className="w-1.5 h-10 rounded-full"
+                              className="w-1.5 h-10 rounded-full shadow-sm"
                               style={{ backgroundColor: category.color }}
                             />
                             <div>
@@ -318,7 +323,7 @@ export default function CategoriesPage() {
                           </div>
                         </td>
                         <td className="px-8 py-5">
-                          <span className="text-sm font-medium text-gray-500 bg-gray-100/50 px-3 py-1 rounded-full">
+                          <span className="text-xs font-semibold text-gray-500 bg-gray-100/50 px-3 py-1.5 rounded-lg font-mono">
                             {category.created_at
                               ? new Date(
                                   category.created_at,
@@ -334,22 +339,22 @@ export default function CategoriesPage() {
                           <div className="flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Link
                               href={`/categories/${category.id}/edit`}
-                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors shadow-sm"
+                              className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors shadow-sm border border-transparent hover:border-primary/10"
                               title="Edit Category"
                             >
-                              <Pencil className="w-4.5 h-4.5" />
+                              <Pencil className="w-4 h-4" />
                             </Link>
                             <button
                               onClick={() =>
                                 category.id && handleDelete(category.id)
                               }
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors shadow-sm"
+                              className="p-2 text-red-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors shadow-sm border border-transparent hover:border-red-100"
                               title="Delete Category"
                             >
-                              <Trash2 className="w-4.5 h-4.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                             <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
-                              <MoreVertical className="w-4.5 h-4.5" />
+                              <MoreVertical className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -379,7 +384,7 @@ export default function CategoriesPage() {
             </tbody>
           </table>
         </div>
-        <div className="p-7 border-t border-gray-50 bg-gray-50/30 flex justify-between items-center text-xs text-gray-400 font-bold uppercase tracking-widest">
+        <div className="p-5 border-t border-gray-50 bg-gray-50/30 flex justify-between items-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
           <span>Showing {filteredCategories.length} results</span>
           <div className="flex gap-4">
             <span className="cursor-pointer hover:text-primary transition-colors">
