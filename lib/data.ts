@@ -39,6 +39,7 @@ export interface DonationDrive {
     end_date?: string;
     images?: { id: string; image: string; created_at: string }[];
     image_urls?: string[];
+    is_featured?: boolean;
 }
 
 export interface Donation {

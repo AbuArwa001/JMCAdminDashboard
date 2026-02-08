@@ -8,6 +8,7 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  Star,
 } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -123,6 +124,26 @@ export default function DriveProgressCard({
     } catch (error) {
       toast.error("Failed to update status");
     } finally {
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleToggleFeatured = async () => {
+    const newFeaturedStatus = !drive.is_featured;
+    const action = newFeaturedStatus ? "mark as featured" : "remove from featured";
+
+    if (!confirm(`Are you sure you want to ${action}?`))
+      return;
+
+    setIsUpdating(true);
+    try {
+      await updateDonationDrive(drive.id, { is_featured: newFeaturedStatus } as any);
+      toast.success(`Drive ${newFeaturedStatus ? "marked as featured" : "removed from featured"}`);
+      if (onUpdate) onUpdate();
+    } catch (error) {
+      toast.error("Failed to update featured status");
+    } finally {
       setIsUpdating(false);
     }
   };
@@ -208,6 +229,20 @@ export default function DriveProgressCard({
         </Link>
 
         <div className="flex gap-1">
+          <button
+            onClick={handleToggleFeatured}
+            disabled={isUpdating}
+            className={clsx(
+              "p-2.5 rounded-xl transition-colors border border-transparent",
+              drive.is_featured
+                ? "text-yellow-500 hover:bg-yellow-50 hover:border-yellow-100"
+                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 hover:border-yellow-100"
+            )}
+            title={drive.is_featured ? "Remove from Featured" : "Mark as Featured"}
+          >
+            <Star className={clsx("w-4 h-4", drive.is_featured && "fill-current")} />
+          </button>
+
           <Link
             href={`/drives/${drive.id}/edit`}
             className="p-2.5 text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors border border-transparent hover:border-primary/10"
