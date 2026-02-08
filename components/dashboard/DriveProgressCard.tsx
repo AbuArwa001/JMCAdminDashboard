@@ -9,6 +9,7 @@ import {
   CheckCircle,
   XCircle,
   Star,
+  QrCode,
 } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/api_data";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/Skeleton";
+import QRCodeModal from "@/components/dashboard/QRCodeModal";
 
 interface DriveProgressCardProps {
   drive?: DonationDrive & { categoryName?: string };
@@ -33,6 +35,7 @@ export default function DriveProgressCard({
 }: DriveProgressCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
 
   if (isLoading || !drive) {
     return (
@@ -251,6 +254,14 @@ export default function DriveProgressCard({
             />
           </button>
 
+          <button
+            onClick={() => setIsQRModalOpen(true)}
+            className="p-2.5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors border border-transparent hover:border-gray-200"
+            title="Generate QR Code"
+          >
+            <QrCode className="w-4 h-4" />
+          </button>
+
           <Link
             href={`/drives/${drive.id}/edit`}
             className="p-2.5 text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-colors border border-transparent hover:border-primary/10"
@@ -287,6 +298,13 @@ export default function DriveProgressCard({
           </button>
         </div>
       </div>
+
+      <QRCodeModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        value={`jamiagive://donate/${drive.id}`}
+        title={drive.title}
+      />
     </div>
   );
 }
