@@ -124,22 +124,26 @@ export default function DriveProgressCard({
     } catch (error) {
       toast.error("Failed to update status");
     } finally {
-    } finally {
       setIsUpdating(false);
     }
   };
 
   const handleToggleFeatured = async () => {
     const newFeaturedStatus = !drive.is_featured;
-    const action = newFeaturedStatus ? "mark as featured" : "remove from featured";
+    const action = newFeaturedStatus
+      ? "mark as featured"
+      : "remove from featured";
 
-    if (!confirm(`Are you sure you want to ${action}?`))
-      return;
+    if (!confirm(`Are you sure you want to ${action}?`)) return;
 
     setIsUpdating(true);
     try {
-      await updateDonationDrive(drive.id, { is_featured: newFeaturedStatus } as any);
-      toast.success(`Drive ${newFeaturedStatus ? "marked as featured" : "removed from featured"}`);
+      await updateDonationDrive(drive.id, {
+        is_featured: newFeaturedStatus,
+      } as any);
+      toast.success(
+        `Drive ${newFeaturedStatus ? "marked as featured" : "removed from featured"}`,
+      );
       if (onUpdate) onUpdate();
     } catch (error) {
       toast.error("Failed to update featured status");
@@ -236,11 +240,15 @@ export default function DriveProgressCard({
               "p-2.5 rounded-xl transition-colors border border-transparent",
               drive.is_featured
                 ? "text-yellow-500 hover:bg-yellow-50 hover:border-yellow-100"
-                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 hover:border-yellow-100"
+                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 hover:border-yellow-100",
             )}
-            title={drive.is_featured ? "Remove from Featured" : "Mark as Featured"}
+            title={
+              drive.is_featured ? "Remove from Featured" : "Mark as Featured"
+            }
           >
-            <Star className={clsx("w-4 h-4", drive.is_featured && "fill-current")} />
+            <Star
+              className={clsx("w-4 h-4", drive.is_featured && "fill-current")}
+            />
           </button>
 
           <Link
