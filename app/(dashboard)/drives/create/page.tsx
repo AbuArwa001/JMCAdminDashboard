@@ -29,10 +29,16 @@ export default function CreateDrivePage() {
     paybill_number: "",
     account_name: "",
     account_number: "",
+    consumer_key: "",
+    consumer_secret: "",
+    passkey: "",
+    initiator_name: "",
+    security_credential: "",
   });
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState("manual");
+  const [showCustomCreds, setShowCustomCreds] = useState(false);
   
   console.log("Categories:", categories);
   useEffect(() => {
@@ -279,7 +285,13 @@ export default function CreateDrivePage() {
                       paybill_number: "",
                       account_name: "",
                       account_number: "",
+                      consumer_key: "",
+                      consumer_secret: "",
+                      passkey: "",
+                      initiator_name: "",
+                      security_credential: "",
                     });
+                    setShowCustomCreds(false);
                   }
                 }}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
@@ -322,6 +334,93 @@ export default function CreateDrivePage() {
                       placeholder="e.g. JMC Donation"
                     />
                   </div>
+
+                  <div className="col-span-full pt-4 border-t border-gray-200">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={showCustomCreds}
+                          onChange={(e) => setShowCustomCreds(e.target.checked)}
+                          className="peer sr-only"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">
+                        Use Custom Daraja API Credentials (Optional)
+                      </span>
+                    </label>
+                  </div>
+
+                  {showCustomCreds && (
+                    <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 border border-gray-100 rounded-xl shadow-sm mt-2">
+                      <div className="col-span-full md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Consumer Key
+                        </label>
+                        <input
+                          type="text"
+                          name="consumer_key"
+                          value={formData.consumer_key}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                          placeholder="e.g. WX..."
+                        />
+                      </div>
+                      <div className="col-span-full md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Consumer Secret
+                        </label>
+                        <input
+                          type="text"
+                          name="consumer_secret"
+                          value={formData.consumer_secret}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                          placeholder="e.g. yZ..."
+                        />
+                      </div>
+                      <div className="col-span-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Passkey
+                        </label>
+                        <input
+                          type="text"
+                          name="passkey"
+                          value={formData.passkey}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                          placeholder="e.g. bfb..."
+                        />
+                      </div>
+                      <div className="col-span-full md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Initiator Name <span className="text-gray-400 font-normal">(For B2B/B2C)</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="initiator_name"
+                          value={formData.initiator_name}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                          placeholder="e.g. testapi"
+                        />
+                      </div>
+                      <div className="col-span-full md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Security Credential <span className="text-gray-400 font-normal">(Base64 Cert)</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="security_credential"
+                          value={formData.security_credential}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 font-mono text-sm"
+                          placeholder="e.g. Qk..."
+                        />
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>

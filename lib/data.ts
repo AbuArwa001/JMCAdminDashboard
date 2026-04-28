@@ -23,6 +23,11 @@ export interface CreateDriveData {
     start_date: string;
     end_date?: string;
     uploaded_images?: File[];
+    consumer_key?: string;
+    consumer_secret?: string;
+    passkey?: string;
+    initiator_name?: string;
+    security_credential?: string;
 }
 
 export interface DonationDrive {
