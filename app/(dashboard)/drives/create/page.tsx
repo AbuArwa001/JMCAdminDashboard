@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CategoryData } from "@/lib/data";
+import { CategoryData, BankAccount } from "@/lib/data";
 import {
   createDonationDrive,
   getCategories,
+  getBankAccounts,
 } from "@/lib/api_data";
 import { toast } from "sonner";
 
@@ -30,14 +31,24 @@ export default function CreateDrivePage() {
     account_number: "",
   });
   const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [accounts, setAccounts] = useState<BankAccount[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState("manual");
+  
   console.log("Categories:", categories);
   useEffect(() => {
-    const fetchCategories = async () => {
-      const cats: CategoryData[] = await getCategories();
-      setCategories(cats);
+    const fetchData = async () => {
+      try {
+        const cats: CategoryData[] = await getCategories();
+        setCategories(cats);
+        
+        const accs: BankAccount[] = await getBankAccounts();
+        setAccounts(accs);
+      } catch (err) {
+        console.error("Error fetching data", err);
+      }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,6 +245,52 @@ export default function CreateDrivePage() {
                 />
                 <span className="font-medium text-gray-700">Bank Account</span>
               </label>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Existing Account (Optional)
+              </label>
+              <select
+                value={selectedAccountId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setSelectedAccountId(id);
+                  if (id !== "manual") {
+                    const acc = accounts.find((a) => a.id === id);
+                    if (acc) {
+                      setFormData({
+                        ...formData,
+                        paybill_number: acc.paybill_number || "",
+                        account_name: acc.account_name || "",
+                        account_number: acc.account_number || "",
+                      });
+                      // Auto-select method based on bank name if possible
+                      if (acc.bank_name.toLowerCase().includes("mpesa")) {
+                        setPaymentMethod("MPESA");
+                      } else {
+                        setPaymentMethod("BANK");
+                      }
+                    }
+                  } else {
+                    // Clear fields if manual is selected again
+                    setFormData({
+                      ...formData,
+                      paybill_number: "",
+                      account_name: "",
+                      account_number: "",
+                    });
+                  }
+                }}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 bg-white"
+              >
+                <option value="manual">-- Enter Details Manually --</option>
+                {accounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.bank_name} - {acc.account_name} ({acc.paybill_number ? `Paybill: ${acc.paybill_number}` : `Acc: ${acc.account_number}`})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-lg">
