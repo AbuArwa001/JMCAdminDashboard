@@ -102,6 +102,11 @@ export interface BankAccount {
     account_number: string;
     account_name: string;
     is_active: boolean;
+    consumer_key?: string;
+    consumer_secret?: string;
+    passkey?: string;
+    initiator_name?: string;
+    security_credential?: string;
     created_at: string;
     updated_at: string;
 }

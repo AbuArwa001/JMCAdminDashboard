@@ -11,6 +11,7 @@ import {
   Building,
   CreditCard,
   CheckCircle2,
+  Key,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -39,6 +40,11 @@ export default function AccountForm({
       account_number: initialData?.account_number || "",
       account_name: initialData?.account_name || "",
       is_active: initialData?.is_active ?? true,
+      consumer_key: initialData?.consumer_key || "",
+      consumer_secret: initialData?.consumer_secret || "",
+      passkey: initialData?.passkey || "",
+      initiator_name: initialData?.initiator_name || "",
+      security_credential: initialData?.security_credential || "",
     },
   });
 
@@ -179,6 +185,68 @@ export default function AccountForm({
                   Active Account (Available for transfers)
                 </span>
               </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Section: API Credentials */}
+        <div className="col-span-full">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div className="p-1.5 bg-secondary rounded-lg">
+              <Key className="w-4 h-4 text-primary-bronze" />
+            </div>
+            Daraja API Credentials <span className="text-gray-400 font-normal text-sm ml-2">(Optional - For Third-Party M-Pesa Integration)</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
+            <div className="col-span-full md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Consumer Key
+              </label>
+              <input
+                {...register("consumer_key")}
+                placeholder="e.g. WX..."
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+              />
+            </div>
+            <div className="col-span-full md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Consumer Secret
+              </label>
+              <input
+                {...register("consumer_secret")}
+                placeholder="e.g. yZ..."
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+              />
+            </div>
+            <div className="col-span-full">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Passkey
+              </label>
+              <input
+                {...register("passkey")}
+                placeholder="e.g. bfb..."
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+              />
+            </div>
+            <div className="col-span-full md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Initiator Name <span className="text-gray-400 font-normal">(For B2B)</span>
+              </label>
+              <input
+                {...register("initiator_name")}
+                placeholder="e.g. testapi"
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+              />
+            </div>
+            <div className="col-span-full md:col-span-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Security Credential <span className="text-gray-400 font-normal">(Base64 Cert)</span>
+              </label>
+              <input
+                {...register("security_credential")}
+                placeholder="e.g. Qk..."
+                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+              />
             </div>
           </div>
         </div>
