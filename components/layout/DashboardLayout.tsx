@@ -10,6 +10,7 @@ export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
+}) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(true);
 
     // Close sidebar by default on smaller screens
