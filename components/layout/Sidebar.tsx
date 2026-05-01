@@ -10,6 +10,10 @@ import {
   Settings,
   X,
   ArrowRightLeft,
+  BookOpen,
+  Quote,
+  Mic,
+  ToggleRight,
 } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -23,6 +27,10 @@ const MENU_ITEMS = [
   { name: "Donations", href: "/donations", icon: CreditCard },
   { name: "Accounts", href: "/accounts", icon: List },
   { name: "Transfers", href: "/transfers", icon: ArrowRightLeft },
+  { name: "Darsas", href: "/community/darsas", icon: BookOpen },
+  { name: "Inspiration", href: "/community/inspiration", icon: Quote },
+  { name: "Khutba", href: "/community/khutba", icon: Mic },
+  { name: "Features", href: "/settings/features", icon: ToggleRight },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
