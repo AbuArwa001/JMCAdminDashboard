@@ -2,15 +2,32 @@
 
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import clsx from "clsx";
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
-}) {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(true);
+
+    // Close sidebar by default on smaller screens
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1024) {
+                setIsMobileMenuOpen(false);
+            } else {
+                setIsMobileMenuOpen(true);
+            }
+        };
+        
+        // Initial check
+        handleResize();
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <div className="min-h-screen bg-secondary/30 flex">
@@ -24,12 +41,12 @@ export default function DashboardLayout({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                     />
                 )}
             </AnimatePresence>
 
-            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 min-h-screen">
+            <div className={clsx("flex-1 flex flex-col transition-all duration-300 min-h-screen", isMobileMenuOpen ? "lg:ml-64" : "")}>
                 <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
                 <main className="flex-1 p-6 overflow-y-auto">
                     <motion.div

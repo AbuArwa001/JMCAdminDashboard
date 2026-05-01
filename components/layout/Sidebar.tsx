@@ -14,6 +14,7 @@ import {
   Quote,
   Mic,
   ToggleRight,
+  Users,
 } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -25,7 +26,7 @@ const MENU_ITEMS = [
   { name: "Donation Drives", href: "/drives", icon: Heart },
   { name: "Categories", href: "/categories", icon: List },
   { name: "Donations", href: "/donations", icon: CreditCard },
-  { name: "Accounts", href: "/accounts", icon: List },
+  { name: "Accounts", href: "/accounts", icon: Users },
   { name: "Transfers", href: "/transfers", icon: ArrowRightLeft },
   { name: "Darsas", href: "/community/darsas", icon: BookOpen },
   { name: "Inspiration", href: "/community/inspiration", icon: Quote },
@@ -76,7 +77,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <aside
       className={clsx(
         "fixed left-0 top-0 h-screen bg-secondary-dark text-white z-50 transition-transform duration-300 ease-in-out w-64 border-r border-gray-800 flex flex-col",
-        isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="p-6 flex items-center justify-center border-b border-gray-800 relative">
@@ -97,7 +98,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </button>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#374151 transparent' }}>
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           return (
