@@ -1,33 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #f3f4f6;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #f3f4f6;
-    /* Force light mode background for now as per user request to avoid dark floating look */
-    --foreground: #171717;
-  }
+  --background: #F8FAFC;
+  --foreground: #0F172A;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter, Arial, Helvetica, sans-serif);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Custom Selection */
 ::selection {
-  background-color: #be983080;
-  color: white;
+  background-color: rgba(190, 152, 48, 0.25);
+  color: #BE9830;
 }
 
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -38,10 +34,65 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: rgba(190, 152, 48, 0.2);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: rgba(190, 152, 48, 0.4);
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+}
+
+.glass-card-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #E9D294 0%, #BE9830 50%, #9D7C3F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #D4AF37 0%, #BE9830 50%, #9D7C3F 100%);
+}
+
+.gold-gradient-bg-hover {
+  background: linear-gradient(135deg, #E5C158 0%, #D4AF37 50%, #BE9830 100%);
+}
+
+.gold-border-glow {
+  box-shadow: 0 0 20px rgba(190, 152, 48, 0.2);
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.6) 25%,
+    rgba(241, 245, 249, 0.9) 50%,
+    rgba(226, 232, 240, 0.6) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-sweep 1.8s infinite;
 }
