@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    env: {
+        RENDER_API_URL: process.env.RENDER_API_URL,
+    },
     images: {
         remotePatterns: [
             {

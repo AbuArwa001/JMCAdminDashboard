@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_RENDER_API_URL || process.env.RENDER_API_URL || 'http://127.0.0.1:8000';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -13,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         if (typeof window !== 'undefined') {
-            const token = Cookies.get('firebaseToken'); 
+            const token = Cookies.get('firebaseToken');
             if (token && config.headers) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
