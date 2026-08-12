@@ -81,7 +81,11 @@ export default function KhutbaPage() {
     if (!confirm("Are you sure you want to send a push notification to all devices for this Khutba?")) return;
     try {
       const res = await api.post(`/api/v1/khutba/${id}/notify/`);
-      alert(`Notification sent! Success: ${res.data.success_count || 0}`);
+      if (res.data.status === "No devices registered") {
+        alert("Cannot send notification: No devices or users have registered for push notifications yet.");
+      } else {
+        alert(`Notification sent! Delivered to ${res.data.success_count || 0} devices. Failed: ${res.data.failure_count || 0}`);
+      }
       fetchData(); // refresh logs
     } catch (error) {
       console.error("Error sending notification", error);
