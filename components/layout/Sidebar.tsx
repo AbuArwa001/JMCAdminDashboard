@@ -20,6 +20,11 @@ import {
   ShieldCheck,
   MoonStar,
   LogOut,
+  HandHeart,
+  BookMarked,
+  Clock,
+  Calculator,
+  CalendarDays,
 } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -63,6 +68,11 @@ const MENU_SECTIONS: MenuSection[] = [
       { name: "Darsas & Classes", href: "/community/darsas", icon: BookOpen },
       { name: "Inspiration Quote", href: "/community/inspiration", icon: Quote },
       { name: "Friday Khutba", href: "/community/khutba", icon: Mic },
+      { name: "Events", href: "/community/events", icon: CalendarDays },
+      { name: "Duas", href: "/community/duas", icon: HandHeart },
+      { name: "Quran", href: "/community/quran", icon: BookMarked },
+      { name: "Prayer Timings", href: "/community/prayer-times", icon: Clock },
+      { name: "Zakat Calculator", href: "/community/zakat", icon: Calculator },
     ],
   },
   {
