@@ -190,7 +190,7 @@ export default function PrayerTimesPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {cities.map((city) => (
                     <tr key={city.id}>
-                      <td className="px-3 py-4 text-sm font-medium text-gray-900">{city.name}, {city.country}</td>
+                      <td className="px-3 py-4 text-sm font-medium text-gray-900">{city.name}</td>
                       <td className="px-3 py-4 text-sm text-gray-500">{city.latitude}, {city.longitude}</td>
                       <td className="px-3 py-4 text-sm text-right">
                         <button
