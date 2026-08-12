@@ -17,7 +17,8 @@ export default function FeaturesSettingsPage() {
   const fetchFeatures = async () => {
     try {
       const response = await api.get("/api/v1/core_config/features/");
-      setFeatures(response.data);
+      const data = response.data.results || response.data;
+      setFeatures(data);
     } catch (error) {
       console.error("Error fetching features:", error);
     } finally {
