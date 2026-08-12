@@ -44,7 +44,8 @@ export default function LoginPage() {
 
         try {
             // Sign in with Firebase using the imported auth instance
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const trimmedEmail = email.trim();
+            const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
             const user = userCredential.user;
 
             // Get ID token result to check claims
