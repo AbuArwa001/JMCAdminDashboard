@@ -49,7 +49,7 @@ export default function ZakatSettingsPage() {
     setSaving(true);
     setMessage(null);
     try {
-      await api.put("/api/v1/zakat/nisab-rate/", formData);
+      await api.patch("/api/v1/zakat/nisab-rate/", formData);
       setMessage({ type: 'success', text: "Nisab rates updated successfully." });
       fetchNisab();
     } catch (error) {
