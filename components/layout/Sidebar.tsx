@@ -106,7 +106,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           setFormData({
             name: userData.full_name || "Administrator",
             email: userData.email || "admin@jmc.org",
-            role: userData.role || "Super Admin",
+            role: userData.role_name || "Super Admin",
           });
         }
       } catch (error) {
