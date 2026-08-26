@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import { Plus, Trash, Edit, Bell, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash, Edit, Bell, Image as ImageIcon, Sparkles, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -22,6 +23,35 @@ export default function EventsPage() {
   const [galleryEvent, setGalleryEvent] = useState<any>(null);
   const [galleryFile, setGalleryFile] = useState<File | null>(null);
   const [galleryCaption, setGalleryCaption] = useState("");
+  
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const handleGenerateAI = async () => {
+    const prompt = window.prompt("What should the event story be about? (e.g. Write an engaging description for a Hajj preparation lecture)");
+    if (!prompt) return;
+
+    try {
+      setIsGeneratingAI(true);
+      const res = await fetch("/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to generate text");
+      }
+
+      setForm((prev: any) => ({ ...prev, story: data.content }));
+    } catch (error: any) {
+      alert("AI Generation failed: " + error.message);
+      console.error(error);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -180,9 +210,24 @@ export default function EventsPage() {
               <label className="block text-sm font-medium mb-1">Guest Name (Optional)</label>
               <input type="text" className="w-full p-2 border rounded" value={form.guest_name || ""} onChange={e => setForm({...form, guest_name: e.target.value})} />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Story / Rich Details</label>
-              <textarea required rows={4} className="w-full p-2 border rounded" value={form.story} onChange={e => setForm({...form, story: e.target.value})} />
+            <div className="md:col-span-2 space-y-1">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium">Story / Rich Details</label>
+                <button 
+                  type="button" 
+                  onClick={handleGenerateAI}
+                  disabled={isGeneratingAI}
+                  className="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md flex items-center gap-1.5 font-medium transition-colors"
+                >
+                  {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                  {isGeneratingAI ? "Generating..." : "Generate with AI"}
+                </button>
+              </div>
+              <RichTextEditor 
+                value={form.story || ""} 
+                onChange={content => setForm({...form, story: content})} 
+                placeholder="Enter event details or generate with AI..." 
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Cover Image</label>
