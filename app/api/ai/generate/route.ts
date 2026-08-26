@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-latest" });
 
     const systemPrompt = `You are a helpful AI assistant for a mosque management system. 
 Generate a rich text (HTML formatted) response based on the user's prompt. 
