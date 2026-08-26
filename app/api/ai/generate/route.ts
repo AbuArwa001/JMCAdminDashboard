@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-lite-latest" });
 
     const systemPrompt = `You are a helpful AI assistant for a mosque management system. 
 Generate a rich text (HTML formatted) response based on the user's prompt. 
@@ -25,9 +25,9 @@ Only output valid HTML (e.g. <p>, <strong>, <ul>, <li>, <h3>) suitable for inser
       { text: systemPrompt },
       { text: prompt }
     ]);
-    
+
     let htmlContent = result.response.text();
-    
+
     // Clean up potential markdown formatting that sometimes creeps in
     htmlContent = htmlContent.replace(/^```html/gi, "").replace(/^```/g, "").replace(/```$/g, "").trim();
 
