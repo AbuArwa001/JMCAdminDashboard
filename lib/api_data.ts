@@ -90,8 +90,21 @@ export const createDonationDrive = async (driveData: CreateDriveData) => {
 
 export const getDonationDrives = async (): Promise<DonationDrive[]> => {
     try {
-        const response = await api.get('api/v1/donations/');
-        return response.data.results;
+        let results: DonationDrive[] = [];
+        let url: string | null = 'api/v1/donations/';
+        
+        while (url) {
+            const response = await api.get(url);
+            results = [...results, ...response.data.results];
+            
+            // Use HTTPS to avoid mixed content errors if backend returns HTTP
+            if (response.data.next) {
+                url = response.data.next.replace(/^http:\/\//i, 'https://');
+            } else {
+                url = null;
+            }
+        }
+        return results;
     } catch (error) {
         console.error('Error fetching donation drives:', error);
         throw error;
@@ -164,8 +177,21 @@ export const getTransactionsByDonationDrive = async (driveId: string) => {
 };
 export const getTransactions = async () => {
     try {
-        const response = await api.get('api/v1/transactions/');
-        return response.data.results;
+        let results: any[] = [];
+        let url: string | null = 'api/v1/transactions/';
+        
+        while (url) {
+            const response = await api.get(url);
+            results = [...results, ...response.data.results];
+            
+            // Use HTTPS to avoid mixed content errors if backend returns HTTP
+            if (response.data.next) {
+                url = response.data.next.replace(/^http:\/\//i, 'https://');
+            } else {
+                url = null;
+            }
+        }
+        return results;
     } catch (error) {
         console.error('Error fetching transactions:', error);
         throw error;
