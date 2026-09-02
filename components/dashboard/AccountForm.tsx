@@ -10,10 +10,11 @@ import {
   Save,
   Building,
   CreditCard,
-  CheckCircle2,
   Key,
+  ShieldCheck,
 } from "lucide-react";
-import clsx from "clsx";
+import { toast } from "sonner";
+import ToggleSwitch from "@/components/ui/ToggleSwitch";
 
 interface AccountFormProps {
   initialData?: BankAccount;
@@ -26,12 +27,12 @@ export default function AccountForm({
 }: AccountFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -50,227 +51,244 @@ export default function AccountForm({
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
-    setError("");
     try {
       if (isEdit && initialData) {
         await updateBankAccount(initialData.id, data);
+        toast.success("Account updated successfully.");
       } else {
         await addBankAccount(data);
+        toast.success("Account created successfully.");
       }
       router.push("/accounts");
       router.refresh();
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || "Something went wrong");
+      toast.error(err.response?.data?.error || "Failed to save account details.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const isPaybill = watch("paybill_number");
+  const isActive = watch("is_active");
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 max-w-3xl mx-auto"
-    >
-      {error && (
-        <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-2">
-          <div className="w-1 h-8 bg-red-500 rounded-full"></div>
-          {error}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-4xl mx-auto">
+      {/* ── Section 1: Provider Details ── */}
+      <div className="form-section">
+        <div className="form-section-header">
+          <div className="w-8 h-8 rounded-lg bg-[#c99335]/20 border border-[#c99335]/40 flex items-center justify-center">
+            <Building className="w-4 h-4 text-[#c99335]" />
+          </div>
+          <div>
+            <h3
+              className="font-bold text-sm tracking-wide"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Provider Information
+            </h3>
+            <p className="text-[11px] text-gray-400">Bank name and MPESA paybill number</p>
+          </div>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Section: Provider Details */}
-        <div className="col-span-full">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-secondary rounded-lg">
-              <Building className="w-4 h-4 text-primary-bronze" />
-            </div>
-            Provider Details
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bank / Provider Name
+        <div className="form-section-body space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="form-label">
+                Bank / Provider Name <span className="text-rose-500 font-bold">*</span>
               </label>
               <input
                 {...register("bank_name", {
                   required: "Provider name is required",
                 })}
-                placeholder="e.g. MPESA Paybill, Equity Bank"
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium placeholder:text-gray-400"
+                placeholder="e.g. MPESA Paybill, Equity Bank, KCB"
+                className="form-input"
               />
               {errors.bank_name && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
+                <p className="text-rose-500 text-xs mt-1 font-medium">
                   {errors.bank_name.message as string}
                 </p>
               )}
             </div>
 
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Paybill Number{" "}
-                <span className="text-gray-400 font-normal">(Optional)</span>
+            <div>
+              <label className="form-label">
+                Paybill Number <span className="text-gray-400 font-normal lowercase">(optional)</span>
               </label>
               <input
                 {...register("paybill_number")}
                 placeholder="e.g. 522522"
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Section: Account Details */}
-        <div className="col-span-full">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-secondary rounded-lg">
-              <CreditCard className="w-4 h-4 text-primary-bronze" />
-            </div>
-            Account Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Account Name
-              </label>
-              <input
-                {...register("account_name", {
-                  required: "Account name is required",
-                })}
-                placeholder="e.g. Jamia Mosque Committee"
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium placeholder:text-gray-400"
-              />
-              {errors.account_name && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.account_name.message as string}
-                </p>
-              )}
-            </div>
-
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {isPaybill ? "Account Reference" : "Account Number"}
-              </label>
-              <input
-                {...register("account_number", {
-                  required: "Account number/reference is required",
-                })}
-                placeholder={
-                  isPaybill ? "e.g. Account Name" : "e.g. 1234567890"
-                }
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400"
-              />
-              {errors.account_number && (
-                <p className="text-red-500 text-xs mt-1 ml-1">
-                  {errors.account_number.message as string}
-                </p>
-              )}
-            </div>
-
-            <div className="col-span-full pt-2">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    {...register("is_active")}
-                    className="peer sr-only"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">
-                  Active Account (Available for transfers)
-                </span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Section: API Credentials */}
-        <div className="col-span-full">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <div className="p-1.5 bg-secondary rounded-lg">
-              <Key className="w-4 h-4 text-primary-bronze" />
-            </div>
-            Daraja API Credentials <span className="text-gray-400 font-normal text-sm ml-2">(Optional - For Third-Party M-Pesa Integration)</span>
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Consumer Key
-              </label>
-              <input
-                {...register("consumer_key")}
-                placeholder="e.g. WX..."
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
-              />
-            </div>
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Consumer Secret
-              </label>
-              <input
-                {...register("consumer_secret")}
-                placeholder="e.g. yZ..."
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
-              />
-            </div>
-            <div className="col-span-full">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Passkey
-              </label>
-              <input
-                {...register("passkey")}
-                placeholder="e.g. bfb..."
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
-              />
-            </div>
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Initiator Name <span className="text-gray-400 font-normal">(For B2B)</span>
-              </label>
-              <input
-                {...register("initiator_name")}
-                placeholder="e.g. testapi"
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
-              />
-            </div>
-            <div className="col-span-full md:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Security Credential <span className="text-gray-400 font-normal">(Base64 Cert)</span>
-              </label>
-              <input
-                {...register("security_credential")}
-                placeholder="e.g. Qk..."
-                className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-mono placeholder:text-gray-400 text-sm"
+                className="form-input font-mono"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 pt-6">
+      {/* ── Section 2: Account Details ── */}
+      <div className="form-section">
+        <div className="form-section-header">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+            <CreditCard className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <h3
+              className="font-bold text-sm tracking-wide"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Account Credentials
+            </h3>
+            <p className="text-[11px] text-gray-400">Beneficiary account name & number</p>
+          </div>
+        </div>
+
+        <div className="form-section-body space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="form-label">
+                Account Name <span className="text-rose-500 font-bold">*</span>
+              </label>
+              <input
+                {...register("account_name", {
+                  required: "Account name is required",
+                })}
+                placeholder="e.g. Jamia Mosque Committee"
+                className="form-input"
+              />
+              {errors.account_name && (
+                <p className="text-rose-500 text-xs mt-1 font-medium">
+                  {errors.account_name.message as string}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="form-label">
+                {isPaybill ? "Account Reference" : "Account Number"}{" "}
+                <span className="text-rose-500 font-bold">*</span>
+              </label>
+              <input
+                {...register("account_number", {
+                  required: "Account number/reference is required",
+                })}
+                placeholder={isPaybill ? "e.g. Education Fund" : "e.g. 1234567890"}
+                className="form-input font-mono"
+              />
+              {errors.account_number && (
+                <p className="text-rose-500 text-xs mt-1 font-medium">
+                  {errors.account_number.message as string}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Active Status Toggle */}
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            <ToggleSwitch
+              checked={isActive}
+              onChange={(val) => setValue("is_active", val)}
+              label="Active Beneficiary Channel"
+              description="Enable this account for internal transfers and automated payouts."
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section 3: Daraja API Credentials ── */}
+      <div className="form-section">
+        <div className="form-section-header">
+          <div className="w-8 h-8 rounded-lg bg-violet-500/20 border border-violet-500/40 flex items-center justify-center">
+            <Key className="w-4 h-4 text-violet-400" />
+          </div>
+          <div>
+            <h3
+              className="font-bold text-sm tracking-wide"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Daraja API Integration Credentials
+            </h3>
+            <p className="text-[11px] text-gray-400">
+              Optional — custom M-Pesa B2C/B2B credentials for this account
+            </p>
+          </div>
+        </div>
+
+        <div className="form-section-body space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="form-label">Consumer Key</label>
+              <input
+                {...register("consumer_key")}
+                placeholder="e.g. WX..."
+                className="form-input font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Consumer Secret</label>
+              <input
+                {...register("consumer_secret")}
+                placeholder="e.g. yZ..."
+                className="form-input font-mono text-sm"
+              />
+            </div>
+
+            <div className="col-span-full">
+              <label className="form-label">Passkey</label>
+              <input
+                {...register("passkey")}
+                placeholder="e.g. bfb..."
+                className="form-input font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Initiator Name (B2B)</label>
+              <input
+                {...register("initiator_name")}
+                placeholder="e.g. testapi"
+                className="form-input font-mono text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="form-label">Security Credential (Base64 Cert)</label>
+              <input
+                {...register("security_credential")}
+                placeholder="e.g. Qk..."
+                className="form-input font-mono text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Submit Bar */}
+      <div className="flex items-center justify-between pt-2">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-3 text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+          className="btn-secondary"
         >
           Cancel
         </button>
+
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary to-primary-bronze text-white rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium transform active:scale-95"
+          className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Saving Account...
+            </>
           ) : (
-            <Save className="w-5 h-5" />
+            <>
+              <Save className="w-4 h-4" />
+              {isEdit ? "Update Account" : "Save Account"}
+            </>
           )}
-          {isEdit ? "Update Account" : "Save Account"}
         </button>
       </div>
     </form>
