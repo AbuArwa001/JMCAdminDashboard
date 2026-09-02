@@ -9,7 +9,7 @@ import { exportToCSV } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { get } from "http";
-import { getDonationDrives } from "@/lib/api_data";
+import { getDonationDrives, getCategories } from "@/lib/api_data";
 
 export default function DrivesPage() {
   const [drives, setDrives] = useState<DonationDrive[]>([]);
@@ -17,11 +17,28 @@ export default function DrivesPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
   const fetchDrives = async () => {
     try {
       setIsLoading(true);
-      const drives = await getDonationDrives();
-      setDrives(drives);
+      const [rawDrives, categoriesRes] = await Promise.all([
+        getDonationDrives(),
+        getCategories(),
+      ]);
+
+      const categoryMap = categoriesRes.reduce((acc: any, cat: any) => {
+        acc[cat.id] = cat.category_name;
+        return acc;
+      }, {});
+
+      const mappedDrives = rawDrives.map((drive) => ({
+        ...drive,
+        categoryName: categoryMap[drive.category] || "General",
+      }));
+
+      setDrives(mappedDrives);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -41,6 +58,16 @@ export default function DrivesPage() {
       statusFilter === "All" || drive.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredDrives.length / itemsPerPage);
+  const paginatedDrives = filteredDrives.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const handleExport = () => {
     exportToCSV(filteredDrives, "donation_drives");
@@ -108,8 +135,8 @@ export default function DrivesPage() {
           Array.from({ length: 6 }).map((_, i) => (
             <DriveProgressCard key={i} isLoading={true} />
           ))
-        ) : filteredDrives.length > 0 ? (
-          filteredDrives.map((drive) => (
+        ) : paginatedDrives.length > 0 ? (
+          paginatedDrives.map((drive) => (
             <DriveProgressCard
               key={drive.id}
               drive={drive}
@@ -128,6 +155,30 @@ export default function DrivesPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {!isLoading && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8 pt-4 border-t border-gray-100">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors text-sm font-medium"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-500 font-medium">
+            Page <span className="text-gray-900">{currentPage}</span> of{" "}
+            <span className="text-gray-900">{totalPages}</span>
+          </span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 disabled:opacity-30 hover:bg-gray-50 transition-colors text-sm font-medium"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
