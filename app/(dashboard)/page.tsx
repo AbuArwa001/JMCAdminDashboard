@@ -41,7 +41,7 @@ export default function Home() {
     totalCollectedMonth: 0,
     activeDrives: 0,
   });
-  const [recentDonations, setRecentDonations] = useState([]);
+  const [recentDonations, setRecentDonations] = useState<any[]>([]);
   const [categoryStats, setCategoryStats] = useState<CategoryData[]>([]);
   const [donationTrends, setDonationTrends] = useState<DonationTrend[]>([]);
   const [drives, setDrives] = useState<DonationDrive[]>([]);
