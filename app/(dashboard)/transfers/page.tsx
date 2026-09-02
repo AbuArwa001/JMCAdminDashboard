@@ -18,11 +18,18 @@ import {
   CreditCard,
   Send,
   Building,
+  ShieldCheck,
+  ChevronDown,
+  Lock,
+  Plus,
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 export default function TransfersPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -52,6 +59,7 @@ export default function TransfersPage() {
       setHistory(historyData);
     } catch (error) {
       console.error("Fetch error:", error);
+      toast.error("Failed to load transfer history.");
     } finally {
       setIsLoading(false);
     }
@@ -63,374 +71,401 @@ export default function TransfersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.destination_account) {
+      toast.error("Please select a beneficiary account.");
+      return;
+    }
+    if (!formData.amount || Number(formData.amount) <= 0) {
+      toast.error("Please enter a valid transfer amount.");
+      return;
+    }
+
     if (
       !confirm(
-        `Are you sure you want to transfer KES ${formData.amount} to the selected account?`,
+        `Are you sure you want to transfer KES ${Number(formData.amount).toLocaleString()} to the selected beneficiary?`
       )
-    )
+    ) {
       return;
+    }
 
     setIsSubmitting(true);
     try {
       await initiateTransfer(
         Number(formData.amount),
         formData.destination_account,
-        formData.description,
+        formData.description
       );
-      alert("Transfer initiated successfully!");
+      toast.success("Transfer initiated successfully! 🚀");
       setFormData({ ...formData, amount: "" });
-      fetchData(); // Refresh history
+      fetchData();
     } catch (error: any) {
-      // Error handling matches api_data throw
-      alert(
-        "Transfer failed: " + (error.response?.data?.error || error.message),
+      toast.error(
+        "Transfer failed: " + (error.response?.data?.error || error.message)
       );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "text-green-700 bg-green-50 border-green-100";
-      case "Pending":
-        return "text-yellow-700 bg-yellow-50 border-yellow-100";
-      case "Failed":
-        return "text-red-700 bg-red-50 border-red-100";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-100";
+  const handleExportCSV = () => {
+    if (history.length === 0) {
+      toast.error("No transaction data to export.");
+      return;
     }
+    const dataToExport = history.map((tx) => ({
+      ID: tx.id,
+      Date: format(new Date(tx.created_at), "yyyy-MM-dd HH:mm:ss"),
+      Beneficiary: tx.destination_account_details?.account_name || "N/A",
+      Bank: tx.destination_account_details?.bank_name || "N/A",
+      AccountNo: tx.destination_account_details?.account_number || "N/A",
+      Amount_KES: Number(tx.amount),
+      Reference: tx.transaction_reference || "PENDING",
+      Status: tx.status,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transfers");
+    XLSX.writeFile(workbook, `JMC_Transfers_${format(new Date(), "yyyyMMdd")}.xlsx`);
+    toast.success("Exported transfer history to Excel!");
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-secondary-dark tracking-tight">
-          Fund Transfers
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Move funds securely from JMC Donation Account to approved
-          beneficiaries.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Transfer Form Section */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl shadow-sm border border-secondary/20 overflow-hidden relative">
-            {/* Decorative Header */}
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-primary-bronze" />
-
-            <div className="p-8">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 bg-primary/10 rounded-xl text-primary">
-                  <Send className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Initiate Transfer
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Safe & Secure B2B Payment
-                  </p>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Source Account (Fixed) */}
-                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 flex items-center gap-4 opacity-75 grayscale-[0.5]">
-                  <div className="p-3 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <Wallet className="w-6 h-6 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-                      Source Account
-                    </p>
-                    <p className="font-bold text-gray-900 text-lg">
-                      JMC Paybill
-                    </p>
-                    <p className="text-sm text-gray-500 font-mono">150770</p>
-                  </div>
-                </div>
-
-                {/* Arrow Indicator */}
-                <div className="flex justify-center -my-4 relative z-10">
-                  <div className="bg-white p-2 rounded-full shadow border border-gray-100 text-primary">
-                    <ArrowRight className="w-5 h-5 transform rotate-90" />
-                  </div>
-                </div>
-
-                {/* Destination & Details */}
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Beneficiary
-                    </label>
-                    <div className="relative">
-                      <select
-                        required
-                        value={formData.destination_account}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            destination_account: e.target.value,
-                          })
-                        }
-                        className="w-full pl-5 pr-10 py-4 bg-white border border-gray-200 rounded-xl text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none transition-all shadow-sm"
-                      >
-                        <option value="">Choose an account...</option>
-                        {accounts.map((acc) => (
-                          <option key={acc.id} value={acc.id}>
-                            {acc.account_name} — {acc.bank_name} (
-                            {acc.account_number})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                        <ArrowRightLeft className="w-5 h-5 opacity-50" />
-                      </div>
-                    </div>
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => router.push("/accounts/create")}
-                        className="text-sm text-primary font-medium hover:underline"
-                      >
-                        + Add New Beneficiary
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Amount (KES)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">
-                        KES
-                      </span>
-                      <input
-                        type="number"
-                        required
-                        min="1"
-                        value={formData.amount}
-                        onChange={(e) =>
-                          setFormData({ ...formData, amount: e.target.value })
-                        }
-                        placeholder="0.00"
-                        className="w-full pl-16 pr-5 py-4 bg-white border border-gray-200 rounded-xl text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all shadow-sm placeholder:text-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description / Remarks
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    disabled={
-                      isSubmitting ||
-                      !formData.destination_account ||
-                      !formData.amount
-                    }
-                    className="w-full py-4 bg-gradient-to-r from-primary to-primary-bronze text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-3"
-                  >
-                    {isSubmitting
-                      ? "Processing Transaction..."
-                      : "Confirm Transfer"}
-                    {!isSubmitting && <ArrowRight className="w-6 h-6" />}
-                  </button>
-                  <p className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center gap-1">
-                    <CheckCircle className="w-3 h-3" /> Secure 256-bit encrypted
-                    transaction
-                  </p>
-                </div>
-              </form>
-            </div>
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1512] to-[#2d2520] flex items-center justify-center shadow-md">
+            <ArrowRightLeft className="w-5 h-5 text-[#c99335]" />
+          </div>
+          <div>
+            <h1
+              className="text-2xl font-bold text-[#1a1512] tracking-tight"
+              style={{ fontFamily: "var(--font-cinzel), serif" }}
+            >
+              Internal Fund Transfers
+            </h1>
+            <p className="text-sm text-gray-500 font-medium mt-0.5">
+              Secure B2B payout channels from JMC Central Paybill to approved beneficiaries.
+            </p>
           </div>
         </div>
 
-        {/* Side Panel / Summary / Stats could go here later */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-primary-bronze/5 rounded-3xl p-6 border border-primary/10">
-            <h3 className="text-primary-bronze font-bold mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5" /> Recent Activity
-            </h3>
-            <div className="space-y-4">
-              {isLoading ? (
-                <p className="text-sm text-gray-500">Loading...</p>
-              ) : (
-                history.slice(0, 5).map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="flex gap-3 items-start pb-4 border-b border-primary/5 last:border-0 last:pb-0"
-                  >
-                    <div
-                      className={`p-2 rounded-full mt-0.5 shrink-0 ${tx.status === "Completed" ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500"}`}
-                    >
-                      {tx.status === "Completed" ? (
-                        <CheckCircle className="w-3 h-3" />
-                      ) : (
-                        <Clock className="w-3 h-3" />
-                      )}
+        <button
+          onClick={handleExportCSV}
+          className="btn-secondary flex-shrink-0"
+        >
+          <Download className="w-4 h-4" />
+          Export History
+        </button>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Transfer Form Card */}
+        <div className="lg:col-span-2">
+          <div className="form-section">
+            {/* Header */}
+            <div className="form-section-header">
+              <div className="w-8 h-8 rounded-lg bg-[#c99335]/20 border border-[#c99335]/40 flex items-center justify-center">
+                <Send className="w-4 h-4 text-[#c99335]" />
+              </div>
+              <div>
+                <h3
+                  className="font-bold text-sm tracking-wide"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
+                  Initiate Transfer
+                </h3>
+                <p className="text-[11px] text-gray-400">Safe &amp; Encrypted B2B Channel</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="form-section-body space-y-6">
+              {/* Source Account Card (Fixed) */}
+              <div className="p-5 bg-gradient-to-r from-[#1a1512] to-[#2d2520] text-white rounded-2xl border border-[#2d2520] shadow-md relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#c99335]/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-3.5">
+                    <div className="p-3 bg-white/10 rounded-xl border border-white/10">
+                      <Wallet className="w-5 h-5 text-[#c99335]" />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-900 line-clamp-1">
-                        {tx.destination_account_details?.account_name}
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                        Source Account
+                      </span>
+                      <h4 className="font-bold text-base text-white">JMC Central Paybill</h4>
+                      <p className="text-xs text-[#c99335] font-mono mt-0.5">Paybill: 150770</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    <Lock className="w-3 h-3 text-emerald-400" /> Verified Channel
+                  </div>
+                </div>
+              </div>
+
+              {/* Arrow Indicator */}
+              <div className="flex justify-center -my-2">
+                <div className="w-8 h-8 rounded-full bg-[#1a1512] text-[#c99335] border border-[#2d2520] flex items-center justify-center shadow-md">
+                  <ArrowRight className="w-4 h-4 rotate-90" />
+                </div>
+              </div>
+
+              {/* Destination Account Selection */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="form-label mb-0">
+                    Select Beneficiary Account <span className="text-rose-500 font-bold">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/accounts/create")}
+                    className="text-xs font-bold text-[#c99335] hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> New Beneficiary
+                  </button>
+                </div>
+                <div className="relative">
+                  <select
+                    required
+                    value={formData.destination_account}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        destination_account: e.target.value,
+                      })
+                    }
+                    className="form-input appearance-none pr-10 cursor-pointer text-sm"
+                  >
+                    <option value="">Choose an account...</option>
+                    {accounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.account_name} — {acc.bank_name} (
+                        {acc.paybill_number ? `Paybill: ${acc.paybill_number}` : `Acc: ${acc.account_number}`})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="form-label">
+                  Transfer Amount (KES) <span className="text-rose-500 font-bold">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">
+                    KES
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.amount}
+                    onChange={(e) =>
+                      setFormData({ ...formData, amount: e.target.value })
+                    }
+                    placeholder="0.00"
+                    className="form-input pl-14 text-lg font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="form-label">Description / Remarks</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      description: e.target.value,
+                    })
+                  }
+                  className="form-input"
+                  placeholder="Reason for transfer..."
+                />
+              </div>
+
+              {/* Submit CTA */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={
+                    isSubmitting ||
+                    !formData.destination_account ||
+                    !formData.amount
+                  }
+                  className="w-full btn-primary justify-center py-3.5 text-base shadow-lg shadow-[#006838]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Processing Transaction...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Confirm &amp; Dispatch Funds
+                    </>
+                  )}
+                </button>
+                <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1.5 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  Protected by 256-bit encrypted Daraja B2B gateway
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Side Panel: Recent Activity */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="form-section">
+            <div className="form-section-header">
+              <div className="w-8 h-8 rounded-lg bg-[#c99335]/20 border border-[#c99335]/40 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-[#c99335]" />
+              </div>
+              <div>
+                <h3
+                  className="font-bold text-sm tracking-wide"
+                  style={{ fontFamily: "var(--font-cinzel), serif" }}
+                >
+                  Recent Activity
+                </h3>
+                <p className="text-[11px] text-gray-400">Latest dispatched transfers</p>
+              </div>
+            </div>
+
+            <div className="p-5 bg-white divide-y divide-gray-100">
+              {isLoading ? (
+                <div className="py-8 text-center text-xs text-gray-400 font-medium">Loading history...</div>
+              ) : history.length > 0 ? (
+                history.slice(0, 5).map((tx) => (
+                  <div key={tx.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-gray-900 line-clamp-1">
+                        {tx.destination_account_details?.account_name || "Beneficiary"}
                       </p>
-                      <p className="text-xs text-secondary-dark/60 font-mono">
+                      <p className="text-[11px] text-gray-500 font-mono mt-0.5">
                         KES {Number(tx.amount).toLocaleString()}
                       </p>
                       <p className="text-[10px] text-gray-400 mt-0.5">
                         {format(new Date(tx.created_at), "MMM dd, HH:mm")}
                       </p>
                     </div>
+                    <div>
+                      {tx.status === "Completed" ? (
+                        <span className="badge-emerald text-[10px]">Completed</span>
+                      ) : tx.status === "Pending" ? (
+                        <span className="badge-gold text-[10px]">Pending</span>
+                      ) : (
+                        <span className="badge-rose text-[10px]">Failed</span>
+                      )}
+                    </div>
                   </div>
                 ))
-              )}
-              {history.length === 0 && !isLoading && (
-                <p className="text-sm text-gray-500 italic">
-                  No recent transfers.
-                </p>
+              ) : (
+                <div className="py-8 text-center text-xs text-gray-400">No recent transfers.</div>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Full History Table */}
-      <div className="bg-white rounded-3xl border border-secondary/20 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">
-              Transaction History
-            </h3>
-            <p className="text-sm text-gray-500">
-              Full log of all B2B transfers
-            </p>
-          </div>
-          <button className="px-5 py-2.5 bg-gray-50 text-gray-700 font-medium rounded-xl hover:bg-gray-100 transition-colors flex items-center gap-2 text-sm border border-gray-200">
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
+      {/* Full Transaction History Table */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <h3
+            className="font-bold text-gray-900 text-base flex items-center gap-2"
+            style={{ fontFamily: "var(--font-cinzel), serif" }}
+          >
+            <Clock className="w-4 h-4 text-emerald-600" />
+            Transaction History Log
+          </h3>
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+            {history.length} records
+          </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="px-8 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50 first:pl-8">
-                  Date
-                </th>
-                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
-                  Beneficiary
-                </th>
-                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
-                  Amount
-                </th>
-                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
-                  Reference
-                </th>
-                <th className="px-6 py-5 text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gray-50/50">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {isLoading ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-8 py-12 text-center text-gray-500"
-                  >
-                    Loading history...
-                  </td>
+        {isLoading ? (
+          <div className="p-12 text-center text-gray-400 font-medium">Loading history...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50/80 text-[10px] uppercase tracking-widest font-bold text-gray-400">
+                  <th className="px-6 py-4 border-b border-gray-100">Date &amp; Time</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Beneficiary</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Amount</th>
+                  <th className="px-6 py-4 border-b border-gray-100">Reference</th>
+                  <th className="px-6 py-4 border-b border-gray-100 text-center">Status</th>
                 </tr>
-              ) : history.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-8 py-12 text-center text-gray-400 italic"
-                  >
-                    No transactions found
-                  </td>
-                </tr>
-              ) : (
-                history.map((tx) => (
-                  <tr
-                    key={tx.id}
-                    className="hover:bg-amber-50/30 transition-colors group"
-                  >
-                    <td className="px-8 py-6 text-gray-600 text-sm whitespace-nowrap">
-                      <div className="font-medium text-gray-900">
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {history.map((tx) => (
+                  <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <p className="text-xs font-semibold text-gray-900">
                         {format(new Date(tx.created_at), "MMM dd, yyyy")}
-                      </div>
-                      <div className="text-xs text-gray-400">
+                      </p>
+                      <p className="text-[10px] text-gray-400 font-mono">
                         {format(new Date(tx.created_at), "HH:mm aaa")}
-                      </div>
+                      </p>
                     </td>
-                    <td className="px-6 py-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-100 rounded-lg text-gray-500">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2 bg-gray-100 rounded-lg text-gray-500 flex-shrink-0">
                           {tx.destination_account_details?.paybill_number ? (
-                            <CreditCard className="w-4 h-4" />
+                            <CreditCard className="w-4 h-4 text-[#c99335]" />
                           ) : (
-                            <Building className="w-4 h-4" />
+                            <Building className="w-4 h-4 text-[#006838]" />
                           )}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
+                          <p className="text-sm font-bold text-gray-900">
                             {tx.destination_account_details?.account_name}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {tx.destination_account_details?.bank_name} •{" "}
-                            {tx.destination_account_details?.account_number}
+                            {tx.destination_account_details?.bank_name} &bull;{" "}
+                            <span className="font-mono">{tx.destination_account_details?.account_number}</span>
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-6">
-                      <span className="font-mono font-bold text-gray-900 text-lg">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-mono font-bold text-[#1a1512] text-sm">
                         KES {Number(tx.amount).toLocaleString()}
                       </span>
                     </td>
-                    <td className="px-6 py-6">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-50 text-gray-600 font-mono text-xs border border-gray-200">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 font-mono text-xs border border-gray-200">
                         {tx.transaction_reference || "PENDING"}
                       </span>
                     </td>
-                    <td className="px-6 py-6">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${getStatusColor(tx.status)}`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full bg-current`}
-                        />
-                        {tx.status}
-                      </span>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      {tx.status === "Completed" ? (
+                        <span className="badge-emerald">Completed</span>
+                      ) : tx.status === "Pending" ? (
+                        <span className="badge-gold">Pending</span>
+                      ) : (
+                        <span className="badge-rose">Failed</span>
+                      )}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+                {history.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 font-medium">
+                      No transfer records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
