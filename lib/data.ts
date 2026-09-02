@@ -28,6 +28,7 @@ export interface CreateDriveData {
     passkey?: string;
     initiator_name?: string;
     security_credential?: string;
+    is_featured?: boolean;
 }
 
 export interface DonationDrive {
