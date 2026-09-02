@@ -94,12 +94,12 @@ export const getDonationDrives = async (): Promise<DonationDrive[]> => {
         let url: string | null = 'api/v1/donations/';
         
         while (url) {
-            const response = await api.get(url);
-            results = [...results, ...response.data.results];
+            const res: any = await api.get(url);
+            results = [...results, ...res.data.results];
             
             // Use HTTPS to avoid mixed content errors if backend returns HTTP
-            if (response.data.next) {
-                url = response.data.next.replace(/^http:\/\//i, 'https://');
+            if (res.data.next) {
+                url = res.data.next.replace(/^http:\/\//i, 'https://');
             } else {
                 url = null;
             }
@@ -181,12 +181,12 @@ export const getTransactions = async () => {
         let url: string | null = 'api/v1/transactions/';
         
         while (url) {
-            const response = await api.get(url);
-            results = [...results, ...response.data.results];
+            const res: any = await api.get(url);
+            results = [...results, ...res.data.results];
             
             // Use HTTPS to avoid mixed content errors if backend returns HTTP
-            if (response.data.next) {
-                url = response.data.next.replace(/^http:\/\//i, 'https://');
+            if (res.data.next) {
+                url = res.data.next.replace(/^http:\/\//i, 'https://');
             } else {
                 url = null;
             }
