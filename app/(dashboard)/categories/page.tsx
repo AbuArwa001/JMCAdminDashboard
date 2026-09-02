@@ -115,28 +115,33 @@ export default function CategoriesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
       >
-        <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-            Management Categories
-          </h1>
-          <p className="text-gray-500 mt-1 font-medium">
-            Overview and performance of your donation categories.
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1512] to-[#2d2520] flex items-center justify-center shadow-md">
+            <ListIcon className="w-5 h-5 text-sky-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-[#1a1512] tracking-tight" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+              Donation Categories
+            </h1>
+            <p className="text-sm text-gray-500 font-medium mt-0.5">
+              Overview and performance of your donation categories.
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-semibold shadow-sm hover:bg-gray-50 transition-all text-sm"
+            className="btn-secondary"
           >
-            <Download className="w-4.5 h-4.5" />
+            <Download className="w-4 h-4" />
             Export Data
           </button>
           <Link
             href="/categories/create"
-            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold shadow-md shadow-primary/20 hover:bg-primary-bronze transition-all text-sm"
+            className="btn-primary"
           >
-            <Plus className="w-4.5 h-4.5" />
+            <Plus className="w-4 h-4" />
             Add Category
           </Link>
         </div>
@@ -250,13 +255,13 @@ export default function CategoriesPage() {
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-grow group">
-              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
+              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#006838] transition-colors" />
               <input
                 type="text"
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-11 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-full md:w-80 transition-all font-medium"
+                className="pl-11 pr-4 py-2.5 bg-gray-50 border-0 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#006838]/20 w-full md:w-80 transition-all font-medium"
               />
             </div>
             <button className="p-2.5 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
