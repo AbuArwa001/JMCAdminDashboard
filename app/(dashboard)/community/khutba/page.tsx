@@ -306,11 +306,11 @@ export default function KhutbaPage() {
 
                     {/* Topic Summary — Rich Text */}
                     <div>
-                      <label className="form-label">Topic Summary</label>
+                      <label className="form-label">Topic Summary (Markdown)</label>
                       <RichTextEditor
                         value={form.topic_summary}
                         onChange={(val) => setForm({ ...form, topic_summary: val })}
-                        placeholder="Describe the khutba topic, key Quranic verses, hadith references, and main points..."
+                        placeholder="Describe the khutba topic, key Quranic verses, hadith references, and main points using Markdown..."
                         minHeight={220}
                       />
                     </div>

@@ -164,60 +164,64 @@ export default function EventsPage() {
   if (loading) return <div className="p-6">Loading Events...</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 bg-white/40 backdrop-blur-xl p-6 rounded-2xl border border-white/60 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Events</h1>
-          <p className="text-gray-500">Manage mosque events, lectures, and gallery.</p>
+          <h1 className="text-3xl font-black bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent mb-1">Mosque Events</h1>
+          <p className="text-gray-500 font-medium">Manage and broadcast mosque events to the community.</p>
         </div>
-        <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="px-4 py-2 bg-amber-600 text-white rounded-md font-medium flex items-center gap-2 hover:bg-amber-700">
-          <Plus className="w-4 h-4"/> {showForm ? "Cancel" : "Add Event"}
+        <button 
+          onClick={() => { resetForm(); setShowForm(!showForm); }} 
+          className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300"
+        >
+          <Plus className="w-5 h-5"/> {showForm ? "Cancel" : "Create Event"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={saveEvent} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 space-y-6">
-          <h2 className="text-xl font-semibold mb-4">{form.id ? "Edit Event" : "New Event"}</h2>
+        <form onSubmit={saveEvent} className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">{form.id ? "Edit Event Details" : "New Event Details"}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Event Title</label>
-              <input required type="text" className="w-full p-2 border rounded" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Event Title</label>
+              <input required type="text" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Weekly Tafseer" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <select className="w-full p-2 border rounded" value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category</label>
+              <select className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
                 <option value="">Select Category...</option>
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
-              <input required type="date" className="w-full p-2 border rounded" value={form.event_date} onChange={e => setForm({...form, event_date: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date</label>
+              <input required type="date" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.event_date} onChange={e => setForm({...form, event_date: e.target.value})} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Start Time</label>
-              <input required type="time" className="w-full p-2 border rounded" value={form.start_time} onChange={e => setForm({...form, start_time: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Start Time</label>
+              <input required type="time" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.start_time} onChange={e => setForm({...form, start_time: e.target.value})} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">End Time (Optional)</label>
-              <input type="time" className="w-full p-2 border rounded" value={form.end_time || ""} onChange={e => setForm({...form, end_time: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">End Time (Optional)</label>
+              <input type="time" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.end_time || ""} onChange={e => setForm({...form, end_time: e.target.value})} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Venue Name</label>
-              <input required type="text" className="w-full p-2 border rounded" value={form.venue_name} onChange={e => setForm({...form, venue_name: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Venue Name</label>
+              <input required type="text" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.venue_name} onChange={e => setForm({...form, venue_name: e.target.value})} placeholder="e.g. Main Prayer Hall" />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Guest Name (Optional)</label>
-              <input type="text" className="w-full p-2 border rounded" value={form.guest_name || ""} onChange={e => setForm({...form, guest_name: e.target.value})} />
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Guest Speaker (Optional)</label>
+              <input type="text" className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all" value={form.guest_name || ""} onChange={e => setForm({...form, guest_name: e.target.value})} placeholder="e.g. Mufti Menk" />
             </div>
-            <div className="md:col-span-2 space-y-1">
+            <div className="md:col-span-2 space-y-2">
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium">Story / Rich Details</label>
+                <label className="block text-sm font-semibold text-gray-700">Story / Rich Details (Markdown)</label>
                 <button 
                   type="button" 
                   onClick={handleGenerateAI}
                   disabled={isGeneratingAI}
-                  className="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md flex items-center gap-1.5 font-medium transition-colors"
+                  className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg flex items-center gap-1.5 font-bold transition-colors border border-amber-200"
                 >
                   {isGeneratingAI ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                   {isGeneratingAI ? "Generating..." : "Generate with AI"}
@@ -226,25 +230,25 @@ export default function EventsPage() {
               <RichTextEditor 
                 value={form.story || ""} 
                 onChange={content => setForm({...form, story: content})} 
-                placeholder="Enter event details or generate with AI..." 
+                placeholder="Write your event description using Markdown here..." 
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Cover Image</label>
-              <input type="file" accept="image/*" className="w-full p-2 border rounded" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
+              <input type="file" accept="image/*" className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" onChange={e => setCoverImage(e.target.files?.[0] || null)} />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Guest Photo</label>
-              <input type="file" accept="image/*" className="w-full p-2 border rounded" onChange={e => setGuestPhoto(e.target.files?.[0] || null)} />
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Guest Photo (Optional)</label>
+              <input type="file" accept="image/*" className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onChange={e => setGuestPhoto(e.target.files?.[0] || null)} />
             </div>
-            <div className="md:col-span-2 flex items-center pt-2">
-              <input type="checkbox" id="published" className="h-4 w-4 text-amber-600 rounded" checked={form.published} onChange={e => setForm({...form, published: e.target.checked})} />
-              <label htmlFor="published" className="ml-2 block text-sm">Published</label>
+            <div className="md:col-span-2 flex items-center p-4 bg-green-50/50 rounded-xl border border-green-100">
+              <input type="checkbox" id="published" className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded" checked={form.published} onChange={e => setForm({...form, published: e.target.checked})} />
+              <label htmlFor="published" className="ml-3 block text-sm font-semibold text-green-800">Publish Immediately</label>
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
-            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-gray-500 font-medium">Cancel</button>
-            <button type="submit" className="px-6 py-2 bg-gray-900 text-white rounded font-medium hover:bg-gray-800">Save Event</button>
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+            <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
+            <button type="submit" className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 hover:shadow-lg transition-all">Save Event</button>
           </div>
         </form>
       )}
@@ -289,42 +293,63 @@ export default function EventsPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Venue</th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {events.map((ev) => (
-              <tr key={ev.id}>
-                <td className="px-6 py-4">
-                  <div className="font-bold text-gray-900">{ev.title}</div>
-                  <div className="text-sm text-gray-500">{ev.category_name || 'General'} • Guest: {ev.guest_name || 'N/A'}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm font-medium">{format(new Date(ev.event_date), "MMM d, yyyy")} at {ev.start_time}</div>
-                  <div className="text-sm text-gray-500">{ev.venue_name}</div>
-                </td>
-                <td className="px-6 py-4 text-center">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ev.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {ev.published ? 'Published' : 'Draft'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right space-x-3 text-sm">
-                  <button onClick={() => setGalleryEvent(ev)} className="text-indigo-600 hover:text-indigo-900" title="Gallery"><ImageIcon className="w-4 h-4 inline"/></button>
-                  <button onClick={() => notifyEvent(ev.id)} className="text-amber-600 hover:text-amber-900" title="Send Push Notification"><Bell className="w-4 h-4 inline"/></button>
-                  <button onClick={() => { setForm({ ...ev, category: ev.category || "" }); setShowForm(true); }} className="text-gray-400 hover:text-gray-900"><Edit className="w-4 h-4 inline"/></button>
-                  <button onClick={() => deleteEvent(ev.id)} className="text-gray-400 hover:text-red-600"><Trash className="w-4 h-4 inline"/></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {events.map((ev) => (
+          <div key={ev.id} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col relative">
+            <div className="h-48 bg-gray-100 relative">
+              {ev.cover_image ? (
+                <Image src={ev.cover_image} alt={ev.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
+                  <ImageIcon className="w-10 h-10 text-amber-300" />
+                </div>
+              )}
+              <div className="absolute top-3 right-3 flex gap-2">
+                <span className={`px-3 py-1 text-xs font-bold rounded-full backdrop-blur-md shadow-sm ${ev.published ? 'bg-green-500/90 text-white' : 'bg-white/90 text-gray-800'}`}>
+                  {ev.published ? 'Live' : 'Draft'}
+                </span>
+              </div>
+            </div>
+            <div className="p-6 flex-1 flex flex-col">
+              <div className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">{ev.category_name || 'General Event'}</div>
+              <h3 className="text-xl font-bold text-gray-900 leading-tight mb-3 group-hover:text-amber-600 transition-colors">{ev.title}</h3>
+              
+              <div className="space-y-2 mt-auto">
+                <div className="flex items-center text-sm text-gray-600 font-medium">
+                  <div className="w-5 flex justify-center mr-2 opacity-50">📅</div>
+                  {format(new Date(ev.event_date), "MMMM d, yyyy")} @ {ev.start_time}
+                </div>
+                <div className="flex items-center text-sm text-gray-600 font-medium">
+                  <div className="w-5 flex justify-center mr-2 opacity-50">📍</div>
+                  {ev.venue_name}
+                </div>
+                {ev.guest_name && (
+                  <div className="flex items-center text-sm text-gray-600 font-medium">
+                    <div className="w-5 flex justify-center mr-2 opacity-50">🎙️</div>
+                    {ev.guest_name}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center gap-2">
+              <button onClick={() => setGalleryEvent(ev)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-indigo-600 hover:bg-indigo-50 transition-colors">
+                <ImageIcon className="w-4 h-4" /> Gallery
+              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => notifyEvent(ev.id)} className="p-2 rounded-lg text-amber-600 hover:bg-amber-50 transition-colors" title="Send Push Notification">
+                  <Bell className="w-4 h-4" />
+                </button>
+                <button onClick={() => { setForm({ ...ev, category: ev.category || "" }); setShowForm(true); window.scrollTo({top: 0, behavior: 'smooth'}); }} className="p-2 rounded-lg text-gray-600 hover:bg-gray-200 transition-colors" title="Edit">
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => deleteEvent(ev.id)} className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors" title="Delete">
+                  <Trash className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
