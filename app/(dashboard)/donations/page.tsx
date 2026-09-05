@@ -6,7 +6,7 @@ import { Download, Filter, Search } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
 
 import { toast } from "sonner";
-import { getTransactions, getCategories } from "@/lib/api_data";
+import { getTransactions, getCategories, getDonationDrives } from "@/lib/api_data";
 import { Donation, Transaction, CategoryData } from "@/lib/data";
 import { useSearchParams } from "next/navigation";
 
@@ -25,13 +25,13 @@ export default function DonationsPage() {
   }, [searchParams]);
 
   const filteredDonations = donations.filter((donation) => {
+    const term = searchTerm.toLowerCase();
     const matchesSearch =
-      donation.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      donation.user_name?.toLowerCase().includes(term) ||
+      donation.account_name?.toLowerCase().includes(term) ||
       donation.amount.toString().includes(searchTerm) ||
-      donation.payment_method
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      donation.category?.toLowerCase().includes(searchTerm.toLowerCase());
+      donation.payment_method?.toLowerCase().includes(term) ||
+      donation.category?.toLowerCase().includes(term);
 
     const matchesStatus =
       statusFilter === "All" || donation.payment_status === statusFilter;
@@ -40,8 +40,8 @@ export default function DonationsPage() {
   });
 
   const exportData = filteredDonations.map((item) => ({
-    "Full Name": item.user_name,
-    donation_title: item.donation?.title,
+    "Full Name": item.user_name || item.account_name || "Anonymous Donor",
+    donation_title: item.donation?.title || "Donation Drive",
     amount: item.amount,
     donated_at: item.donated_at,
     payment_method: item.payment_method,
@@ -52,26 +52,49 @@ export default function DonationsPage() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        // 1. Fetch Transactions AND Categories in parallel
-        // 1. Fetch Transactions AND Categories in parallel
-        const [transactions, categoriesData] = await Promise.all([
-          getTransactions(),
-          getCategories(),
+        const [transactions, categoriesData, drivesData] = await Promise.all([
+          getTransactions().catch(() => []),
+          getCategories().catch(() => []),
+          getDonationDrives().catch(() => []),
         ]);
 
-        // 2. Create a lookup map: { "id": "Name" }
-        const categoryMap = categoriesData.reduce((acc: any, cat: any) => {
+        const categoryMap = (categoriesData || []).reduce((acc: any, cat: any) => {
           acc[cat.id] = cat.category_name;
           return acc;
         }, {});
 
-        // 3. Map transactions with category names in memory (No more extra API calls!)
-        const mappedDonations = transactions.map(
-          (t: any): Transaction => ({
-            ...t,
-            category: categoryMap[t.donation?.category] || "General",
-            user_name: t.user?.full_name || "Anonymous",
-          }),
+        const driveMap = (drivesData || []).reduce((acc: any, drive: any) => {
+          acc[drive.id] = drive;
+          return acc;
+        }, {});
+
+        const mappedDonations = (transactions || []).map(
+          (t: any): Transaction => {
+            const drive =
+              t.donation && typeof t.donation === "object"
+                ? t.donation
+                : driveMap[t.donation_id || t.donation];
+            const catId = drive?.category_id || drive?.category;
+            const categoryName =
+              (catId && categoryMap[catId]) ||
+              drive?.categoryName ||
+              drive?.category_name ||
+              (typeof t.category === "string" && t.category ? t.category : "General");
+            const rawName =
+              t.user?.full_name || t.user_name || t.account_name;
+            const donorName =
+              rawName && rawName.trim().toLowerCase() !== "anonymous"
+                ? rawName.trim()
+                : (t.account_name || "Anonymous Donor");
+
+            return {
+              ...t,
+              donation: drive || t.donation,
+              category: categoryName,
+              user_name: donorName,
+              account_name: t.account_name || donorName,
+            };
+          },
         );
 
         setDonations(mappedDonations);

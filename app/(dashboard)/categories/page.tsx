@@ -22,6 +22,8 @@ import {
   getAnalyticsCategories,
   getCategories,
   deleteCategory,
+  getTransactions,
+  getDonationDrives,
 } from "@/lib/api_data";
 import { CategoryData } from "@/lib/data";
 
@@ -36,12 +38,12 @@ export default function CategoriesPage() {
 
   const chartData = stats.map((category) => {
     let totalAmount = 0;
-    if (category.total_amount !== undefined) {
-      totalAmount = category.total_amount;
+    if (category.total_amount !== undefined && category.total_amount !== null) {
+      totalAmount = Number(category.total_amount) || 0;
     } else if (Array.isArray(category.donations)) {
       totalAmount = category.donations.reduce(
         (sum: any, donation: { collected_amount: any }) =>
-          sum + (donation.collected_amount || 0),
+          sum + (Number(donation.collected_amount) || 0),
         0,
       );
     }
@@ -69,12 +71,41 @@ export default function CategoriesPage() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const [statsRes, categoriesRes] = await Promise.all([
-        getAnalyticsCategories(),
-        getCategories(),
+      const [statsRes, categoriesRes, allTransactions, drivesData] = await Promise.all([
+        getAnalyticsCategories().catch(() => []),
+        getCategories().catch(() => []),
+        getTransactions().catch(() => []),
+        getDonationDrives().catch(() => []),
       ]);
 
-      setStats(Array.isArray(statsRes) ? statsRes : []);
+      const driveMap = (drivesData || []).reduce((acc: any, drive: any) => {
+        acc[drive.id] = drive;
+        return acc;
+      }, {});
+
+      let resolvedStats = Array.isArray(statsRes) ? statsRes : [];
+      if (!resolvedStats.some((s: any) => (Number(s.total_amount) || 0) > 0) && Array.isArray(allTransactions)) {
+        const categoryTotals: Record<string, number> = {};
+        allTransactions.forEach((t: any) => {
+          if (t.payment_status === "Completed") {
+            const drive =
+              t.donation && typeof t.donation === "object"
+                ? t.donation
+                : driveMap[t.donation_id || t.donation];
+            const catId = drive?.category_id || drive?.category;
+            if (catId) {
+              categoryTotals[catId] =
+                (categoryTotals[catId] || 0) + (Number(t.amount) || 0);
+            }
+          }
+        });
+        resolvedStats = (categoriesRes || []).map((cat: any) => ({
+          ...cat,
+          total_amount: categoryTotals[cat.id] || 0,
+        }));
+      }
+
+      setStats(resolvedStats);
       setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
     } catch (error) {
       toast.error("Failed to load categories");

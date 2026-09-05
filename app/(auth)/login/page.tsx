@@ -76,6 +76,8 @@ export default function LoginPage() {
         userFriendlyError = "No account found with this email";
       } else if (errorCode === "auth/wrong-password") {
         userFriendlyError = "Incorrect password";
+      } else if (errorCode === "auth/invalid-credential") {
+        userFriendlyError = "Invalid email or password";
       } else if (errorCode === "auth/invalid-email") {
         userFriendlyError = "Invalid email format";
       } else if (errorCode === "auth/too-many-requests") {

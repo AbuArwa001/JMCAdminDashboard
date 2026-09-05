@@ -62,13 +62,14 @@ export interface Transaction {
     id: string;
     user?: User;
     amount: number;
-    donation: DonationDrive;
+    donation?: DonationDrive;
+    donation_id?: string;
     category?: string;
     payment_method: string;
     payment_status?: string;
     status: string;
-    donated_at?: Date;
-    date: string;
+    donated_at?: Date | string;
+    date?: string;
     user_name?: string;
     account_name?: string;
     account_number?: string;

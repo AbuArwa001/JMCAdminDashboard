@@ -11,7 +11,8 @@ import {
 import { CategoryData } from "@/lib/data";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { PieChart as PieIcon, Sparkles } from "lucide-react";
+import { PieChart as PieIcon } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface CategoryPieChartProps {
   data: CategoryData[];
@@ -31,20 +32,28 @@ export default function CategoryPieChart({
   data,
   isLoading,
 }: CategoryPieChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const chartData = (Array.isArray(data) ? data : [])
     .map((category, idx) => {
       let totalAmount = 0;
-      if (category.total_amount !== undefined) {
-        totalAmount = category.total_amount;
+      if (category.total_amount !== undefined && category.total_amount !== null) {
+        totalAmount = Number(category.total_amount) || 0;
       } else if (Array.isArray(category.donations)) {
         totalAmount = category.donations.reduce(
-          (sum, donation) => sum + (donation.collected_amount || 0),
+          (sum, donation) => sum + (Number(donation.collected_amount) || 0),
           0,
         );
       }
 
+      const name = category.category_name || (category as any).name || "Category";
+
       return {
-        name: category.category_name,
+        name,
         value: totalAmount,
         color: category.color || LUXURY_PALETTE[idx % LUXURY_PALETTE.length],
       };
@@ -79,7 +88,7 @@ export default function CategoryPieChart({
         </div>
       </div>
 
-      {isLoading ? (
+      {isLoading || !isMounted ? (
         <div className="flex flex-col items-center justify-center h-[320px]">
           <Skeleton className="w-48 h-48 rounded-full" />
           <div className="mt-6 flex gap-4">
@@ -87,8 +96,18 @@ export default function CategoryPieChart({
             <Skeleton className="w-20 h-4 rounded-full" />
           </div>
         </div>
+      ) : chartData.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-[330px] text-center p-6">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-3">
+            <PieIcon className="w-7 h-7 text-amber-500/70" />
+          </div>
+          <p className="text-sm font-bold text-slate-800">No Category Data</p>
+          <p className="text-xs text-slate-400 mt-1 max-w-[240px] leading-relaxed">
+            No completed donations recorded under fund categories yet.
+          </p>
+        </div>
       ) : (
-        <div className="relative h-[330px] w-full">
+        <div className="relative h-[330px] w-full min-w-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

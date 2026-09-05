@@ -51,21 +51,26 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
     }, [drive]);
     useEffect(() => {
         const fetchTransactionsForDrive = async () => {
-            // fetching donations for the drive
-            const driveDonations = await getTransactionsByDonationDrive(id);
-            setDonations(driveDonations);
+            try {
+                // fetching donations for the drive
+                const driveDonations = await getTransactionsByDonationDrive(id);
+                setDonations(driveDonations || []);
+            } catch (err) {
+                console.error("Failed to fetch transactions for drive:", err);
+                setDonations([]);
+            }
         };
         fetchTransactionsForDrive();
 
     }, [id]);
-    const driveDonations: Donation[] = donations.map(d => ({
+    const driveDonations: Donation[] = (donations || []).map(d => ({
         id: d.id,
-        donorName: d.user?.full_name || "Anonymous",
+        donorName: d.user?.full_name || d.user_name || d.account_name || "Anonymous",
         amount: d.amount,
-        category: d.category || "General",
-        driveId: d.donation.id,
+        category: d.category || (category ? category.category_name : "General"),
+        driveId: d.donation?.id || d.donation_id || id,
         status: d.payment_status === "Completed" ? "Completed" : "Pending",
-        date: d.donated_at ? d.donated_at.toString() : d.date,
+        date: d.donated_at ? d.donated_at.toString() : (d.date || new Date().toISOString()),
         paymentMethod: d.payment_method === "M-Pesa" ? "M-Pesa" : "Cash",
     }));
     // console.log("Drive Donations:", driveDonations);

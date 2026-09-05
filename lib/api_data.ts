@@ -5,8 +5,11 @@ import { CategoriesResponse, CategoryData, CreateDriveData, DonationDrive, Analy
 
 export const getCategories = async (): Promise<CategoryData[]> => {
     try {
-        const response = await api.get<CategoriesResponse>('api/v1/categories/');
-        return response.data.results;
+        const response = await api.get<any>('api/v1/categories/');
+        if (Array.isArray(response.data)) {
+            return response.data;
+        }
+        return response.data?.results || [];
     } catch (error) {
         console.error('Error fetching categories:', error);
         return [];
@@ -92,13 +95,16 @@ export const getDonationDrives = async (): Promise<DonationDrive[]> => {
     try {
         let results: DonationDrive[] = [];
         let url: string | null = 'api/v1/donations/';
-        
+
         while (url) {
             const res: any = await api.get(url);
-            results = [...results, ...res.data.results];
-            
+            if (Array.isArray(res.data)) {
+                return res.data;
+            }
+            results = [...results, ...(res.data?.results || [])];
+
             // Use HTTPS to avoid mixed content errors if backend returns HTTP
-            if (res.data.next) {
+            if (res.data?.next) {
                 url = res.data.next.replace(/^http:\/\//i, 'https://');
             } else {
                 url = null;
@@ -169,7 +175,7 @@ export const deleteDonationDrive = async (driveId: string) => {
 export const getTransactionsByDonationDrive = async (driveId: string) => {
     try {
         const response = await api.get(`api/v1/transactions/?donation=${driveId}`);
-        return response.data.results;
+        return Array.isArray(response.data) ? response.data : (response.data?.results || []);
     } catch (error) {
         console.error('Error fetching transactions for donation drive:', error);
         throw error;
@@ -179,13 +185,16 @@ export const getTransactions = async () => {
     try {
         let results: any[] = [];
         let url: string | null = 'api/v1/transactions/';
-        
+
         while (url) {
             const res: any = await api.get(url);
-            results = [...results, ...res.data.results];
-            
+            if (Array.isArray(res.data)) {
+                return res.data;
+            }
+            results = [...results, ...(res.data?.results || [])];
+
             // Use HTTPS to avoid mixed content errors if backend returns HTTP
-            if (res.data.next) {
+            if (res.data?.next) {
                 url = res.data.next.replace(/^http:\/\//i, 'https://');
             } else {
                 url = null;
@@ -232,7 +241,7 @@ export const updateTransaction = async (transactionId: string, transactionData: 
 export const getRatings = async () => {
     try {
         const response = await api.get('api/v1/ratings/');
-        return response.data.results;
+        return Array.isArray(response.data) ? response.data : (response.data?.results || []);
     } catch (error) {
         console.error('Error fetching ratings:', error);
         return [];
@@ -270,7 +279,7 @@ export const initiateSTKPush = async (phone_number: string, amount: number, acco
 export const getBankAccounts = async (): Promise<BankAccount[]> => {
     try {
         const response = await api.get('api/v1/bank-accounts/');
-        return response.data.results;
+        return Array.isArray(response.data) ? response.data : (response.data?.results || []);
     } catch (error) {
         console.error('Error fetching bank accounts:', error);
         return [];
@@ -319,7 +328,7 @@ export const deleteBankAccount = async (id: string) => {
 export const getTransferHistory = async (): Promise<Transfer[]> => {
     try {
         const response = await api.get('api/v1/transfers/');
-        return response.data.results;
+        return Array.isArray(response.data) ? response.data : (response.data?.results || []);
     } catch (error) {
         console.error('Error fetching transfer history:', error);
         return [];
@@ -339,7 +348,7 @@ export const getUserById = async (userId: string) => {
 
 export const getMe = async () => {
     try {
-        const response = await api.get('auth/users/me/');
+        const response = await api.get('api/v1/users/me/');
         return response.data;
     } catch (error) {
         console.error('Error fetching current user:', error);
@@ -386,9 +395,7 @@ export const deleteDonationImage = async (imageId: string) => {
 
 export const getAnalyticsCategories = async (): Promise<CategoryData[]> => {
     try {
-        console.log("Calling getAnalyticsCategories...");
-        const response = await api.get('api/v1/analytics/categories/');
-        console.log("getAnalyticsCategories response:", response.status, Array.isArray(response.data) ? "Array" : typeof response.data);
+        const response = await api.get('api/v1/analytics/categories');
         return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error('Error fetching analytics categories:', error);
@@ -398,7 +405,7 @@ export const getAnalyticsCategories = async (): Promise<CategoryData[]> => {
 
 export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
     try {
-        const response = await api.get<AnalyticsSummary>('api/v1/analytics/summary/');
+        const response = await api.get<AnalyticsSummary>('api/v1/analytics/summary');
         return response.data;
     } catch (error) {
         console.error('Error fetching analytics summary:', error);
@@ -408,7 +415,7 @@ export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
 
 export const getDonationTrends = async (period: string = 'week'): Promise<DonationTrend[]> => {
     try {
-        const response = await api.get<DonationTrend[]>('api/v1/analytics/trends/', {
+        const response = await api.get<DonationTrend[]>('api/v1/analytics/trends', {
             params: { period }
         });
         return response.data;

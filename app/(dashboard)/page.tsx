@@ -6,6 +6,7 @@ import {
   getDonationDrives,
   getTransactions,
   getAnalyticsSummary,
+  getAnalyticsCategories,
 } from "@/lib/api_data";
 import StatCard from "@/components/dashboard/StatCard";
 import DriveProgressCard from "@/components/dashboard/DriveProgressCard";
@@ -51,38 +52,112 @@ export default function Home() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [summaryData, categoriesRes, allTransactions] = await Promise.all([
-          getAnalyticsSummary(),
-          getCategories(),
-          getTransactions(),
+        const [
+          summaryData,
+          categoriesRes,
+          allTransactions,
+          analyticsCategoriesRes,
+          rawDrives,
+        ] = await Promise.all([
+          getAnalyticsSummary().catch(() => ({
+            total_collected: 0,
+            total_collected_week: 0,
+            total_collected_month: 0,
+            active_drives: 0,
+            donation_trends: [],
+          })),
+          getCategories().catch(() => []),
+          getTransactions().catch(() => []),
+          getAnalyticsCategories().catch(() => []),
+          getDonationDrives().catch(() => []),
         ]);
 
         setStats({
-          totalCollected: summaryData.total_collected,
-          totalCollectedWeek: summaryData.total_collected_week,
-          totalCollectedMonth: summaryData.total_collected_month,
-          activeDrives: summaryData.active_drives,
+          totalCollected: summaryData?.total_collected || 0,
+          totalCollectedWeek: summaryData?.total_collected_week || 0,
+          totalCollectedMonth: summaryData?.total_collected_month || 0,
+          activeDrives: summaryData?.active_drives || 0,
         });
-        setDonationTrends(summaryData.donation_trends);
+        setDonationTrends(summaryData?.donation_trends || []);
 
-        setCategoryStats(categoriesRes);
-
-        const categoryMap = categoriesRes.reduce((acc: any, cat: any) => {
+        const categoryMap = (categoriesRes || []).reduce((acc: any, cat: any) => {
           acc[cat.id] = cat.category_name;
           return acc;
         }, {});
 
-        const transactionsRes = allTransactions.slice(0, 5).map((t: any) => ({
-          ...t,
-          category: categoryMap[t.donation?.category] || "General",
-          user_name: t.user?.full_name || "Anonymous",
-        }));
+        const driveMap = (rawDrives || []).reduce((acc: any, drive: any) => {
+          acc[drive.id] = drive;
+          return acc;
+        }, {});
+
+        // Calculate category totals from completed transactions
+        const categoryTotals: Record<string, number> = {};
+        (allTransactions || []).forEach((t: any) => {
+          if (t.payment_status === "Completed") {
+            const drive =
+              t.donation && typeof t.donation === "object"
+                ? t.donation
+                : driveMap[t.donation_id || t.donation];
+            const catId = drive?.category_id || drive?.category;
+            if (catId) {
+              categoryTotals[catId] =
+                (categoryTotals[catId] || 0) + (Number(t.amount) || 0);
+            }
+          }
+        });
+
+        let resolvedCategoryStats: CategoryData[] = [];
+        if (
+          Array.isArray(analyticsCategoriesRes) &&
+          analyticsCategoriesRes.some((c: any) => (Number(c.total_amount) || 0) > 0)
+        ) {
+          resolvedCategoryStats = analyticsCategoriesRes.map((c: any) => ({
+            ...c,
+            total_amount: Number(c.total_amount) || 0,
+          }));
+        } else {
+          resolvedCategoryStats = (categoriesRes || []).map((cat: any) => ({
+            ...cat,
+            total_amount: categoryTotals[cat.id] || 0,
+          }));
+        }
+
+        setCategoryStats(resolvedCategoryStats);
+
+        const transactionsRes = (allTransactions || [])
+          .slice(0, 5)
+          .map((t: any) => {
+            const drive =
+              t.donation && typeof t.donation === "object"
+                ? t.donation
+                : driveMap[t.donation_id || t.donation];
+            const catId = drive?.category_id || drive?.category;
+            const categoryName =
+              (catId && categoryMap[catId]) ||
+              drive?.categoryName ||
+              drive?.category_name ||
+              (typeof t.category === "string" && t.category ? t.category : "General");
+            const rawName =
+              t.user?.full_name || t.user_name || t.account_name;
+            const donorName =
+              rawName && rawName.trim().toLowerCase() !== "anonymous"
+                ? rawName.trim()
+                : (t.account_name || "Anonymous Donor");
+
+            return {
+              ...t,
+              donation: drive || t.donation,
+              category: categoryName,
+              user_name: donorName,
+              account_name: t.account_name || donorName,
+            };
+          });
         setRecentDonations(transactionsRes);
 
-        const rawDrives = await getDonationDrives();
-        const mappedDrives = rawDrives.map(drive => ({
+        const mappedDrives = (rawDrives || []).map((drive: any) => ({
           ...drive,
-          categoryName: categoryMap[drive.category] || "Loading..."
+          categoryName:
+            categoryMap[drive.category_id || drive.category] || "General",
         }));
         setDrives(mappedDrives);
 

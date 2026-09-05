@@ -123,8 +123,15 @@ export default function RecentDonationsTable({
                   </tr>
                 ))
               : localTransactions.map((transaction) => {
-                  const name = transaction.user?.full_name || "Anonymous Donor";
-                  const initial = name.charAt(0).toUpperCase();
+                  const rawName =
+                    transaction.user?.full_name ||
+                    transaction.user_name ||
+                    transaction.account_name;
+                  const name =
+                    rawName && rawName.trim().toLowerCase() !== "anonymous"
+                      ? rawName.trim()
+                      : (transaction.account_name || "Anonymous Donor");
+                  const initial = name.charAt(0).toUpperCase() || "A";
 
                   return (
                     <tr
