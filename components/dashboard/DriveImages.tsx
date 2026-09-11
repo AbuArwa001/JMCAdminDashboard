@@ -21,33 +21,35 @@ export default function DriveImages({ driveId, initialImages, image_urls = [], o
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
-        const file = files[0];
-        // Basic validation
-        if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
-            return;
-        }
-
         try {
             setIsUploading(true);
-            await uploadDonationImage(driveId, file);
-            toast.success("Image uploaded successfully");
-            onImagesUpdated();
+            let uploadCount = 0;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith("image/")) continue;
+                await uploadDonationImage(driveId, file);
+                uploadCount++;
+            }
+            if (uploadCount > 0) {
+                toast.success(`${uploadCount} image(s) uploaded successfully`);
+                onImagesUpdated();
+            } else {
+                toast.error("Please select valid image files");
+            }
         } catch (error) {
-            toast.error("Failed to upload image");
+            toast.error("Failed to upload image(s)");
         } finally {
             setIsUploading(false);
-            // Reset input
             e.target.value = "";
         }
     };
 
-    const handleDelete = async (imageId: string) => {
+    const handleDelete = async (imageUrlOrId: string) => {
         if (!confirm("Are you sure you want to delete this image?")) return;
 
         try {
-            setIsDeleting(imageId);
-            await deleteDonationImage(imageId);
+            setIsDeleting(imageUrlOrId);
+            await deleteDonationImage(driveId, imageUrlOrId);
             toast.success("Image deleted successfully");
             onImagesUpdated();
         } catch (error) {
@@ -70,12 +72,13 @@ export default function DriveImages({ driveId, initialImages, image_urls = [], o
                 <div>
                     <label htmlFor="image-upload" className={`flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-bronze transition-colors cursor-pointer text-sm ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                         <Upload className="w-4 h-4" />
-                        {isUploading ? "Uploading..." : "Add Image"}
+                        {isUploading ? "Uploading..." : "Add Images"}
                     </label>
                     <input
                         id="image-upload"
                         type="file"
                         accept="image/*"
+                        multiple
                         className="hidden"
                         onChange={handleFileChange}
                         disabled={isUploading}
@@ -98,17 +101,16 @@ export default function DriveImages({ driveId, initialImages, image_urls = [], o
                                 className="object-cover"
                                 unoptimized
                             />
-                            {img.type === 'legacy' && (
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button
-                                        onClick={() => handleDelete(img.id)}
-                                        disabled={isDeleting === img.id}
-                                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                    onClick={() => handleDelete(img.image || img.id)}
+                                    disabled={isDeleting === (img.image || img.id)}
+                                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                                    title="Delete image"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

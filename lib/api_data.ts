@@ -59,32 +59,20 @@ export const updateCategory = async (categoryId: string, categoryData: { categor
 // Donation Drive Interfaces
 export const createDonationDrive = async (driveData: CreateDriveData) => {
     try {
-        let data: any = driveData;
-        let config = {};
+        const { uploaded_images, ...restData } = driveData;
+        const response = await api.post('api/v1/donations/', restData);
+        const newDrive = response.data;
 
-        if (driveData.uploaded_images && driveData.uploaded_images.length > 0) {
-            const formData = new FormData();
-
-            (Object.keys(driveData) as Array<keyof CreateDriveData>).forEach(key => {
-                const value = driveData[key];
-                if (key === 'uploaded_images') {
-                    (value as File[]).forEach((file) => {
-                        formData.append('uploaded_images', file);
-                    });
-                } else if (value !== undefined && value !== null) {
-                    // Convert numbers/booleans to string for FormData
-                    formData.append(key, String(value));
+        if (uploaded_images && uploaded_images.length > 0 && newDrive?.id) {
+            for (const file of uploaded_images) {
+                try {
+                    await uploadDonationImage(newDrive.id, file);
+                } catch (imgErr) {
+                    console.error('Error uploading initial drive image:', imgErr);
                 }
-            });
-
-            data = formData;
-            config = {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            };
+            }
         }
-
-        const response = await api.post('api/v1/donations/', data, config);
-        return response.data;
+        return newDrive;
     } catch (error) {
         console.error('Error creating donation drive:', error);
         throw error;
@@ -369,10 +357,10 @@ export const updateMe = async (userData: any) => {
 export const uploadDonationImage = async (donationId: string, imageFile: File) => {
     try {
         const formData = new FormData();
-        // serializer expects 'uploaded_images'
+        formData.append('files', imageFile);
         formData.append('uploaded_images', imageFile);
 
-        const response = await api.patch(`api/v1/donations/${donationId}/`, formData, {
+        const response = await api.post(`api/v1/donations/${donationId}/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -384,9 +372,12 @@ export const uploadDonationImage = async (donationId: string, imageFile: File) =
     }
 };
 
-export const deleteDonationImage = async (imageId: string) => {
+export const deleteDonationImage = async (donationId: string, imageUrlOrId: string) => {
     try {
-        await api.delete(`api/v1/donations/${imageId}/`);
+        const response = await api.delete(`api/v1/donations/${donationId}/images`, {
+            params: { image_url: imageUrlOrId }
+        });
+        return response.data;
     } catch (error) {
         console.error('Error deleting donation image:', error);
         throw error;
