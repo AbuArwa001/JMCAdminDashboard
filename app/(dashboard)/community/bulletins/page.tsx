@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
-import { Plus, Trash, Newspaper, Upload, X, Save } from "lucide-react";
+import { Plus, Trash, Newspaper, Upload, X, Save, Bell } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ export default function BulletinsPage() {
   const [bulletins, setBulletins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [notifyingId, setNotifyingId] = useState<number | null>(null);
   const [form, setForm] = useState<any>({
     title: "",
     issue_number: "",
@@ -33,6 +34,19 @@ export default function BulletinsPage() {
       toast.error("Failed to load bulletins");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNotifyBulletin = async (id: number) => {
+    try {
+      setNotifyingId(id);
+      await api.post(`/api/v1/bulletins/${id}/notify`);
+      toast.success("Push notification broadcasted to all users successfully!");
+    } catch (error) {
+      console.error("Error broadcasting bulletin notification", error);
+      toast.error("Failed to send push notification.");
+    } finally {
+      setNotifyingId(null);
     }
   };
 
@@ -331,7 +345,16 @@ export default function BulletinsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
+                          onClick={() => handleNotifyBulletin(b.id)}
+                          disabled={notifyingId === b.id}
+                          title="Broadcast Push Notification"
+                          className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg border border-transparent hover:border-blue-200 transition-colors disabled:opacity-50"
+                        >
+                          <Bell className={`w-4 h-4 ${notifyingId === b.id ? "animate-spin" : ""}`} />
+                        </button>
+                        <button
                           onClick={() => deleteBulletin(b.id)}
+                          title="Delete Bulletin"
                           className="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition-colors"
                         >
                           <Trash className="w-4 h-4" />
