@@ -305,7 +305,7 @@ export default function BulletinsPage() {
                     <td className="px-6 py-4">
                       {b.cover_image_path ? (
                         <div className="w-12 h-16 relative rounded overflow-hidden shadow-sm border border-gray-200">
-                          <Image src={process.env.NEXT_PUBLIC_API_URL + b.cover_image_path} alt="Cover" fill className="object-cover" />
+                          <Image src={b.cover_image_path.startsWith('http') ? b.cover_image_path : process.env.NEXT_PUBLIC_API_URL + b.cover_image_path} alt="Cover" fill className="object-cover" />
                         </div>
                       ) : (
                         <div className="w-12 h-16 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
@@ -315,7 +315,7 @@ export default function BulletinsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{b.title}</p>
-                      <a href={process.env.NEXT_PUBLIC_API_URL + b.pdf_path} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline mt-0.5 inline-block">View PDF</a>
+                      <a href={b.pdf_path.startsWith('http') ? b.pdf_path : process.env.NEXT_PUBLIC_API_URL + b.pdf_path} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline mt-0.5 inline-block">View PDF</a>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-medium text-gray-700">{b.issue_number || "-"}</span>
