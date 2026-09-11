@@ -23,6 +23,7 @@ import {
   Calculator,
   CalendarDays,
   LogOut,
+  Newspaper,
 } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
@@ -66,6 +67,7 @@ const MENU_SECTIONS: MenuSection[] = [
       { name: "Darsas & Classes", href: "/community/darsas", icon: BookOpen, iconColor: "text-teal-400" },
       { name: "Inspiration Quote", href: "/community/inspiration", icon: Quote, iconColor: "text-pink-400" },
       { name: "Friday Khutba", href: "/community/khutba", icon: Mic, iconColor: "text-amber-400" },
+      { name: "Friday Bulletins", href: "/community/bulletins", icon: Newspaper, iconColor: "text-blue-400" },
       { name: "Events", href: "/community/events", icon: CalendarDays, iconColor: "text-sky-400" },
       { name: "Duas", href: "/community/duas", icon: HandHeart, iconColor: "text-rose-400" },
       { name: "Quran", href: "/community/quran", icon: BookMarked, iconColor: "text-emerald-400" },
