@@ -2,6 +2,7 @@
 
 import { BankAccount } from "@/lib/data";
 import { getBankAccounts, deleteBankAccount } from "@/lib/api_data";
+import { Skeleton } from "@/components/ui/Skeleton";
 import {
   Plus,
   Search,
@@ -107,14 +108,14 @@ export default function AccountsPage() {
           Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm animate-pulse h-64 flex flex-col justify-between"
+              className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-64 flex flex-col justify-between"
             >
               <div className="space-y-3">
-                <div className="w-10 h-10 bg-gray-200 rounded-xl" />
-                <div className="w-3/4 h-5 bg-gray-200 rounded" />
-                <div className="w-1/2 h-4 bg-gray-200 rounded" />
+                <Skeleton className="w-10 h-10 rounded-xl" />
+                <Skeleton className="w-3/4 h-5 rounded" />
+                <Skeleton className="w-1/2 h-4 rounded" />
               </div>
-              <div className="w-full h-10 bg-gray-100 rounded-xl" />
+              <Skeleton className="w-full h-10 rounded-xl" />
             </div>
           ))
         ) : filteredAccounts.length > 0 ? (

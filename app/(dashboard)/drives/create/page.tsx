@@ -12,6 +12,7 @@ import { createDonationDrive, getCategories, getBankAccounts } from "@/lib/api_d
 import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import Image from "next/image";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 export default function CreateDrivePage() {
   const router = useRouter();
@@ -481,17 +482,10 @@ export default function CreateDrivePage() {
           <Link href="/drives" className="btn-secondary">
             <ArrowLeft className="w-4 h-4" /> Cancel
           </Link>
-          <button type="submit" disabled={isSubmitting} className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
-            {isSubmitting ? (
-              <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating Drive...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" /> Create Drive
-              </>
-            )}
+          <button type="submit" disabled={isSubmitting} className="btn-primary disabled:cursor-not-allowed p-0 overflow-hidden">
+            <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
+              <Save className="w-4 h-4" /> Create Drive
+            </ButtonShimmer>
           </button>
         </div>
       </form>

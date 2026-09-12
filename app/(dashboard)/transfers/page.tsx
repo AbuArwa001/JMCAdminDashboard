@@ -6,6 +6,7 @@ import {
   getTransferHistory,
   initiateTransfer,
 } from "@/lib/api_data";
+import { Skeleton, ButtonShimmer } from "@/components/ui/Skeleton";
 import {
   ArrowRight,
   CheckCircle,
@@ -297,19 +298,12 @@ export default function TransfersPage() {
                     !formData.destination_account ||
                     !formData.amount
                   }
-                  className="w-full btn-primary justify-center py-3.5 text-base shadow-lg shadow-[#006838]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full btn-primary justify-center py-0 text-base shadow-lg shadow-[#006838]/20 disabled:cursor-not-allowed p-0 overflow-hidden"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Processing Transaction...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Confirm &amp; Dispatch Funds
-                    </>
-                  )}
+                  <ButtonShimmer isLoading={isSubmitting} className="w-full py-3.5 flex items-center justify-center gap-2">
+                    <Send className="w-4 h-4" />
+                    Confirm &amp; Dispatch Funds
+                  </ButtonShimmer>
                 </button>
                 <p className="text-center text-xs text-gray-400 mt-3 flex items-center justify-center gap-1.5 font-medium">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -340,7 +334,17 @@ export default function TransfersPage() {
 
             <div className="p-5 bg-white divide-y divide-gray-100">
               {isLoading ? (
-                <div className="py-8 text-center text-xs text-gray-400 font-medium">Loading history...</div>
+                <div className="space-y-4 py-2">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="flex justify-between items-center">
+                      <div className="space-y-2">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-2 w-16" />
+                      </div>
+                      <Skeleton className="h-4 w-12 rounded-full" />
+                    </div>
+                  ))}
+                </div>
               ) : history.length > 0 ? (
                 history.slice(0, 5).map((tx) => (
                   <div key={tx.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between">
@@ -390,7 +394,17 @@ export default function TransfersPage() {
         </div>
 
         {isLoading ? (
-          <div className="p-12 text-center text-gray-400 font-medium">Loading history...</div>
+          <div className="p-6 space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex gap-6 items-center">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-48" />
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-10 w-20 ml-auto" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
