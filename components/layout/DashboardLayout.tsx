@@ -5,6 +5,7 @@ import Header from "./Header";
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
+import { requestAdminFCMPermission } from "@/lib/fcm";
 
 export default function DashboardLayout({
   children,
@@ -20,6 +21,11 @@ export default function DashboardLayout({
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Register admin browser for FCM push notifications
+  useEffect(() => {
+    requestAdminFCMPermission().catch(console.error);
   }, []);
 
   return (
