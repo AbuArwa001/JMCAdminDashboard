@@ -25,6 +25,7 @@ export default function EventsPage() {
   const [galleryCaption, setGalleryCaption] = useState("");
   
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleGenerateAI = async () => {
     const prompt = window.prompt("What should the event story be about? (e.g. Write an engaging description for a Hajj preparation lecture)");
@@ -73,6 +74,7 @@ export default function EventsPage() {
 
   const saveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const formData = new FormData();
       Object.keys(form).forEach(key => {
@@ -94,6 +96,8 @@ export default function EventsPage() {
       fetchData();
     } catch (error) {
       console.error("Error saving event", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -247,8 +251,10 @@ export default function EventsPage() {
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
-            <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 hover:shadow-lg transition-all">Save Event</button>
+            <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors" disabled={isSaving}>Cancel</button>
+            <button type="submit" className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 hover:shadow-lg transition-all flex items-center gap-2" disabled={isSaving}>
+              {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</> : "Save Event"}
+            </button>
           </div>
         </form>
       )}
