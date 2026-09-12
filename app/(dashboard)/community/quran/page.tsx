@@ -111,10 +111,10 @@ export default function QuranPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading Quran settings...</div>;
+  if (loading) return <TableSkeleton />;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">Quran Management</h1>
         <p className="text-gray-500">Manage reciters and Surah audio files.</p>

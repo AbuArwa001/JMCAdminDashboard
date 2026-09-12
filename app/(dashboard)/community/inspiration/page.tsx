@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
 
 interface CommunityContent {
   id?: number;
@@ -72,7 +73,7 @@ export default function InspirationPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading items...</div>;
+  if (loading) return <GridCardSkeleton />;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">

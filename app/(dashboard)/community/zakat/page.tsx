@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 interface NisabRate {
   id?: number;
@@ -60,10 +61,10 @@ export default function ZakatSettingsPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading Zakat settings...</div>;
+  if (loading) return <TableSkeleton />;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto space-y-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Zakat Calculator Settings</h1>
         <p className="text-gray-500">Update current gold and silver prices to accurately calculate Nisab.</p>

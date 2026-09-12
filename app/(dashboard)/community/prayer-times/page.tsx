@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
-import { Plus, Trash, Eye, X } from "lucide-react";
+import { Plus, Trash, Eye, X, Edit, Check, RefreshCw } from "lucide-react";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 interface City {
   id: number;
@@ -144,10 +145,10 @@ export default function PrayerTimesPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading prayer timings...</div>;
+  if (loading) return <TableSkeleton />;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
+    <div className="p-6 max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">Prayer Timings</h1>
         <p className="text-gray-500">Manage supported cities, calculation methods, and manual time overrides.</p>

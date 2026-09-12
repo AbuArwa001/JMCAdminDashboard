@@ -7,6 +7,8 @@ import { format } from "date-fns";
 import Image from "next/image";
 import RichTextEditor from "@/components/RichTextEditor";
 
+import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
+
 export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -165,7 +167,7 @@ export default function EventsPage() {
     }
   }
 
-  if (loading) return <div className="p-6">Loading Events...</div>;
+  if (loading) return <GridCardSkeleton />;
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 min-h-screen">

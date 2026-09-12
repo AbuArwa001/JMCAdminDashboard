@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import { motion, AnimatePresence } from "framer-motion";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 export default function KhutbaPage() {
   const [khutbas, setKhutbas] = useState<any[]>([]);
@@ -125,6 +126,8 @@ export default function KhutbaPage() {
       setImamPhotoPreview(null);
     }
   };
+
+  if (loading) return <TableSkeleton />;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -332,9 +335,6 @@ export default function KhutbaPage() {
 
           {/* Khutba Table */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            {loading ? (
-              <div className="p-12 text-center text-gray-400 font-medium">Loading Khutbas...</div>
-            ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
@@ -409,7 +409,6 @@ export default function KhutbaPage() {
                   </tbody>
                 </table>
               </div>
-            )}
           </div>
         </div>
       )}

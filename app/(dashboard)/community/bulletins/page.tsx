@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 export default function BulletinsPage() {
   const [bulletins, setBulletins] = useState<any[]>([]);
@@ -132,6 +133,8 @@ export default function BulletinsPage() {
     }
     setPdfFile(file);
   };
+
+  if (loading) return <TableSkeleton />;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
@@ -301,9 +304,6 @@ export default function BulletinsPage() {
 
       {/* Bulletins Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-12 text-center text-gray-400 font-medium">Loading Bulletins...</div>
-        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -380,7 +380,6 @@ export default function BulletinsPage() {
               </tbody>
             </table>
           </div>
-        )}
       </div>
     </div>
   );

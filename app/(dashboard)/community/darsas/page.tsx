@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import { motion, AnimatePresence } from "framer-motion";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 interface CommunityContent {
   id?: number;
@@ -98,6 +99,8 @@ export default function DarsasPage() {
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  if (loading) return <TableSkeleton />;
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -243,11 +246,8 @@ export default function DarsasPage() {
           </span>
         </div>
 
-        {loading ? (
-          <div className="p-12 text-center text-gray-400 font-medium">Loading darsas...</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-50/80 text-[10px] uppercase tracking-widest font-bold text-gray-400">
                   <th className="px-6 py-4 border-b border-gray-100">Title</th>
@@ -317,7 +317,6 @@ export default function DarsasPage() {
               </tbody>
             </table>
           </div>
-        )}
       </div>
     </div>
   );

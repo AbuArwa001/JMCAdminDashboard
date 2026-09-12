@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, ChevronRight } from "lucide-react";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 
 interface DuaCategory {
   id: number;
@@ -116,7 +117,7 @@ export default function DuasPage() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading Duas...</div>;
+  if (loading) return <TableSkeleton />;
 
   const currentDuas = duas.filter(d => d.category === selectedCategoryId).sort((a,b) => a.display_order - b.display_order);
 
