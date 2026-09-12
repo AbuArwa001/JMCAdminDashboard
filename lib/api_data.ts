@@ -118,31 +118,26 @@ export const getDonationDriveById = async (driveId: string) => {
 
 export const updateDonationDrive = async (driveId: string, driveData: Partial<CreateDriveData>) => {
     try {
-        let data: any = driveData;
-        let config = {};
+        const { uploaded_images, ...restData } = driveData;
 
-        if (driveData.uploaded_images && driveData.uploaded_images.length > 0) {
-            const formData = new FormData();
+        // Clean up empty date strings that cause 422 validation errors in FastAPI
+        if (restData.start_date === "") (restData as any).start_date = null;
+        if (restData.end_date === "") (restData as any).end_date = null;
 
-            (Object.keys(driveData) as Array<keyof CreateDriveData>).forEach(key => {
-                const value = driveData[key];
-                if (key === 'uploaded_images') {
-                    (value as File[]).forEach((file) => {
-                        formData.append('uploaded_images', file);
-                    });
-                } else if (value !== undefined && value !== null) {
-                    formData.append(key, String(value));
+        const response = await api.patch(`api/v1/donations/${driveId}`, restData);
+        const updatedDrive = response.data;
+
+        if (uploaded_images && (uploaded_images as any[]).length > 0) {
+            for (const file of (uploaded_images as File[])) {
+                try {
+                    await uploadDonationImage(driveId, file);
+                } catch (imgErr) {
+                    console.error('Error uploading drive image:', imgErr);
                 }
-            });
-
-            data = formData;
-            config = {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            };
+            }
         }
-
-        const response = await api.patch(`api/v1/donations/${driveId}/`, data, config);
-        return response.data;
+        
+        return updatedDrive;
     } catch (error) {
         console.error('Error updating donation drive:', error);
         throw error;
