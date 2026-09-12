@@ -33,7 +33,7 @@ export default function KhutbaPage() {
     try {
       setLoading(true);
       const [kRes, lRes] = await Promise.all([
-        api.get("/api/v1/khutba/"),
+        api.get("/api/v1/khutba/?published_only=false"),
         api.get("/api/v1/khutba/logs/"),
       ]);
       setKhutbas(kRes.data.results || kRes.data);
