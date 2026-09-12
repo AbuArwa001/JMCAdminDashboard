@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 export default function BulletinsPage() {
   const [bulletins, setBulletins] = useState<any[]>([]);
@@ -285,9 +286,11 @@ export default function BulletinsPage() {
                   <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary">
                     Cancel
                   </button>
-                  <button type="submit" disabled={isSubmitting} className="btn-primary bg-blue-600 hover:bg-blue-700 disabled:opacity-70">
-                    <Save className="w-4 h-4" />
-                    {isSubmitting ? "Uploading..." : "Upload Bulletin"}
+                  <button type="submit" disabled={isSubmitting} className="btn-primary bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed p-0 overflow-hidden">
+                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
+                      <Save className="w-4 h-4" />
+                      Upload Bulletin
+                    </ButtonShimmer>
                   </button>
                 </div>
               </div>
