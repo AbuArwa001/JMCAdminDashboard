@@ -1,13 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import React from "react";
 
 export function Skeleton({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: HTMLMotionProps<"div">) {
   return (
     <motion.div
       initial={{ opacity: 0.5 }}
