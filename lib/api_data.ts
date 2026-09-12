@@ -59,8 +59,19 @@ export const updateCategory = async (categoryId: string, categoryData: { categor
 // Donation Drive Interfaces
 export const createDonationDrive = async (driveData: CreateDriveData) => {
     try {
-        const { uploaded_images, ...restData } = driveData;
-        const response = await api.post('api/v1/donations/', restData);
+        const { uploaded_images, category, ...restData } = driveData;
+        
+        const submitData: any = {
+            ...restData,
+            category_id: category,
+        };
+
+        if (!submitData.end_date) {
+            // Set a default far-future date or same as start_date if backend requires it
+            submitData.end_date = submitData.start_date; // fallback
+        }
+
+        const response = await api.post('api/v1/donations/', submitData);
         const newDrive = response.data;
 
         if (uploaded_images && uploaded_images.length > 0 && newDrive?.id) {
@@ -118,13 +129,18 @@ export const getDonationDriveById = async (driveId: string) => {
 
 export const updateDonationDrive = async (driveId: string, driveData: Partial<CreateDriveData>) => {
     try {
-        const { uploaded_images, ...restData } = driveData;
+        const { uploaded_images, category, ...restData } = driveData;
 
         // Clean up empty date strings that cause 422 validation errors in FastAPI
         if (restData.start_date === "") (restData as any).start_date = null;
         if (restData.end_date === "") (restData as any).end_date = null;
 
-        const response = await api.patch(`api/v1/donations/${driveId}`, restData);
+        const updatePayload: any = { ...restData };
+        if (category) {
+            updatePayload.category_id = category;
+        }
+
+        const response = await api.patch(`api/v1/donations/${driveId}`, updatePayload);
         const updatedDrive = response.data;
 
         if (uploaded_images && (uploaded_images as any[]).length > 0) {
