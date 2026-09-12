@@ -25,6 +25,12 @@ const nextConfig = {
             },
             {
                 protocol: 'http',
+                hostname: 'donations-api.jamiamosque.co.ke',
+                port: '80',
+                pathname: '/**',
+            },
+            {
+                protocol: 'http',
                 hostname: 'jamiagive.com',
                 port: '443',
                 pathname: '/media/**',
