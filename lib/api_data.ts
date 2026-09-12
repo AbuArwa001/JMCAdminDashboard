@@ -173,7 +173,7 @@ export const deleteDonationDrive = async (driveId: string) => {
 
 export const getTransactionsByDonationDrive = async (driveId: string) => {
     try {
-        const response = await api.get(`api/v1/transactions/?donation=${driveId}`);
+        const response = await api.get(`api/v1/transactions/?donation_id=${driveId}`);
         return Array.isArray(response.data) ? response.data : (response.data?.results || []);
     } catch (error) {
         console.error('Error fetching transactions for donation drive:', error);
