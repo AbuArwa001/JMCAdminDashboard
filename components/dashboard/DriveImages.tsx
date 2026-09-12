@@ -95,7 +95,7 @@ export default function DriveImages({ driveId, initialImages, image_urls = [], o
                     {allImages.map((img) => (
                         <div key={img.id} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
                             <Image
-                                src={img.image}
+                                src={img.image.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '')}${img.image}` : img.image}
                                 alt="Donation Image"
                                 fill
                                 className="object-cover"
