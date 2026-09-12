@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, Users, Music } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 import Image from "next/image";
 
 interface Reciter {
@@ -26,6 +27,8 @@ export default function QuranPage() {
   const [audios, setAudios] = useState<SurahAudio[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"reciters" | "audio">("reciters");
+  const [isSubmittingReciter, setIsSubmittingReciter] = useState(false);
+  const [isSubmittingAudio, setIsSubmittingAudio] = useState(false);
 
   // Reciter Form
   const [showReciterForm, setShowReciterForm] = useState(false);
@@ -55,6 +58,7 @@ export default function QuranPage() {
 
   const saveReciter = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingReciter(true);
     try {
       const formData = new FormData();
       formData.append("name", reciterForm.name);
@@ -73,6 +77,8 @@ export default function QuranPage() {
       fetchData();
     } catch (error) {
       console.error("Error saving reciter", error);
+    } finally {
+      setIsSubmittingReciter(false);
     }
   };
 
@@ -88,6 +94,7 @@ export default function QuranPage() {
 
   const saveAudio = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingAudio(true);
     try {
       if (audioForm.id) {
         await api.put(`/api/v1/quran/audio/${audioForm.id}/`, audioForm);
@@ -99,6 +106,8 @@ export default function QuranPage() {
       fetchData();
     } catch (error) {
       console.error("Error saving audio", error);
+    } finally {
+      setIsSubmittingAudio(false);
     }
   };
 
@@ -162,9 +171,13 @@ export default function QuranPage() {
                 <label className="block text-sm font-medium mb-1">Photo</label>
                 <input type="file" accept="image/*" className="w-full p-2 border rounded" onChange={e => setReciterForm({...reciterForm, photo: e.target.files?.[0] || null})} />
               </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <button type="button" onClick={() => setShowReciterForm(false)} className="px-4 py-2 text-gray-500">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-amber-600 text-white rounded">Save</button>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowReciterForm(false)} className="px-4 py-2 text-gray-500" disabled={isSubmittingReciter}>Cancel</button>
+                <button type="submit" disabled={isSubmittingReciter} className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed">
+                  <ButtonShimmer isLoading={isSubmittingReciter} className="w-full h-full px-6 py-2 flex items-center justify-center">
+                    Save
+                  </ButtonShimmer>
+                </button>
               </div>
             </form>
           )}
@@ -224,8 +237,12 @@ export default function QuranPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4">
-                <button type="button" onClick={() => setShowAudioForm(false)} className="px-4 py-2 text-gray-500">Cancel</button>
-                <button type="submit" className="px-6 py-2 bg-amber-600 text-white rounded">Save</button>
+                <button type="button" onClick={() => setShowAudioForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmittingAudio}>Cancel</button>
+                <button type="submit" disabled={isSubmittingAudio} className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed">
+                  <ButtonShimmer isLoading={isSubmittingAudio} className="w-full h-full px-6 py-2 flex items-center justify-center">
+                    Save
+                  </ButtonShimmer>
+                </button>
               </div>
             </form>
           )}

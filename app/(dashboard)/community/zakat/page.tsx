@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 interface NisabRate {
   id?: number;
@@ -17,7 +18,7 @@ interface NisabRate {
 export default function ZakatSettingsPage() {
   const [rate, setRate] = useState<NisabRate | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<NisabRate>({
     gold_price_per_gram: "",
     silver_price_per_gram: "",
@@ -47,7 +48,7 @@ export default function ZakatSettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
+    setIsSubmitting(true);
     setMessage(null);
     try {
       await api.patch("/api/v1/zakat/nisab-rate/", formData);
@@ -57,7 +58,7 @@ export default function ZakatSettingsPage() {
       console.error("Error updating nisab rate:", error);
       setMessage({ type: 'error', text: "Failed to update Nisab rates." });
     } finally {
-      setSaving(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -143,10 +144,12 @@ export default function ZakatSettingsPage() {
             </div>
             <button
               type="submit"
-              disabled={saving}
-              className="px-6 py-2 bg-amber-600 text-white rounded-md font-medium hover:bg-amber-700 transition disabled:opacity-50"
+              disabled={isSubmitting}
+              className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed"
             >
-              {saving ? "Saving..." : "Save Settings"}
+              <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-6 py-2 flex items-center justify-center font-medium">
+                Save Settings
+              </ButtonShimmer>
             </button>
           </div>
         </form>

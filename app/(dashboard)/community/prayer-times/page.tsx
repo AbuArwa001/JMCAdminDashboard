@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { format } from "date-fns";
 import { Plus, Trash, Eye, X, Edit, Check, RefreshCw } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 interface City {
   id: number;
@@ -49,6 +50,7 @@ export default function PrayerTimesPage() {
   const [overrides, setOverrides] = useState<Override[]>([]);
   
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [previewCityId, setPreviewCityId] = useState<number | "">("");
   const [previewDate, setPreviewDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
@@ -119,6 +121,7 @@ export default function PrayerTimesPage() {
 
   const saveOverride = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (overrideForm.id) {
         await api.put(`/api/v1/prayer-times/overrides/${overrideForm.id}/`, overrideForm);
@@ -132,6 +135,8 @@ export default function PrayerTimesPage() {
     } catch (error) {
       console.error("Error saving override", error);
       alert("Failed to save override.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -287,8 +292,13 @@ export default function PrayerTimesPage() {
                     <input required type="text" className="w-full p-2 border rounded" value={overrideForm.reason} onChange={e => setOverrideForm({...overrideForm, reason: e.target.value})}/>
                   </div>
                 </div>
-                <div className="flex justify-end pt-2">
-                  <button type="submit" className="px-4 py-2 bg-amber-600 text-white rounded font-medium hover:bg-amber-700">Save</button>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button type="button" onClick={() => setShowOverrideForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmitting}>Cancel</button>
+                  <button type="submit" disabled={isSubmitting} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
+                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center">
+                      Save
+                    </ButtonShimmer>
+                  </button>
                 </div>
               </form>
             )}

@@ -9,11 +9,13 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import { motion, AnimatePresence } from "framer-motion";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 export default function KhutbaPage() {
   const [khutbas, setKhutbas] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<"khutbas" | "logs">("khutbas");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<any>({
@@ -62,6 +64,7 @@ export default function KhutbaPage() {
 
   const saveKhutba = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       Object.keys(form).forEach((key) => {
@@ -88,6 +91,8 @@ export default function KhutbaPage() {
     } catch (error) {
       console.error("Error saving khutba", error);
       toast.error("Failed to save khutba.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -319,12 +324,14 @@ export default function KhutbaPage() {
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary">
+                      <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary" disabled={isSubmitting}>
                         Cancel
                       </button>
-                      <button type="submit" className="btn-primary">
-                        <FileText className="w-4 h-4" />
-                        {form.id ? "Update Khutba" : "Save Khutba"}
+                      <button type="submit" disabled={isSubmitting} className="btn-primary p-0 overflow-hidden disabled:cursor-not-allowed">
+                        <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          {form.id ? "Update Khutba" : "Save Khutba"}
+                        </ButtonShimmer>
                       </button>
                     </div>
                   </div>

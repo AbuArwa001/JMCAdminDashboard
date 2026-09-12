@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 interface CommunityContent {
   id?: number;
@@ -16,6 +17,7 @@ interface CommunityContent {
 export default function InspirationPage() {
   const [items, setItems] = useState<CommunityContent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<Partial<CommunityContent>>({
     content_type: "INSPIRATION",
@@ -42,6 +44,7 @@ export default function InspirationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       await api.post("/api/v1/community/content/", formData);
       setShowForm(false);
@@ -49,6 +52,8 @@ export default function InspirationPage() {
       fetchItems();
     } catch (error) {
       console.error("Error creating inspiration item:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,8 +144,10 @@ export default function InspirationPage() {
               </label>
             </div>
             <div className="flex justify-end pt-2">
-              <button type="submit" className="px-6 py-2 bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition">
-                Save Inspiration
+              <button type="submit" disabled={isSubmitting} className="bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition p-0 overflow-hidden disabled:cursor-not-allowed">
+                <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-6 py-2 flex items-center justify-center">
+                  Save Inspiration
+                </ButtonShimmer>
               </button>
             </div>
           </form>

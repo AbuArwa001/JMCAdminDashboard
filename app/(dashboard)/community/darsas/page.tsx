@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import { motion, AnimatePresence } from "framer-motion";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 interface CommunityContent {
   id?: number;
@@ -22,6 +23,7 @@ interface CommunityContent {
 export default function DarsasPage() {
   const [darsas, setDarsas] = useState<CommunityContent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<Partial<CommunityContent>>({
@@ -56,6 +58,7 @@ export default function DarsasPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       if (editingId) {
         await api.patch(`/api/v1/community/content/${editingId}/`, formData);
@@ -70,6 +73,8 @@ export default function DarsasPage() {
     } catch (error) {
       console.error("Error saving darsa:", error);
       toast.error("Failed to save darsa.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -220,12 +225,14 @@ export default function DarsasPage() {
 
                 {/* Actions */}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                  <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary">
+                  <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary" disabled={isSubmitting}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary">
-                    <FileText className="w-4 h-4" />
-                    {editingId ? "Update Darsa" : "Save Darsa"}
+                  <button type="submit" disabled={isSubmitting} className="btn-primary p-0 overflow-hidden disabled:cursor-not-allowed">
+                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      {editingId ? "Update Darsa" : "Save Darsa"}
+                    </ButtonShimmer>
                   </button>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, ChevronRight } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 interface DuaCategory {
   id: number;
@@ -31,6 +32,8 @@ export default function DuasPage() {
   const [categories, setCategories] = useState<DuaCategory[]>([]);
   const [duas, setDuas] = useState<Dua[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmittingCat, setIsSubmittingCat] = useState(false);
+  const [isSubmittingDua, setIsSubmittingDua] = useState(false);
   
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   
@@ -65,6 +68,7 @@ export default function DuasPage() {
 
   const saveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingCat(true);
     try {
       if (catForm.id) {
         await api.put(`/api/v1/duas/categories/${catForm.id}/`, catForm);
@@ -76,6 +80,8 @@ export default function DuasPage() {
       fetchData();
     } catch (error) {
       console.error("Error saving category", error);
+    } finally {
+      setIsSubmittingCat(false);
     }
   };
 
@@ -92,6 +98,7 @@ export default function DuasPage() {
 
   const saveDua = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmittingDua(true);
     try {
       const payload = { ...duaForm, category: selectedCategoryId };
       if (duaForm.id) {
@@ -104,6 +111,8 @@ export default function DuasPage() {
       fetchData();
     } catch (error) {
       console.error("Error saving dua", error);
+    } finally {
+      setIsSubmittingDua(false);
     }
   };
 
@@ -147,8 +156,12 @@ export default function DuasPage() {
                 <input type="number" placeholder="Order" required className="w-20 p-2 border rounded text-sm" value={catForm.display_order} onChange={e => setCatForm({...catForm, display_order: Number(e.target.value)})} />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowCatForm(false)} className="px-3 py-1 text-sm text-gray-500">Cancel</button>
-                <button type="submit" className="px-3 py-1 bg-amber-600 text-white rounded text-sm font-medium">Save</button>
+                <button type="button" onClick={() => setShowCatForm(false)} className="px-3 py-1 text-sm text-gray-500" disabled={isSubmittingCat}>Cancel</button>
+                <button type="submit" disabled={isSubmittingCat} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
+                  <ButtonShimmer isLoading={isSubmittingCat} className="w-full h-full px-3 py-1 text-sm flex items-center justify-center">
+                    Save
+                  </ButtonShimmer>
+                </button>
               </div>
             </form>
           )}
@@ -228,8 +241,12 @@ export default function DuasPage() {
                     </div>
                   </div>
                   <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
-                    <button type="button" onClick={() => setShowDuaForm(false)} className="px-4 py-2 text-gray-500 font-medium">Cancel</button>
-                    <button type="submit" className="px-6 py-2 bg-amber-600 text-white rounded font-medium">Save Dua</button>
+                    <button type="button" onClick={() => setShowDuaForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmittingDua}>Cancel</button>
+                    <button type="submit" disabled={isSubmittingDua} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
+                      <ButtonShimmer isLoading={isSubmittingDua} className="w-full h-full px-6 py-2 flex items-center justify-center">
+                        Save Dua
+                      </ButtonShimmer>
+                    </button>
                   </div>
                 </form>
               )}
