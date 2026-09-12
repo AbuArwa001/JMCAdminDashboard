@@ -10,8 +10,8 @@ import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-
 import { AnimatePresence, motion } from "framer-motion";
+import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 export default function SignupPage() {
     const router = useRouter();
@@ -187,9 +187,11 @@ export default function SignupPage() {
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-primary hover:bg-primary-bronze text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center"
+                    className="w-full bg-primary hover:bg-primary-bronze text-white font-bold py-0 rounded-lg transition-all p-0 overflow-hidden disabled:cursor-not-allowed"
                 >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign Up"}
+                    <ButtonShimmer isLoading={isLoading} className="w-full h-full px-4 py-3 flex items-center justify-center gap-2">
+                        Sign Up
+                    </ButtonShimmer>
                 </button>
             </form>
 
