@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, Users, Music } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+// import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 import { ProcessingModal } from "@/components/ui/ProcessingModal";
 import Image from "next/image";
 
@@ -33,7 +33,7 @@ export default function QuranPage() {
 
   // Reciter Form
   const [showReciterForm, setShowReciterForm] = useState(false);
-  const [reciterForm, setReciterForm] = useState<{id?: number, name: string, bio: string, photo?: File | null}>({ name: "", bio: "" });
+  const [reciterForm, setReciterForm] = useState<{ id?: number, name: string, bio: string, photo?: File | null }>({ name: "", bio: "" });
 
   // Audio Form
   const [showAudioForm, setShowAudioForm] = useState(false);
@@ -137,13 +137,13 @@ export default function QuranPage() {
             onClick={() => setActiveTab("reciters")}
             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === 'reciters' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
-            <Users className="w-5 h-5"/> Reciters
+            <Users className="w-5 h-5" /> Reciters
           </button>
           <button
             onClick={() => setActiveTab("audio")}
             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === 'audio' ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
-            <Music className="w-5 h-5"/> Surah Audio
+            <Music className="w-5 h-5" /> Surah Audio
           </button>
         </nav>
       </div>
@@ -153,7 +153,7 @@ export default function QuranPage() {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Reciters</h2>
             <button onClick={() => { setReciterForm({ name: "", bio: "" }); setShowReciterForm(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-md font-medium flex items-center gap-2 hover:bg-amber-700">
-              <Plus className="w-4 h-4"/> Add Reciter
+              <Plus className="w-4 h-4" /> Add Reciter
             </button>
           </div>
 
@@ -162,15 +162,15 @@ export default function QuranPage() {
               <h3 className="text-lg font-semibold mb-2">{reciterForm.id ? "Edit Reciter" : "New Reciter"}</h3>
               <div>
                 <label className="block text-sm font-medium mb-1">Name</label>
-                <input required type="text" className="w-full p-2 border rounded" value={reciterForm.name} onChange={e => setReciterForm({...reciterForm, name: e.target.value})} />
+                <input required type="text" className="w-full p-2 border rounded" value={reciterForm.name} onChange={e => setReciterForm({ ...reciterForm, name: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Biography</label>
-                <textarea rows={3} className="w-full p-2 border rounded" value={reciterForm.bio} onChange={e => setReciterForm({...reciterForm, bio: e.target.value})} />
+                <textarea rows={3} className="w-full p-2 border rounded" value={reciterForm.bio} onChange={e => setReciterForm({ ...reciterForm, bio: e.target.value })} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Photo</label>
-                <input type="file" accept="image/*" className="w-full p-2 border rounded" onChange={e => setReciterForm({...reciterForm, photo: e.target.files?.[0] || null})} />
+                <input type="file" accept="image/*" className="w-full p-2 border rounded" onChange={e => setReciterForm({ ...reciterForm, photo: e.target.files?.[0] || null })} />
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setShowReciterForm(false)} className="px-4 py-2 text-gray-500" disabled={isSubmittingReciter}>Cancel</button>
@@ -185,15 +185,15 @@ export default function QuranPage() {
             {reciters.map(reciter => (
               <div key={reciter.id} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden relative group">
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 p-1 rounded backdrop-blur">
-                  <button onClick={() => { setReciterForm({ id: reciter.id, name: reciter.name, bio: reciter.bio }); setShowReciterForm(true); }} className="p-1 hover:text-amber-600"><Edit className="w-4 h-4"/></button>
-                  <button onClick={() => deleteReciter(reciter.id)} className="p-1 hover:text-red-600"><Trash className="w-4 h-4"/></button>
+                  <button onClick={() => { setReciterForm({ id: reciter.id, name: reciter.name, bio: reciter.bio }); setShowReciterForm(true); }} className="p-1 hover:text-amber-600"><Edit className="w-4 h-4" /></button>
+                  <button onClick={() => deleteReciter(reciter.id)} className="p-1 hover:text-red-600"><Trash className="w-4 h-4" /></button>
                 </div>
                 <div className="aspect-square bg-gray-100 relative">
                   {reciter.photo ? (
                     <Image src={reciter.photo} alt={reciter.name} fill className="object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <Users className="w-16 h-16"/>
+                      <Users className="w-16 h-16" />
                     </div>
                   )}
                 </div>
@@ -212,7 +212,7 @@ export default function QuranPage() {
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Surah Audio Files</h2>
             <button onClick={() => { setAudioForm({ surah_number: 1, reciter: reciters[0]?.id || 0, audio_url: "" }); setShowAudioForm(true); }} className="px-4 py-2 bg-amber-600 text-white rounded-md font-medium flex items-center gap-2 hover:bg-amber-700">
-              <Plus className="w-4 h-4"/> Assign Audio
+              <Plus className="w-4 h-4" /> Assign Audio
             </button>
           </div>
 
@@ -221,18 +221,18 @@ export default function QuranPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Surah Number (1-114)</label>
-                  <input required type="number" min="1" max="114" className="w-full p-2 border rounded" value={audioForm.surah_number} onChange={e => setAudioForm({...audioForm, surah_number: Number(e.target.value)})} />
+                  <input required type="number" min="1" max="114" className="w-full p-2 border rounded" value={audioForm.surah_number} onChange={e => setAudioForm({ ...audioForm, surah_number: Number(e.target.value) })} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Reciter</label>
-                  <select required className="w-full p-2 border rounded" value={audioForm.reciter} onChange={e => setAudioForm({...audioForm, reciter: Number(e.target.value)})}>
+                  <select required className="w-full p-2 border rounded" value={audioForm.reciter} onChange={e => setAudioForm({ ...audioForm, reciter: Number(e.target.value) })}>
                     <option value={0}>Select Reciter...</option>
                     {reciters.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
                   </select>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-1">Audio URL</label>
-                  <input required type="url" className="w-full p-2 border rounded" value={audioForm.audio_url} onChange={e => setAudioForm({...audioForm, audio_url: e.target.value})} />
+                  <input required type="url" className="w-full p-2 border rounded" value={audioForm.audio_url} onChange={e => setAudioForm({ ...audioForm, audio_url: e.target.value })} />
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4">
@@ -263,8 +263,8 @@ export default function QuranPage() {
                       <td className="px-6 py-4 text-gray-500">{reciter?.name || "Unknown"}</td>
                       <td className="px-6 py-4 text-sm"><a href={audio.audio_url} target="_blank" className="text-amber-600 hover:underline overflow-hidden text-ellipsis max-w-[200px] inline-block">{audio.audio_url}</a></td>
                       <td className="px-6 py-4 text-right space-x-3">
-                        <button onClick={() => { setAudioForm(audio); setShowAudioForm(true); }} className="text-gray-400 hover:text-amber-600"><Edit className="w-4 h-4 inline"/></button>
-                        <button onClick={() => deleteAudio(audio.id)} className="text-gray-400 hover:text-red-600"><Trash className="w-4 h-4 inline"/></button>
+                        <button onClick={() => { setAudioForm(audio); setShowAudioForm(true); }} className="text-gray-400 hover:text-amber-600"><Edit className="w-4 h-4 inline" /></button>
+                        <button onClick={() => deleteAudio(audio.id)} className="text-gray-400 hover:text-red-600"><Trash className="w-4 h-4 inline" /></button>
                       </td>
                     </tr>
                   )
