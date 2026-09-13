@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface CommunityContent {
   id?: number;
@@ -144,10 +145,8 @@ export default function InspirationPage() {
               </label>
             </div>
             <div className="flex justify-end pt-2">
-              <button type="submit" disabled={isSubmitting} className="bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition p-0 overflow-hidden disabled:cursor-not-allowed">
-                <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-6 py-2 flex items-center justify-center">
-                  Save Inspiration
-                </ButtonShimmer>
+              <button type="submit" disabled={isSubmitting} className="bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition px-6 py-2 disabled:cursor-not-allowed">
+                Save Inspiration
               </button>
             </div>
           </form>
@@ -185,6 +184,7 @@ export default function InspirationPage() {
           </div>
         )}
       </div>
+      <ProcessingModal isOpen={isSubmitting} />
     </div>
   );
 }
