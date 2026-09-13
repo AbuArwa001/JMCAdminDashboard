@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, Users, Music } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 import Image from "next/image";
 
 interface Reciter {
@@ -173,10 +174,8 @@ export default function QuranPage() {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setShowReciterForm(false)} className="px-4 py-2 text-gray-500" disabled={isSubmittingReciter}>Cancel</button>
-                <button type="submit" disabled={isSubmittingReciter} className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed">
-                  <ButtonShimmer isLoading={isSubmittingReciter} className="w-full h-full px-6 py-2 flex items-center justify-center">
-                    Save
-                  </ButtonShimmer>
+                <button type="submit" disabled={isSubmittingReciter} className="bg-amber-600 text-white rounded px-6 py-2 disabled:cursor-not-allowed">
+                  Save
                 </button>
               </div>
             </form>
@@ -238,10 +237,8 @@ export default function QuranPage() {
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <button type="button" onClick={() => setShowAudioForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmittingAudio}>Cancel</button>
-                <button type="submit" disabled={isSubmittingAudio} className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed">
-                  <ButtonShimmer isLoading={isSubmittingAudio} className="w-full h-full px-6 py-2 flex items-center justify-center">
-                    Save
-                  </ButtonShimmer>
+                <button type="submit" disabled={isSubmittingAudio} className="bg-amber-600 text-white rounded px-6 py-2 disabled:cursor-not-allowed">
+                  Save
                 </button>
               </div>
             </form>
@@ -277,6 +274,7 @@ export default function QuranPage() {
           </div>
         </div>
       )}
+      <ProcessingModal isOpen={isSubmittingReciter || isSubmittingAudio} />
     </div>
   );
 }
