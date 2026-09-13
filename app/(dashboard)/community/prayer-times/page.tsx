@@ -5,7 +5,6 @@ import api from "@/lib/api";
 import { format } from "date-fns";
 import { Plus, Trash, Eye, X, Edit, Check, RefreshCw } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface City {

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, ChevronRight } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
 import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface DuaCategory {

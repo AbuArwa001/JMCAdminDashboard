@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
-import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
 import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface CommunityContent {
