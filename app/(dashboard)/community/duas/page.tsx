@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { Plus, Trash, Edit, ChevronRight } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface DuaCategory {
   id: number;
@@ -157,10 +158,8 @@ export default function DuasPage() {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setShowCatForm(false)} className="px-3 py-1 text-sm text-gray-500" disabled={isSubmittingCat}>Cancel</button>
-                <button type="submit" disabled={isSubmittingCat} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
-                  <ButtonShimmer isLoading={isSubmittingCat} className="w-full h-full px-3 py-1 text-sm flex items-center justify-center">
-                    Save
-                  </ButtonShimmer>
+                <button type="submit" disabled={isSubmittingCat} className="bg-amber-600 text-white rounded font-medium disabled:cursor-not-allowed px-3 py-1 text-sm">
+                  Save
                 </button>
               </div>
             </form>
@@ -242,10 +241,8 @@ export default function DuasPage() {
                   </div>
                   <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
                     <button type="button" onClick={() => setShowDuaForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmittingDua}>Cancel</button>
-                    <button type="submit" disabled={isSubmittingDua} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
-                      <ButtonShimmer isLoading={isSubmittingDua} className="w-full h-full px-6 py-2 flex items-center justify-center">
-                        Save Dua
-                      </ButtonShimmer>
+                    <button type="submit" disabled={isSubmittingDua} className="bg-amber-600 text-white rounded font-medium disabled:cursor-not-allowed px-6 py-2">
+                      Save Dua
                     </button>
                   </div>
                 </form>
@@ -282,6 +279,7 @@ export default function DuasPage() {
           )}
         </div>
       </div>
+      <ProcessingModal isOpen={isSubmittingCat || isSubmittingDua} />
     </div>
   );
 }
