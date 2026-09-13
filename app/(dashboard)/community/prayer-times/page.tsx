@@ -5,7 +5,8 @@ import api from "@/lib/api";
 import { format } from "date-fns";
 import { Plus, Trash, Eye, X, Edit, Check, RefreshCw } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface City {
   id: number;
@@ -294,10 +295,8 @@ export default function PrayerTimesPage() {
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
                   <button type="button" onClick={() => setShowOverrideForm(false)} className="px-4 py-2 text-gray-500 font-medium" disabled={isSubmitting}>Cancel</button>
-                  <button type="submit" disabled={isSubmitting} className="bg-amber-600 text-white rounded font-medium p-0 overflow-hidden disabled:cursor-not-allowed">
-                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center">
-                      Save
-                    </ButtonShimmer>
+                  <button type="submit" disabled={isSubmitting} className="bg-amber-600 text-white rounded font-medium px-4 py-2 disabled:cursor-not-allowed">
+                    Save
                   </button>
                 </div>
               </form>
@@ -335,6 +334,7 @@ export default function PrayerTimesPage() {
           </div>
         </div>
       </div>
+      <ProcessingModal isOpen={isSubmitting} />
     </div>
   );
 }
