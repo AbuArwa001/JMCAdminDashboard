@@ -7,8 +7,8 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 export default function BulletinsPage() {
   const [bulletins, setBulletins] = useState<any[]>([]);
@@ -289,11 +289,9 @@ export default function BulletinsPage() {
                   <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary">
                     Cancel
                   </button>
-                  <button type="submit" disabled={isSubmitting} className="btn-primary bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed p-0 overflow-hidden">
-                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
-                      <Save className="w-4 h-4" />
-                      Upload Bulletin
-                    </ButtonShimmer>
+                  <button type="submit" disabled={isSubmitting} className="btn-primary bg-blue-600 hover:bg-blue-700 disabled:cursor-not-allowed">
+                    <Save className="w-4 h-4 mr-2" />
+                    Upload Bulletin
                   </button>
                 </div>
               </div>
@@ -301,6 +299,8 @@ export default function BulletinsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ProcessingModal isOpen={isSubmitting} />
 
       {/* Bulletins Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

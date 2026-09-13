@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import RichTextEditor from "@/components/RichTextEditor";
 import { motion, AnimatePresence } from "framer-motion";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface CommunityContent {
   id?: number;
@@ -228,11 +228,9 @@ export default function DarsasPage() {
                   <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="btn-secondary" disabled={isSubmitting}>
                     Cancel
                   </button>
-                  <button type="submit" disabled={isSubmitting} className="btn-primary p-0 overflow-hidden disabled:cursor-not-allowed">
-                    <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-4 py-2 flex items-center justify-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      {editingId ? "Update Darsa" : "Save Darsa"}
-                    </ButtonShimmer>
+                  <button type="submit" disabled={isSubmitting} className="btn-primary disabled:cursor-not-allowed">
+                    <FileText className="w-4 h-4 mr-2" />
+                    {editingId ? "Update Darsa" : "Save Darsa"}
                   </button>
                 </div>
               </div>
@@ -240,6 +238,8 @@ export default function DarsasPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ProcessingModal isOpen={isSubmitting} />
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

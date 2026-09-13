@@ -8,7 +8,7 @@ import Image from "next/image";
 import RichTextEditor from "@/components/RichTextEditor";
 
 import { GridCardSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -255,14 +255,14 @@ export default function EventsPage() {
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
             <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors" disabled={isSaving}>Cancel</button>
-            <button type="submit" disabled={isSaving} className="bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 hover:shadow-lg transition-all p-0 overflow-hidden disabled:cursor-not-allowed">
-              <ButtonShimmer isLoading={isSaving} className="w-full h-full px-6 py-2.5 flex items-center gap-2">
-                Save Event
-              </ButtonShimmer>
+            <button type="submit" disabled={isSaving} className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 hover:shadow-lg transition-all disabled:cursor-not-allowed">
+              Save Event
             </button>
           </div>
         </form>
       )}
+
+      <ProcessingModal isOpen={isSaving} />
 
       {galleryEvent && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
