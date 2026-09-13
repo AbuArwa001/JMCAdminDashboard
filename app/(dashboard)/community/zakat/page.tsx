@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { format } from "date-fns";
 import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
+import { TableSkeleton } from "@/components/ui/PremiumSkeletons";
+import { ProcessingModal } from "@/components/ui/ProcessingModal";
 
 interface NisabRate {
   id?: number;
@@ -145,15 +146,15 @@ export default function ZakatSettingsPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-amber-600 text-white rounded p-0 overflow-hidden disabled:cursor-not-allowed"
+              className="bg-amber-600 text-white rounded px-6 py-2 font-medium disabled:cursor-not-allowed"
             >
-              <ButtonShimmer isLoading={isSubmitting} className="w-full h-full px-6 py-2 flex items-center justify-center font-medium">
-                Save Settings
-              </ButtonShimmer>
+              Save Settings
             </button>
           </div>
         </form>
       </div>
+
+      <ProcessingModal isOpen={isSubmitting} />
     </div>
   );
 }
