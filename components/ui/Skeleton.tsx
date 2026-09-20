@@ -47,7 +47,7 @@ export function ButtonShimmer({
   className?: string;
   isLoading?: boolean;
 }) {
-  if (!isLoading) return <>{children}</>;
+  if (!isLoading) return <div className={className}>{children}</div>;
 
   return (
     <div className={cn("relative overflow-hidden cursor-not-allowed opacity-80", className)}>

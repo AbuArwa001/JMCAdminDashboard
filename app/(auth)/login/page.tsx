@@ -11,7 +11,6 @@ import Cookies from "js-cookie";
 import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { AnimatePresence, motion } from "framer-motion";
-import { ButtonShimmer } from "@/components/ui/Skeleton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -186,12 +185,19 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full btn-primary justify-center py-0 text-base shadow-lg shadow-[#006838]/20 disabled:cursor-not-allowed p-0 overflow-hidden"
+            className="w-full btn-primary justify-center py-3.5 text-sm font-semibold rounded-xl shadow-md hover:shadow-lg shadow-[#006838]/20 transition-all duration-200 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <ButtonShimmer isLoading={isLoading} className="w-full h-full px-4 py-3.5 flex items-center justify-center gap-2">
-              <LogIn className="w-5 h-5" />
-              Sign In to Portal
-            </ButtonShimmer>
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Verifying Session...</span>
+              </>
+            ) : (
+              <>
+                <LogIn className="w-4 h-4" />
+                <span>Sign In to Portal</span>
+              </>
+            )}
           </button>
         </form>
 
