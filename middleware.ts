@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Define paths that don't require authentication
-    const publicPaths = ['/login', '/signup', '/logo.png', '/api/auth'];
+    const publicPaths = ['/login', '/signup', '/reset-password', '/forgot-password', '/logo.png', '/api/auth'];
     const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
     // Get Firebase token from cookies or headers
