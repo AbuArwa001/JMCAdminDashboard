@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Menu, Search, LogOut, User as UserIcon, Shield, Command, CheckCircle2, Sparkles, Mic, CalendarDays, Newspaper, Heart, AlertCircle } from "lucide-react";
+import { Bell, Menu, Search, LogOut, User as UserIcon, Shield, Command, CheckCircle2, Sparkles, Mic, CalendarDays, Newspaper, Heart, AlertCircle, UserCheck, KeyRound, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRBAC } from "@/hooks/useRBAC";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -32,6 +33,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/community/zakat": "Zakat Calculator",
   "/settings": "Portal Settings",
   "/settings/features": "Feature Toggles",
+  "/users": "Staff & Access Control",
+  "/roles": "Roles & Permissions Matrix",
 };
 
 interface NotificationLog {
@@ -65,6 +68,7 @@ function NotifIcon({ type }: { type?: string | null }) {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const { user, logout } = useAuth();
+  const { staffUser, isSuperAdmin, hasPermission } = useRBAC();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -289,18 +293,29 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <div className="relative">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2.5 px-2 py-1.5 text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200 hover:border-gray-300"
+            className="flex items-center gap-2.5 px-2.5 py-1.5 text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200 hover:border-gray-300"
           >
-            <div className="w-7 h-7 bg-gradient-to-tr from-[#c99335] to-[#e39e3b] rounded-lg flex items-center justify-center font-bold text-[#1a1512] text-xs shadow-sm">
-              {user?.displayName ? user.displayName.charAt(0).toUpperCase() : "A"}
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[#1a1512] text-xs shadow-sm transition-transform hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, ${staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981")}, #c99335)`,
+              }}
+            >
+              {(staffUser?.full_name || user?.displayName || user?.email || "A").charAt(0).toUpperCase()}
             </div>
             <div className="hidden md:flex flex-col text-left">
-              <span className="text-xs font-bold text-gray-900 leading-tight">
-                {user?.displayName || user?.email?.split("@")[0] || "Administrator"}
+              <span className="text-xs font-bold text-gray-900 leading-tight truncate max-w-[140px]">
+                {staffUser?.full_name || user?.displayName || user?.email?.split("@")[0] || "Administrator"}
               </span>
-              <span className="text-[10px] font-semibold text-[#c99335] uppercase tracking-wider leading-tight">
-                Admin
-              </span>
+              <div className="flex items-center gap-1">
+                {isSuperAdmin && <Crown className="w-2.5 h-2.5 text-[#c99335]" />}
+                <span
+                  className="text-[10px] font-semibold uppercase tracking-wider leading-tight truncate max-w-[130px]"
+                  style={{ color: staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981") }}
+                >
+                  {staffUser?.role?.role_name || (isSuperAdmin ? "Super Admin" : "Staff Member")}
+                </span>
+              </div>
             </div>
           </button>
 
@@ -313,34 +328,67 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 8, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-20 overflow-hidden"
+                  className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-20 overflow-hidden"
                 >
                   <div className="px-4 py-3 bg-gradient-to-r from-[#1a1512]/5 via-[#c99335]/5 to-transparent border-b border-gray-100">
-                    <p className="text-sm font-bold text-gray-900">
-                      {user?.displayName || "Executive Administrator"}
+                    <p className="text-sm font-bold text-gray-900 truncate">
+                      {staffUser?.full_name || user?.displayName || "Executive Administrator"}
                     </p>
                     <p className="text-xs text-gray-500 truncate font-medium mt-0.5">
-                      {user?.email || "admin@jmc.org"}
+                      {staffUser?.email || user?.email || "admin@jmc.org"}
                     </p>
-                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full w-fit">
-                      <Shield className="w-3 h-3 text-emerald-600" /> Authenticated Session
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full w-fit border"
+                      style={{
+                        backgroundColor: `${staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981")}15`,
+                        borderColor: `${staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981")}40`,
+                        color: staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981"),
+                      }}
+                    >
+                      {isSuperAdmin ? <Crown className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                      <span>{staffUser?.role?.role_name || (isSuperAdmin ? "Super Admin" : "Active Staff")}</span>
                     </div>
                   </div>
                   <div className="p-1.5 space-y-0.5">
                     <a
                       href="/settings"
+                      onClick={() => setShowDropdown(false)}
                       className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
                     >
                       <UserIcon className="w-4 h-4 text-gray-500" />
                       Account &amp; Profile
                     </a>
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                    >
-                      <LogOut className="w-4 h-4 text-rose-500" />
-                      Sign Out of Portal
-                    </button>
+
+                    {(isSuperAdmin || hasPermission("users.manage")) && (
+                      <a
+                        href="/users"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-amber-50 hover:text-amber-900 rounded-xl transition-colors"
+                      >
+                        <UserCheck className="w-4 h-4 text-amber-600" />
+                        Staff Management
+                      </a>
+                    )}
+
+                    {(isSuperAdmin || hasPermission("roles.manage")) && (
+                      <a
+                        href="/roles"
+                        onClick={() => setShowDropdown(false)}
+                        className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-900 rounded-xl transition-colors"
+                      >
+                        <KeyRound className="w-4 h-4 text-emerald-600" />
+                        Roles &amp; Matrix
+                      </a>
+                    )}
+
+                    <div className="pt-1 mt-1 border-t border-gray-100">
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                      >
+                        <LogOut className="w-4 h-4 text-rose-500" />
+                        Sign Out of Portal
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               </>

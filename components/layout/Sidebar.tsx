@@ -24,11 +24,15 @@ import {
   CalendarDays,
   LogOut,
   Newspaper,
+  UserCheck,
+  KeyRound,
+  Crown,
+  Shield,
 } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { getMe } from "@/lib/api_data";
+import { useRBAC } from "@/hooks/useRBAC";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MenuItem {
   name: string;
@@ -37,6 +41,7 @@ interface MenuItem {
   iconColor?: string;
   badge?: string;
   badgeColor?: string;
+  permission?: string | string[];
 }
 
 interface MenuSection {
@@ -44,42 +49,161 @@ interface MenuSection {
   items: MenuItem[];
 }
 
-const MENU_SECTIONS: MenuSection[] = [
+const ALL_MENU_SECTIONS: MenuSection[] = [
   {
     title: "Main Overview",
     items: [
-      { name: "Dashboard", href: "/", icon: LayoutDashboard, iconColor: "text-[#c99335]" },
+      {
+        name: "Dashboard",
+        href: "/",
+        icon: LayoutDashboard,
+        iconColor: "text-[#c99335]",
+        permission: "dashboard.view",
+      },
     ],
   },
   {
     title: "Finance & Donations",
     items: [
-      { name: "Donation Drives", href: "/drives", icon: Heart, iconColor: "text-rose-400", badge: "Active", badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40" },
-      { name: "Categories", href: "/categories", icon: List, iconColor: "text-sky-400" },
-      { name: "Donations Log", href: "/donations", icon: CreditCard, iconColor: "text-emerald-400" },
-      { name: "Donors & Accounts", href: "/accounts", icon: Users, iconColor: "text-purple-400" },
-      { name: "Internal Transfers", href: "/transfers", icon: ArrowRightLeft, iconColor: "text-amber-400" },
+      {
+        name: "Donation Drives",
+        href: "/drives",
+        icon: Heart,
+        iconColor: "text-rose-400",
+        badge: "Active",
+        badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        permission: ["drives.view", "drives.manage"],
+      },
+      {
+        name: "Categories",
+        href: "/categories",
+        icon: List,
+        iconColor: "text-sky-400",
+        permission: "categories.manage",
+      },
+      {
+        name: "Donations Log",
+        href: "/donations",
+        icon: CreditCard,
+        iconColor: "text-emerald-400",
+        permission: ["donations.view", "donations.manage"],
+      },
+      {
+        name: "Donors & Accounts",
+        href: "/accounts",
+        icon: Users,
+        iconColor: "text-purple-400",
+        permission: ["accounts.view", "accounts.manage"],
+      },
+      {
+        name: "Internal Transfers",
+        href: "/transfers",
+        icon: ArrowRightLeft,
+        iconColor: "text-amber-400",
+        permission: ["transfers.view", "transfers.manage"],
+      },
     ],
   },
   {
     title: "Community & Content",
     items: [
-      { name: "Darsas & Classes", href: "/community/darsas", icon: BookOpen, iconColor: "text-teal-400" },
-      { name: "Inspiration Quote", href: "/community/inspiration", icon: Quote, iconColor: "text-pink-400" },
-      { name: "Friday Khutba", href: "/community/khutba", icon: Mic, iconColor: "text-amber-400" },
-      { name: "Friday Bulletins", href: "/community/bulletins", icon: Newspaper, iconColor: "text-blue-400" },
-      { name: "Events", href: "/community/events", icon: CalendarDays, iconColor: "text-sky-400" },
-      { name: "Duas", href: "/community/duas", icon: HandHeart, iconColor: "text-rose-400" },
-      { name: "Quran", href: "/community/quran", icon: BookMarked, iconColor: "text-emerald-400" },
-      { name: "Prayer Timings", href: "/community/prayer-times", icon: Clock, iconColor: "text-[#c99335]" },
-      { name: "Zakat Calculator", href: "/community/zakat", icon: Calculator, iconColor: "text-green-400" },
+      {
+        name: "Darsas & Classes",
+        href: "/community/darsas",
+        icon: BookOpen,
+        iconColor: "text-teal-400",
+        permission: "darsas.manage",
+      },
+      {
+        name: "Inspiration Quote",
+        href: "/community/inspiration",
+        icon: Quote,
+        iconColor: "text-pink-400",
+        permission: "inspiration.manage",
+      },
+      {
+        name: "Friday Khutba",
+        href: "/community/khutba",
+        icon: Mic,
+        iconColor: "text-amber-400",
+        permission: "khutba.manage",
+      },
+      {
+        name: "Friday Bulletins",
+        href: "/community/bulletins",
+        icon: Newspaper,
+        iconColor: "text-blue-400",
+        permission: "bulletins.manage",
+      },
+      {
+        name: "Events",
+        href: "/community/events",
+        icon: CalendarDays,
+        iconColor: "text-sky-400",
+        permission: "events.manage",
+      },
+      {
+        name: "Duas",
+        href: "/community/duas",
+        icon: HandHeart,
+        iconColor: "text-rose-400",
+        permission: "duas.manage",
+      },
+      {
+        name: "Quran",
+        href: "/community/quran",
+        icon: BookMarked,
+        iconColor: "text-emerald-400",
+        permission: "quran.manage",
+      },
+      {
+        name: "Prayer Timings",
+        href: "/community/prayer-times",
+        icon: Clock,
+        iconColor: "text-[#c99335]",
+        permission: "prayer_times.manage",
+      },
+      {
+        name: "Zakat Calculator",
+        href: "/community/zakat",
+        icon: Calculator,
+        iconColor: "text-green-400",
+        permission: "zakat.manage",
+      },
     ],
   },
   {
-    title: "System & Admin",
+    title: "System & Administration",
     items: [
-      { name: "Feature Toggles", href: "/settings/features", icon: ToggleRight, iconColor: "text-violet-400" },
-      { name: "Portal Settings", href: "/settings", icon: Settings, iconColor: "text-gray-400" },
+      {
+        name: "Staff Management",
+        href: "/users",
+        icon: UserCheck,
+        iconColor: "text-amber-400",
+        badge: "Super Admin",
+        badgeColor: "bg-[#c99335]/20 text-[#e39e3b] border-[#c99335]/40",
+        permission: "users.manage",
+      },
+      {
+        name: "Roles & Permissions",
+        href: "/roles",
+        icon: KeyRound,
+        iconColor: "text-emerald-400",
+        permission: "roles.manage",
+      },
+      {
+        name: "Feature Toggles",
+        href: "/settings/features",
+        icon: ToggleRight,
+        iconColor: "text-violet-400",
+        permission: "features.manage",
+      },
+      {
+        name: "Portal Settings",
+        href: "/settings",
+        icon: Settings,
+        iconColor: "text-gray-400",
+      },
     ],
   },
 ];
@@ -90,31 +214,27 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [user, setUser] = useState({
-    name: "Administrator",
-    email: "admin@jmc.org",
-    role: "Super Admin",
-  });
-
   const pathname = usePathname();
+  const { staffUser, isSuperAdmin, hasAnyPermission, isLoading } = useRBAC();
+  const { logout } = useAuth();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = await getMe();
-        if (userData) {
-          setUser({
-            name: userData.full_name || "Administrator",
-            email: userData.email || "admin@jmc.org",
-            role: userData.role_name || "Super Admin",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data in sidebar", error);
-      }
+  // Filter sections and items based on role-based access control
+  const filteredSections = ALL_MENU_SECTIONS.map((section) => {
+    const visibleItems = section.items.filter((item) => {
+      if (isSuperAdmin) return true;
+      if (!item.permission) return true;
+      const perms = Array.isArray(item.permission) ? item.permission : [item.permission];
+      return hasAnyPermission(...perms);
+    });
+    return {
+      ...section,
+      items: visibleItems,
     };
-    fetchUserData();
-  }, []);
+  }).filter((section) => section.items.length > 0);
+
+  const displayName = staffUser?.full_name || "Administrator";
+  const roleName = staffUser?.role?.role_name || (isSuperAdmin ? "Super Admin" : "Staff Member");
+  const roleColor = staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981");
 
   return (
     <aside
@@ -158,7 +278,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Navigation Menu */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
-        {MENU_SECTIONS.map((section, idx) => (
+        {filteredSections.map((section, idx) => (
           <div key={idx}>
             <span className="px-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">
               {section.title}
@@ -188,12 +308,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             isActive ? "text-[#c99335]" : (item.iconColor || "text-gray-400")
                           )}
                         />
-                        <span>{item.name}</span>
+                        <span className="truncate">{item.name}</span>
                       </div>
                       {item.badge ? (
                         <span
                           className={clsx(
-                            "px-1.5 py-0.5 text-[10px] font-semibold rounded border",
+                            "px-1.5 py-0.5 text-[9px] font-semibold rounded border uppercase tracking-wider",
                             item.badgeColor || "bg-amber-500/20 text-amber-300 border-amber-500/40"
                           )}
                         >
@@ -214,27 +334,36 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Footer — User Profile + Logout */}
       <div className="p-4 border-t border-[#2d2520] bg-[#120e0c] flex-shrink-0 space-y-3">
         {/* User Card */}
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-white/5 border border-white/10">
+        <div className="flex items-center gap-3 px-2.5 py-2.5 rounded-xl bg-white/5 border border-white/10">
           <div className="relative flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#c99335] to-[#e39e3b] flex items-center justify-center text-[#1a1512] font-bold text-sm shadow-md">
-              {user.name.charAt(0)}
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[#1a1512] font-bold text-sm shadow-md transition-transform hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, ${roleColor}, #c99335)`,
+              }}
+            >
+              {displayName.charAt(0).toUpperCase()}
             </div>
-            <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-[#120e0c] rounded-full" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-[#120e0c] rounded-full" />
           </div>
-          <div className="overflow-hidden">
-            <p className="text-xs font-bold text-gray-100 truncate">{user.name}</p>
-            <p className="text-[10px] text-[#c99335] font-medium truncate">{user.role}</p>
+          <div className="overflow-hidden flex-1 min-w-0">
+            <p className="text-xs font-bold text-gray-100 truncate">{displayName}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {isSuperAdmin && <Crown className="w-3 h-3 text-[#c99335] flex-shrink-0" />}
+              <p
+                className="text-[10px] font-semibold truncate tracking-wide"
+                style={{ color: roleColor }}
+              >
+                {roleName}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Logout */}
+        {/* Logout Button */}
         <button
-          onClick={() => {
-            // Firebase sign-out handled by useAuth hook
-            document.cookie = "firebaseToken=; Max-Age=0; path=/";
-            window.location.href = "/login";
-          }}
-          className="flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-rose-300 bg-rose-950/40 border border-rose-900/50 hover:bg-rose-900/60 rounded-md transition-colors"
+          onClick={logout}
+          className="flex w-full items-center justify-center gap-2 px-4 py-2 text-xs font-semibold text-rose-300 bg-rose-950/40 border border-rose-900/50 hover:bg-rose-900/60 rounded-xl transition-all shadow-sm active:scale-98"
         >
           <LogOut className="w-3.5 h-3.5" />
           Sign Out Session
