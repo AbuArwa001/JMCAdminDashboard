@@ -15,6 +15,7 @@ export interface PermissionGroup {
 export interface RoleSummary {
   id: string;
   role_name: string;
+  description?: string | null;
   color?: string | null;
   is_system?: boolean;
 }

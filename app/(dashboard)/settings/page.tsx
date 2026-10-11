@@ -1,14 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Save, User, Lock, Bell, Shield, Settings } from "lucide-react";
+import {
+  Save,
+  User,
+  Lock,
+  Bell,
+  Shield,
+  Settings,
+  Crown,
+  KeyRound,
+  UserCheck,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight,
+  ShieldAlert,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { getMe, updateMe } from "@/lib/api_data";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "sonner";
+import { useRBAC } from "@/hooks/useRBAC";
+import Link from "next/link";
 
 export default function SettingsPage() {
+  const { staffUser, isSuperAdmin, permissions, hasPermission } = useRBAC();
+
   const [activeTab, setActiveTab] = useState("profile");
   const [isFetching, setIsFetching] = useState(true);
   const [formData, setFormData] = useState({
@@ -29,9 +47,9 @@ export default function SettingsPage() {
         setFormData((prev) => ({
           ...prev,
           userId: userData.id || "",
-          name: userData.full_name || "Admin User",
-          email: userData.email || "admin@jmc.org",
-          phone: userData.phone_number || "+254 700 000000",
+          name: userData.full_name || staffUser?.full_name || "Admin User",
+          email: userData.email || staffUser?.email || "admin@jmc.org",
+          phone: userData.phone_number || staffUser?.phone_number || "+254 700 000000",
         }));
       } catch (error) {
         console.error("Failed to fetch user data", error);
@@ -40,7 +58,7 @@ export default function SettingsPage() {
       }
     };
     fetchUserData();
-  }, []);
+  }, [staffUser]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -63,48 +81,68 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: "profile", label: "Profile", icon: User },
+    { id: "clearance", label: "Security Clearance", icon: Shield },
     { id: "security", label: "Security", icon: Lock },
     { id: "notifications", label: "Notifications", icon: Bell },
   ];
 
+  const roleName = staffUser?.role?.role_name || (isSuperAdmin ? "Super Admin" : "Staff Administrator");
+  const roleColor = staffUser?.role?.color || (isSuperAdmin ? "#c99335" : "#10b981");
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 pb-12">
       {/* Page Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1512] to-[#2d2520] flex items-center justify-center shadow-md">
           <Settings className="w-5 h-5 text-gray-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-[#1a1512] tracking-tight" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+          <h1
+            className="text-2xl font-bold text-[#1a1512] tracking-tight"
+            style={{ fontFamily: "var(--font-cinzel), serif" }}
+          >
             Portal Settings
           </h1>
           <p className="text-sm text-gray-500 font-medium mt-0.5">
-            Manage your account preferences and security configuration.
+            Manage your account preferences, credentials, and verify your role permissions
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar Navigation */}
-        <div className="md:col-span-3 space-y-3">
+        <div className="md:col-span-4 space-y-3">
           {/* Avatar Card */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#c99335] to-[#e39e3b] flex items-center justify-center text-[#1a1512] font-bold text-lg shadow-md">
+          <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3.5">
+              <div
+                className="w-12 h-12 rounded-2xl flex items-center justify-center text-[#1a1512] font-bold text-lg shadow-md"
+                style={{
+                  background: `linear-gradient(135deg, ${roleColor}, #c99335)`,
+                }}
+              >
                 {formData.name.charAt(0)}
               </div>
-              <div className="overflow-hidden">
+              <div className="overflow-hidden min-w-0 flex-1">
                 <p className="text-sm font-bold text-gray-900 truncate">{formData.name}</p>
                 <p className="text-xs text-gray-400 truncate">{formData.email}</p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full mt-1">
-                  <Shield className="w-2.5 h-2.5" /> Administrator
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-1.5 border"
+                  style={{
+                    backgroundColor: `${roleColor}15`,
+                    borderColor: `${roleColor}40`,
+                    color: roleColor,
+                  }}
+                >
+                  {isSuperAdmin ? <Crown className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                  <span>{roleName}</span>
                 </span>
               </div>
             </div>
           </div>
 
           {/* Tab Nav */}
-          <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
+          <div className="bg-white rounded-3xl p-2 shadow-sm border border-gray-100">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -112,22 +150,63 @@ export default function SettingsPage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={clsx(
-                    "w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200",
+                    "w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-2xl transition-all duration-200",
                     isActive
-                      ? "bg-[#1a1512] text-white"
+                      ? "bg-[#1a1512] text-white shadow-sm"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
-                  <tab.icon className={clsx("w-4 h-4", isActive ? "text-[#c99335]" : "text-gray-400")} />
-                  {tab.label}
+                  <tab.icon
+                    className={clsx("w-4 h-4", isActive ? "text-[#c99335]" : "text-gray-400")}
+                  />
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
           </div>
+
+          {/* Super Admin Quick Links Card */}
+          {(isSuperAdmin || hasPermission("users.manage") || hasPermission("roles.manage")) && (
+            <div className="p-4 bg-gradient-to-br from-[#1a1512] to-[#251d18] rounded-3xl text-white shadow-md border border-[#c99335]/30 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#c99335]">
+                <Crown className="w-4 h-4" />
+                <span>Executive Management</span>
+              </div>
+              <p className="text-[11px] text-gray-300 leading-relaxed">
+                You have elevated privileges to configure access tiers and manage users.
+              </p>
+              <div className="space-y-1.5 pt-1">
+                {(isSuperAdmin || hasPermission("users.manage")) && (
+                  <Link
+                    href="/users"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <UserCheck className="w-3.5 h-3.5 text-[#c99335]" />
+                      Manage Staff
+                    </span>
+                    <ArrowRight className="w-3 h-3 text-gray-400" />
+                  </Link>
+                )}
+                {(isSuperAdmin || hasPermission("roles.manage")) && (
+                  <Link
+                    href="/roles"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors"
+                  >
+                    <span className="flex items-center gap-2">
+                      <KeyRound className="w-3.5 h-3.5 text-[#c99335]" />
+                      Roles Matrix
+                    </span>
+                    <ArrowRight className="w-3 h-3 text-gray-400" />
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Main Content */}
-        <div className="md:col-span-9">
+        <div className="md:col-span-8">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 12 }}
@@ -143,7 +222,10 @@ export default function SettingsPage() {
                     <User className="w-4 h-4 text-[#c99335]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm tracking-wide" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <h3
+                      className="font-bold text-sm tracking-wide"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
                       Profile Information
                     </h3>
                     <p className="text-[11px] text-gray-400">Update your personal details and contact info</p>
@@ -198,12 +280,104 @@ export default function SettingsPage() {
                         )}
                       </div>
                     </div>
+
                     <div className="flex justify-end pt-4 border-t border-gray-100">
-                      <button type="submit" disabled={isFetching} className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
-                        <Save className="w-4 h-4" /> Save Changes
+                      <button type="submit" className="btn-primary">
+                        <Save className="w-4 h-4" /> Save Profile Changes
                       </button>
                     </div>
                   </form>
+                </div>
+              </>
+            )}
+
+            {/* Security Clearance Tab */}
+            {activeTab === "clearance" && (
+              <>
+                <div className="form-section-header">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3
+                      className="font-bold text-sm tracking-wide"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
+                      Active Security Clearance
+                    </h3>
+                    <p className="text-[11px] text-gray-400">
+                      Role-based access controls and permissions assigned to your account
+                    </p>
+                  </div>
+                </div>
+
+                <div className="form-section-body space-y-6">
+                  {/* Role Card Banner */}
+                  <div
+                    className="p-5 rounded-2xl border flex items-start gap-4"
+                    style={{
+                      backgroundColor: `${roleColor}10`,
+                      borderColor: `${roleColor}30`,
+                    }}
+                  >
+                    <div
+                      className="p-3 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{
+                        backgroundColor: `${roleColor}25`,
+                        color: roleColor,
+                      }}
+                    >
+                      {isSuperAdmin ? <Crown className="w-6 h-6" /> : <Shield className="w-6 h-6" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-base font-bold text-gray-900">{roleName}</h4>
+                        {isSuperAdmin && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-[#1a1512] text-[#c99335] px-2 py-0.5 rounded-full">
+                            Full Root Clearance
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                        {staffUser?.role?.description ||
+                          (isSuperAdmin
+                            ? "Unrestricted administrative clearance across all treasury, community, content, and system configuration modules."
+                            : "Standard administrative privileges assigned by the Executive Committee.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Permissions List */}
+                  <div>
+                    <h5 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                      Granted Module Permissions ({isSuperAdmin ? "All (*)" : permissions.length})
+                    </h5>
+
+                    {isSuperAdmin ? (
+                      <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#c99335] flex-shrink-0" />
+                        <span>
+                          As a Super Administrator, you automatically possess wildcard clearance across every section, API endpoint, and management capability.
+                        </span>
+                      </div>
+                    ) : permissions.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-500 text-xs italic">
+                        No specific module permissions assigned. Contact your Super Administrator.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {permissions.map((p) => (
+                          <div
+                            key={p}
+                            className="p-2.5 px-3 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-2 text-xs font-semibold text-gray-700"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                            <span className="truncate">{p}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}
@@ -212,29 +386,34 @@ export default function SettingsPage() {
             {activeTab === "security" && (
               <>
                 <div className="form-section-header">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-rose-400" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                    <Lock className="w-4 h-4 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm tracking-wide" style={{ fontFamily: "var(--font-cinzel), serif" }}>
-                      Security Settings
+                    <h3
+                      className="font-bold text-sm tracking-wide"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
+                      Security &amp; Password
                     </h3>
-                    <p className="text-[11px] text-gray-400">Manage your password and account security</p>
+                    <p className="text-[11px] text-gray-400">Update your access password and session credentials</p>
                   </div>
                 </div>
                 <div className="form-section-body">
-                  <form onSubmit={handleSubmit} className="space-y-5 max-w-md">
-                    {[
-                      { name: "currentPassword", label: "Current Password" },
-                      { name: "newPassword", label: "New Password" },
-                      { name: "confirmPassword", label: "Confirm New Password" },
-                    ].map((field) => (
-                      <div key={field.name}>
-                        <label className="form-label">{field.label}</label>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {["currentPassword", "newPassword", "confirmPassword"].map((field) => (
+                      <div key={field}>
+                        <label className="form-label">
+                          {field === "currentPassword"
+                            ? "Current Password"
+                            : field === "newPassword"
+                            ? "New Password"
+                            : "Confirm New Password"}
+                        </label>
                         <input
                           type="password"
-                          name={field.name}
-                          value={(formData as any)[field.name]}
+                          name={field}
+                          value={(formData as any)[field]}
                           onChange={handleChange}
                           className="form-input"
                           placeholder="••••••••"
@@ -242,7 +421,6 @@ export default function SettingsPage() {
                       </div>
                     ))}
 
-                    {/* Password Strength Info */}
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
                       <p className="text-xs font-bold text-amber-700 mb-2">Password Requirements</p>
                       <ul className="text-xs text-amber-600 space-y-1">
@@ -270,7 +448,10 @@ export default function SettingsPage() {
                     <Bell className="w-4 h-4 text-sky-400" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm tracking-wide" style={{ fontFamily: "var(--font-cinzel), serif" }}>
+                    <h3
+                      className="font-bold text-sm tracking-wide"
+                      style={{ fontFamily: "var(--font-cinzel), serif" }}
+                    >
                       Notification Preferences
                     </h3>
                     <p className="text-[11px] text-gray-400">Control alerts and system notifications</p>
@@ -282,7 +463,7 @@ export default function SettingsPage() {
                   </div>
                   <h3 className="text-base font-bold text-gray-900 mb-2">You&apos;re all caught up!</h3>
                   <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                    Notification preferences will be configurable in a future portal update.
+                    Notification preferences are active with Firebase Cloud Messaging (FCM).
                   </p>
                 </div>
               </>

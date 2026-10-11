@@ -31,6 +31,7 @@ import { format } from "date-fns";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import PermissionGuard from "@/components/auth/PermissionGuard";
 
 export default function TransfersPage() {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
@@ -131,7 +132,12 @@ export default function TransfersPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <PermissionGuard
+      permissions={["transfers.view", "transfers.manage"]}
+      fallbackTitle="Transfer Portal Restricted"
+      fallbackDescription="You do not possess Treasury & Fund Transfer privileges."
+    >
+      <div className="space-y-8 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
         <div className="flex items-center gap-3">
@@ -482,5 +488,6 @@ export default function TransfersPage() {
         )}
       </div>
     </div>
+    </PermissionGuard>
   );
 }
