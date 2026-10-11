@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import FirebaseProvider from "@/components/FirebaseProvider";
+import { RBACProvider } from "@/context/RBACContext";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -35,7 +36,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cinzel.variable} ${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-gray-50 text-gray-900">
-        <FirebaseProvider>{children}</FirebaseProvider>
+        <FirebaseProvider>
+          <RBACProvider>
+            {children}
+          </RBACProvider>
+        </FirebaseProvider>
         <Toaster position="top-right" richColors />
         <Analytics />
       </body>
