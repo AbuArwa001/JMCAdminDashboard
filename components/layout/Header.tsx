@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Menu, Search, LogOut, User as UserIcon, Shield, Command, CheckCircle2, Sparkles, Mic, CalendarDays, Newspaper, Heart, AlertCircle, UserCheck, KeyRound, Crown } from "lucide-react";
+import { Bell, Menu, Search, LogOut, User as UserIcon, Shield, Command, CheckCircle2, Sparkles, Mic, CalendarDays, Newspaper, Heart, AlertCircle, UserCheck, KeyRound, Crown, PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRBAC } from "@/hooks/useRBAC";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 
 interface HeaderProps {
   onMenuClick: () => void;
+  isSidebarCollapsed?: boolean;
 }
 
 // Map routes to readable page titles
@@ -66,7 +67,7 @@ function NotifIcon({ type }: { type?: string | null }) {
   }
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, isSidebarCollapsed }: HeaderProps) {
   const { user, logout } = useAuth();
   const { staffUser, isSuperAdmin, hasPermission } = useRBAC();
   const pathname = usePathname();
@@ -146,9 +147,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <button
           onClick={onMenuClick}
           className="p-2 text-gray-500 hover:text-[#1a1512] hover:bg-gray-100 rounded-lg transition-all duration-200"
-          aria-label="Toggle menu"
+          aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <Menu className="w-5 h-5" />
+          {isSidebarCollapsed ? (
+            <PanelLeftOpen className="w-5 h-5 text-[#c99335]" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
         </button>
 
         <div className="flex items-center gap-2.5">
