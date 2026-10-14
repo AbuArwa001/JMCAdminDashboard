@@ -34,8 +34,9 @@ api.interceptors.response.use(
             if (typeof window !== 'undefined') {
                 if (!window.location.pathname.includes('/login')) {
                     Cookies.remove('firebaseToken');
+                    localStorage.removeItem('firebaseToken');
                     localStorage.removeItem('firebaseUser');
-                    window.location.href = '/login';
+                    window.location.href = '/login?error=session_expired';
                 }
             }
         }
