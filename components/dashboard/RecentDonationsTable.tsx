@@ -95,125 +95,125 @@ export default function RecentDonationsTable({
           <tbody className="divide-y divide-slate-100/80">
             {isLoading
               ? Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
-                  <td className="py-4 pl-4">
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="w-8 h-8 rounded-xl" />
-                      <Skeleton className="h-4 w-28 rounded-lg" />
-                    </div>
-                  </td>
-                  <td className="py-4">
-                    <Skeleton className="h-4 w-20 rounded-lg" />
-                  </td>
-                  <td className="py-4">
-                    <Skeleton className="h-4 w-24 rounded-lg" />
-                  </td>
-                  <td className="py-4">
-                    <Skeleton className="h-4 w-16 rounded-lg" />
-                  </td>
-                  <td className="py-4">
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                  </td>
-                  <td className="py-4">
-                    <Skeleton className="h-4 w-16 rounded-lg" />
-                  </td>
-                  <td className="py-4 pr-4">
-                    <Skeleton className="h-8 w-8 rounded-full ml-auto" />
-                  </td>
-                </tr>
-              ))
-              : localTransactions.map((transaction) => {
-                // Resolve donor name: prefer user_name (API-resolved full_name),
-                // then fall back to account_name only if it doesn't look like a donation title
-                const driveTitle =
-                  typeof transaction.donation === "object"
-                    ? (transaction.donation as any)?.title
-                    : null;
-                const rawApiName =
-                  transaction.user_name ||
-                  transaction.user?.full_name;
-                let name: string;
-                if (rawApiName && rawApiName.trim().toLowerCase() !== "anonymous") {
-                  name = rawApiName.trim();
-                } else if (
-                  transaction.account_name &&
-                  transaction.account_name !== driveTitle &&
-                  transaction.account_name.toLowerCase() !== "donation"
-                ) {
-                  name = transaction.account_name.trim();
-                } else {
-                  name = "Anonymous Donor";
-                }
-                const initial = name.charAt(0).toUpperCase() || "A";
-
-                return (
-                  <tr
-                    key={transaction.id}
-                    className="group hover:bg-amber-500/5 transition-colors"
-                  >
-                    <td className="py-3.5 pl-4">
+                  <tr key={i}>
+                    <td className="py-4 pl-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-extrabold text-slate-950 text-xs shadow-sm shadow-amber-500/20">
-                          {initial}
-                        </div>
-                        <span className="font-bold text-sm text-slate-900 group-hover:text-amber-700 transition-colors">
-                          {name}
-                        </span>
+                        <Skeleton className="w-8 h-8 rounded-xl" />
+                        <Skeleton className="h-4 w-28 rounded-lg" />
                       </div>
                     </td>
-                    <td className="py-3.5">
-                      <div className="font-extrabold text-sm text-slate-900">
-                        KES {transaction.amount.toLocaleString()}
-                      </div>
+                    <td className="py-4">
+                      <Skeleton className="h-4 w-20 rounded-lg" />
                     </td>
-                    <td className="py-3.5">
-                      <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200/60 px-2.5 py-1 rounded-lg text-nowrap">
-                        {transaction.category}
-                      </span>
+                    <td className="py-4">
+                      <Skeleton className="h-4 w-24 rounded-lg" />
                     </td>
-                    <td className="py-3.5">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                        {getMethodIcon(transaction.payment_method)}
-                        <span>{transaction.payment_method}</span>
-                      </div>
+                    <td className="py-4">
+                      <Skeleton className="h-4 w-16 rounded-lg" />
                     </td>
-                    <td className="py-3.5">
-                      <span
-                        className={clsx(
-                          "text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm inline-flex items-center gap-1",
-                          transaction.payment_status === "Completed"
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
-                            : "bg-amber-500/10 text-amber-600 border-amber-500/30",
-                        )}
-                      >
-                        <span className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", transaction.payment_status === "Completed" ? "bg-emerald-500" : "bg-amber-500")}></span>
-                        {transaction.payment_status}
-                      </span>
+                    <td className="py-4">
+                      <Skeleton className="h-6 w-20 rounded-full" />
                     </td>
-                    <td className="py-3.5 text-xs text-slate-400 font-mono font-medium">
-                      {transaction.donated_at
-                        ? new Date(transaction.donated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-                        : "Just now"}
+                    <td className="py-4">
+                      <Skeleton className="h-4 w-16 rounded-lg" />
                     </td>
-                    <td className="py-3.5 pr-4 text-right">
-                      {transaction.payment_status === "Pending" &&
-                        transaction.payment_method === "Cash" ? (
-                        <button
-                          onClick={() => handleCompletePayment(transaction.id)}
-                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl transition-colors"
-                          title="Mark as Completed"
-                        >
-                          <CheckCircle className="w-5 h-5 text-emerald-500" />
-                        </button>
-                      ) : (
-                        <div className="w-8 h-8 ml-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ShieldCheck className="w-4 h-4 text-slate-300" />
-                        </div>
-                      )}
+                    <td className="py-4 pr-4">
+                      <Skeleton className="h-8 w-8 rounded-full ml-auto" />
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              : localTransactions.map((transaction) => {
+                  // Resolve donor name: prefer user_name (API-resolved full_name),
+                  // then fall back to account_name only if it doesn't look like a donation title
+                  const driveTitle =
+                    typeof transaction.donation === "object"
+                      ? (transaction.donation as any)?.title
+                      : null;
+                  const rawApiName =
+                    transaction.user_name ||
+                    transaction.user?.full_name;
+                  let name: string;
+                  if (rawApiName && rawApiName.trim().toLowerCase() !== "anonymous") {
+                    name = rawApiName.trim();
+                  } else if (
+                    transaction.account_name &&
+                    transaction.account_name !== driveTitle &&
+                    transaction.account_name.toLowerCase() !== "donation"
+                  ) {
+                    name = transaction.account_name.trim();
+                  } else {
+                    name = "Anonymous Donor";
+                  }
+                  const initial = name.charAt(0).toUpperCase() || "A";
+
+                  return (
+                    <tr
+                      key={transaction.id}
+                      className="group hover:bg-amber-500/5 transition-colors"
+                    >
+                      <td className="py-3.5 pl-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-extrabold text-slate-950 text-xs shadow-sm shadow-amber-500/20">
+                            {initial}
+                          </div>
+                          <span className="font-bold text-sm text-slate-900 group-hover:text-amber-700 transition-colors">
+                            {name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3.5">
+                        <div className="font-extrabold text-sm text-slate-900">
+                          KES {transaction.amount.toLocaleString()}
+                        </div>
+                      </td>
+                      <td className="py-3.5">
+                        <span className="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200/60 px-2.5 py-1 rounded-lg text-nowrap">
+                          {transaction.category}
+                        </span>
+                      </td>
+                      <td className="py-3.5">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                          {getMethodIcon(transaction.payment_method)}
+                          <span>{transaction.payment_method}</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5">
+                        <span
+                          className={clsx(
+                            "text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm inline-flex items-center gap-1",
+                            transaction.payment_status === "Completed"
+                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                              : "bg-amber-500/10 text-amber-600 border-amber-500/30",
+                          )}
+                        >
+                          <span className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", transaction.payment_status === "Completed" ? "bg-emerald-500" : "bg-amber-500")}></span>
+                          {transaction.payment_status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 text-xs text-slate-400 font-mono font-medium">
+                        {transaction.donated_at
+                          ? new Date(transaction.donated_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                          : "Just now"}
+                      </td>
+                      <td className="py-3.5 pr-4 text-right">
+                        {transaction.payment_status === "Pending" &&
+                        transaction.payment_method === "Cash" ? (
+                          <button
+                            onClick={() => handleCompletePayment(transaction.id)}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl transition-colors"
+                            title="Mark as Completed"
+                          >
+                            <CheckCircle className="w-5 h-5 text-emerald-500" />
+                          </button>
+                        ) : (
+                          <div className="w-8 h-8 ml-auto flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <ShieldCheck className="w-4 h-4 text-slate-300" />
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
           </tbody>
         </table>
       </div>
