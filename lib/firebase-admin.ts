@@ -4,8 +4,18 @@ if (!admin.apps.length) {
     try {
         let credential;
         if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-            // Parse the JSON string from environment variable
-            const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+            // Parse the JSON string from environment variable safely handling unescaped newlines
+            let serviceAccount;
+            try {
+                serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+            } catch {
+                serviceAccount = JSON.parse(
+                    process.env.FIREBASE_SERVICE_ACCOUNT_JSON.replace(/\n/g, "\\n").replace(/\r/g, "\\r")
+                );
+            }
+            if (serviceAccount.private_key) {
+                serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+            }
             credential = admin.credential.cert(serviceAccount);
         } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
             // Fallback to individual environment variables

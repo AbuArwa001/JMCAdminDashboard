@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Mail, Lock, LogIn, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, LogIn, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+  User,
+} from "firebase/auth";
 import { AnimatePresence, motion } from "framer-motion";
+import api from "@/lib/api";
+import { MyAccessResponse } from "@/lib/rbac_api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,6 +40,63 @@ export default function LoginPage() {
     }
   }, [router]);
 
+  // Helper to verify if the user holds admin/staff privileges
+  // Works both for users with Firebase custom claims and for app users elevated to staff by super admin in backend
+  const checkStaffAccess = async (user: User, token: string): Promise<boolean> => {
+    // 1. Fast check: custom claim in Firebase token
+    try {
+      const idTokenResult = await user.getIdTokenResult(true);
+      if (idTokenResult.claims.admin === true || user.email === "admin@jmc.org") {
+        return true;
+      }
+    } catch (claimErr) {
+      console.warn("Could not retrieve custom claims directly:", claimErr);
+    }
+
+    // 2. Authoritative check: backend RBAC endpoint
+    // If the super admin elevated this user in the JamiaGive portal database,
+    // the backend matches their email/UID and returns their staff role & permissions.
+    try {
+      const res = await api.get<MyAccessResponse>("api/v1/rbac/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const rbac = res.data;
+      if (
+        rbac &&
+        (rbac.user?.is_admin ||
+          rbac.is_super_admin ||
+          (rbac.permissions && rbac.permissions.length > 0) ||
+          rbac.user?.role)
+      ) {
+        return true;
+      }
+    } catch (apiError: any) {
+      console.warn("Backend RBAC verification returned:", apiError?.response?.status);
+    }
+
+    return false;
+  };
+
+  const finalizeLogin = (user: User, firebaseToken: string) => {
+    Cookies.set("firebaseToken", firebaseToken, {
+      expires: 1,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    localStorage.setItem("firebaseToken", firebaseToken);
+    localStorage.setItem("firebaseUser", JSON.stringify(user));
+
+    setLoginSuccess(true);
+    toast.success("Welcome back! Redirecting to dashboard...");
+
+    router.push("/");
+    router.refresh();
+  };
+
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -41,33 +105,21 @@ export default function LoginPage() {
       const trimmedEmail = email.trim();
       const userCredential = await signInWithEmailAndPassword(auth, trimmedEmail, password);
       const user = userCredential.user;
+      const firebaseToken = await user.getIdToken();
 
-      const idTokenResult = await user.getIdTokenResult();
-      const isAdmin = idTokenResult.claims.admin === true || user.email === "admin@jmc.org";
+      const hasAccess = await checkStaffAccess(user, firebaseToken);
 
-      if (!isAdmin) {
+      if (!hasAccess) {
         await auth.signOut();
-        toast.error("Access denied. Executive administrator privileges required.");
+        Cookies.remove("firebaseToken");
+        localStorage.removeItem("firebaseToken");
+        localStorage.removeItem("firebaseUser");
+        toast.error("Access denied. Executive administrator or staff privileges required.");
         setIsLoading(false);
         return;
       }
 
-      const firebaseToken = await user.getIdToken();
-
-      Cookies.set("firebaseToken", firebaseToken, {
-        expires: 1,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-      });
-
-      localStorage.setItem("firebaseToken", firebaseToken);
-      localStorage.setItem("firebaseUser", JSON.stringify(user));
-
-      setLoginSuccess(true);
-      toast.success("Welcome back! Redirecting to dashboard...");
-
-      router.push("/");
-      router.refresh();
+      finalizeLogin(user, firebaseToken);
     } catch (error: any) {
       console.error("Login error:", error);
       const errorCode = error.code;
@@ -90,8 +142,81 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    signIn(provider, { callbackUrl: "/" });
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      const firebaseToken = await user.getIdToken(true);
+
+      const hasAccess = await checkStaffAccess(user, firebaseToken);
+
+      if (!hasAccess) {
+        await auth.signOut();
+        Cookies.remove("firebaseToken");
+        localStorage.removeItem("firebaseToken");
+        localStorage.removeItem("firebaseUser");
+        toast.error(
+          "Access denied. Only accounts elevated to a staff role by a super admin can access this portal."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      finalizeLogin(user, firebaseToken);
+    } catch (error: any) {
+      console.error("Google sign-in error:", error);
+      const errorCode = error?.code;
+      if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
+        setIsLoading(false);
+        return;
+      } else if (errorCode === "auth/popup-blocked") {
+        toast.error("Sign-in popup was blocked by browser. Please allow popups for this site.");
+      } else if (errorCode === "auth/account-exists-with-different-credential") {
+        toast.error("An account already exists with this email using another login method.");
+      } else {
+        toast.error(error.message || "Failed to sign in with Google");
+      }
+      setIsLoading(false);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    setIsLoading(true);
+    try {
+      const provider = new GithubAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const user = userCredential.user;
+      const firebaseToken = await user.getIdToken(true);
+
+      const hasAccess = await checkStaffAccess(user, firebaseToken);
+
+      if (!hasAccess) {
+        await auth.signOut();
+        Cookies.remove("firebaseToken");
+        localStorage.removeItem("firebaseToken");
+        localStorage.removeItem("firebaseUser");
+        toast.error(
+          "Access denied. Only accounts elevated to a staff role by a super admin can access this portal."
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      finalizeLogin(user, firebaseToken);
+    } catch (error: any) {
+      console.error("GitHub sign-in error:", error);
+      const errorCode = error?.code;
+      if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
+        setIsLoading(false);
+        return;
+      } else {
+        toast.error(error.message || "Failed to sign in with GitHub");
+      }
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -230,8 +355,9 @@ export default function LoginPage() {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => handleSocialLogin("google")}
-            className="btn-secondary justify-center py-2.5 text-xs text-gray-700"
+            onClick={handleGoogleLogin}
+            disabled={isLoading}
+            className="btn-secondary justify-center py-2.5 text-xs text-gray-700 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
@@ -256,8 +382,9 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => handleSocialLogin("github")}
-            className="btn-secondary justify-center py-2.5 text-xs text-gray-700"
+            onClick={handleGithubLogin}
+            disabled={isLoading}
+            className="btn-secondary justify-center py-2.5 text-xs text-gray-700 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
           >
             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
               <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />

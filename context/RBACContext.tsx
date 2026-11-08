@@ -40,21 +40,23 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
       console.error("Failed to load user RBAC access profile:", err);
       // Fallback: If legacy admin or endpoint error, we check if Firebase claims or email indicates admin
       setError(err?.response?.data?.detail || "Could not load access rights");
-      // Fallback super admin for admin@jmc.org
-      if (authUser.email === "admin@jmc.org") {
+      // Fallback: If legacy admin or endpoint error, check if Firebase claims or email indicates admin
+      const tokenResult = await authUser.getIdTokenResult().catch(() => null);
+      const isClaimAdmin = tokenResult?.claims?.admin === true;
+      if (authUser.email === "admin@jmc.org" || isClaimAdmin) {
         setAccess({
           user: {
             id: authUser.uid,
             email: authUser.email || "admin@jmc.org",
-            username: "admin",
+            username: authUser.email ? authUser.email.split("@")[0] : "admin",
             full_name: authUser.displayName || "Executive Administrator",
             is_active: true,
             is_admin: true,
-            is_super_admin: true,
-            role: { id: "super", role_name: "Super Admin", color: "#c99335", is_system: true },
+            is_super_admin: authUser.email === "admin@jmc.org",
+            role: { id: "staff", role_name: "Staff Administrator", color: "#c99335", is_system: true },
           },
           permissions: ["*"],
-          is_super_admin: true,
+          is_super_admin: authUser.email === "admin@jmc.org",
         });
       }
     } finally {
