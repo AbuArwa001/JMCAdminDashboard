@@ -15,6 +15,8 @@ import {
   Sparkles,
   ArrowRight,
   ShieldAlert,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
@@ -29,6 +31,7 @@ export default function SettingsPage() {
 
   const [activeTab, setActiveTab] = useState("profile");
   const [isFetching, setIsFetching] = useState(true);
+  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
   const [formData, setFormData] = useState({
     userId: "",
     name: "Admin User",
@@ -410,14 +413,33 @@ export default function SettingsPage() {
                             ? "New Password"
                             : "Confirm New Password"}
                         </label>
-                        <input
-                          type="password"
-                          name={field}
-                          value={(formData as any)[field]}
-                          onChange={handleChange}
-                          className="form-input"
-                          placeholder="••••••••"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showPasswords[field] ? "text" : "password"}
+                            name={field}
+                            value={(formData as any)[field]}
+                            onChange={handleChange}
+                            className="form-input pr-10"
+                            placeholder="••••••••"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setShowPasswords((prev) => ({
+                                ...prev,
+                                [field]: !prev[field],
+                              }))
+                            }
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                            aria-label={showPasswords[field] ? "Hide password" : "Show password"}
+                          >
+                            {showPasswords[field] ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     ))}
 

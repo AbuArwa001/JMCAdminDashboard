@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Loader2, Mail, Lock, LogIn, ShieldAlert } from "lucide-react";
+import { Loader2, Mail, Lock, LogIn, ShieldAlert, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import Cookies from "js-cookie";
 import { auth } from "@/lib/firebase";
@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handle session expired error
   useEffect(() => {
@@ -171,13 +172,25 @@ export default function LoginPage() {
             <div className="relative">
               <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input pl-10"
+                className="form-input pl-10 pr-10"
                 placeholder="••••••••"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
           </div>
 

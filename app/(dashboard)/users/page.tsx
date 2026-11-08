@@ -26,6 +26,8 @@ import {
   ChevronDown,
   X,
   AlertTriangle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -65,6 +67,7 @@ export default function UsersManagementPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Invite Form State
+  const [showInvitePassword, setShowInvitePassword] = useState(false);
   const [inviteForm, setInviteForm] = useState({
     full_name: "",
     email: "",
@@ -713,15 +716,29 @@ export default function UsersManagementPage() {
                   </div>
                   <div>
                     <label className="form-label">Temporary Password (Optional)</label>
-                    <input
-                      type="password"
-                      value={inviteForm.password}
-                      onChange={(e) =>
-                        setInviteForm((prev) => ({ ...prev, password: e.target.value }))
-                      }
-                      placeholder="Leave blank to auto-generate"
-                      className="form-input text-xs"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showInvitePassword ? "text" : "password"}
+                        value={inviteForm.password}
+                        onChange={(e) =>
+                          setInviteForm((prev) => ({ ...prev, password: e.target.value }))
+                        }
+                        placeholder="Leave blank to auto-generate"
+                        className="form-input text-xs pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowInvitePassword(!showInvitePassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                        aria-label={showInvitePassword ? "Hide password" : "Show password"}
+                      >
+                        {showInvitePassword ? (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
