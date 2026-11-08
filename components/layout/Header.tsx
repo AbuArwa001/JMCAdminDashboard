@@ -49,6 +49,52 @@ interface NotificationLog {
 }
 
 const LAST_READ_KEY = "jmc_notif_last_read";
+const MIN_DONATION_NOTIFICATION_AMOUNT = 10000;
+
+function isDonationNotification(notif: NotificationLog): boolean {
+  if (notif.notification_type === "admin_donation") return true;
+  const title = (notif.title || "").toLowerCase();
+  if (title.includes("donation received")) return true;
+  return false;
+}
+
+function getDonationAmount(notif: NotificationLog): number | null {
+  const text = `${notif.title || ""} ${notif.body || ""}`;
+
+  // 1. Matches "KES 10,000 donated" or "10,000 donated"
+  const donatedMatch = text.match(/(?:KES|KSh|USD|\$)?\s*([\d,]+(?:\.\d+)?)\s+donated/i);
+  if (donatedMatch && donatedMatch[1]) {
+    const parsed = parseFloat(donatedMatch[1].replace(/,/g, ""));
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  // 2. Matches "donated KES 10,000" or "donated 10,000"
+  const afterDonatedMatch = text.match(/donated\s+(?:KES|KSh|USD|\$)?\s*([\d,]+(?:\.\d+)?)/i);
+  if (afterDonatedMatch && afterDonatedMatch[1]) {
+    const parsed = parseFloat(afterDonatedMatch[1].replace(/,/g, ""));
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  // 3. Fallback: Any currency prefix like "KES 10,000"
+  const currencyMatch = text.match(/(?:KES|KSh|USD|\$)\s*([\d,]+(?:\.\d+)?)/i);
+  if (currencyMatch && currencyMatch[1]) {
+    const parsed = parseFloat(currencyMatch[1].replace(/,/g, ""));
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  return null;
+}
+
+function shouldShowNotification(notif: NotificationLog): boolean {
+  if (isDonationNotification(notif)) {
+    const amount = getDonationAmount(notif);
+    // Only show donation notifications if amount is 10,000 and above
+    if (amount !== null && amount < MIN_DONATION_NOTIFICATION_AMOUNT) {
+      return false;
+    }
+  }
+  return true;
+}
 
 function NotifIcon({ type }: { type?: string | null }) {
   switch (type) {
@@ -94,16 +140,17 @@ export default function Header({ onMenuClick, isSidebarCollapsed }: HeaderProps)
   const fetchNotifications = useCallback(async () => {
     try {
       setLoadingNotifs(true);
-      const res = await api.get("/api/v1/khutba/logs?limit=30");
+      const res = await api.get("/api/v1/khutba/logs?limit=50");
       const data: NotificationLog[] = Array.isArray(res.data)
         ? res.data
         : res.data?.results || [];
-      setNotifications(data);
+      const visibleData = data.filter(shouldShowNotification);
+      setNotifications(visibleData);
 
       // Compute unread count using last-read timestamp
       const lastReadStr = localStorage.getItem(LAST_READ_KEY);
       const lastRead = lastReadStr ? new Date(lastReadStr) : new Date(0);
-      const unread = data.filter((n) => new Date(n.sent_at) > lastRead).length;
+      const unread = visibleData.filter((n) => new Date(n.sent_at) > lastRead).length;
       setUnreadCount(unread);
     } catch {
       // silently fail — don't break the UI

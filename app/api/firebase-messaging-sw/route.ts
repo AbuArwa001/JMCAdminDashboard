@@ -26,6 +26,24 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   const { title, body, image } = payload.notification || {};
+  const notifType = (payload.data && payload.data.type) || "";
+
+  // Only show donation notifications if amount is 10,000 and above
+  if (notifType === "admin_donation" || (title && title.toLowerCase().includes("donation received"))) {
+    let amt = null;
+    if (payload.data && payload.data.amount) {
+      amt = parseFloat(payload.data.amount);
+    } else if (body) {
+      const match = body.match(/(?:KES|KSh|USD|\\$)?\\s*([\\d,]+(?:\\.\\d+)?)\\s+donated|donated\\s+(?:KES|KSh|USD|\\$)?\\s*([\\d,]+(?:\\.\\d+)?)/i);
+      if (match) {
+        amt = parseFloat((match[1] || match[2]).replace(/,/g, ""));
+      }
+    }
+    if (amt !== null && !isNaN(amt) && amt < 10000) {
+      return;
+    }
+  }
+
   const notifTitle = title || "JMC Notification";
   const notifOptions = {
     body: body || "",

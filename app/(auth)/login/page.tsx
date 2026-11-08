@@ -172,6 +172,10 @@ export default function LoginPage() {
       if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
         setIsLoading(false);
         return;
+      } else if (errorCode === "auth/unauthorized-domain") {
+        toast.error(
+          "Domain not authorized: Please add 'jmc-admin-dashboard.vercel.app' to Firebase Console > Authentication > Settings > Authorized domains."
+        );
       } else if (errorCode === "auth/popup-blocked") {
         toast.error("Sign-in popup was blocked by browser. Please allow popups for this site.");
       } else if (errorCode === "auth/account-exists-with-different-credential") {
@@ -212,6 +216,10 @@ export default function LoginPage() {
       if (errorCode === "auth/popup-closed-by-user" || errorCode === "auth/cancelled-popup-request") {
         setIsLoading(false);
         return;
+      } else if (errorCode === "auth/unauthorized-domain") {
+        toast.error(
+          "Domain not authorized: Please add this domain to Firebase Console > Authentication > Settings > Authorized domains."
+        );
       } else {
         toast.error(error.message || "Failed to sign in with GitHub");
       }

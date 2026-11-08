@@ -80,19 +80,30 @@ export default function DonationsPage() {
               drive?.categoryName ||
               drive?.category_name ||
               (typeof t.category === "string" && t.category ? t.category : "General");
-            const rawName =
-              t.user?.full_name || t.user_name || t.account_name;
-            const donorName =
-              rawName && rawName.trim().toLowerCase() !== "anonymous"
-                ? rawName.trim()
-                : (t.account_name || "Anonymous Donor");
+
+            // Resolve donor name: prefer API-provided user_name, then user.full_name,
+            // then account_name — but only if it doesn't match the donation title
+            const driveTitle = drive?.title || null;
+            const rawApiName = t.user_name || t.user?.full_name;
+            let donorName: string;
+            if (rawApiName && rawApiName.trim().toLowerCase() !== "anonymous") {
+              donorName = rawApiName.trim();
+            } else if (
+              t.account_name &&
+              t.account_name !== driveTitle &&
+              t.account_name.toLowerCase() !== "donation"
+            ) {
+              donorName = t.account_name.trim();
+            } else {
+              donorName = "Anonymous Donor";
+            }
 
             return {
               ...t,
               donation: drive || t.donation,
               category: categoryName,
               user_name: donorName,
-              account_name: t.account_name || donorName,
+              account_name: t.account_name,
             };
           },
         );
