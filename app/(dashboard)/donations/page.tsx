@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import RecentDonationsTable from "@/components/dashboard/RecentDonationsTable";
-import { Download, Filter, Search } from "lucide-react";
+import { Download, Filter, Search, Crown } from "lucide-react";
 import { exportToCSV } from "@/lib/utils";
+import { useRBAC } from "@/hooks/useRBAC";
 
 import { toast } from "sonner";
 import { getTransactions, getCategories, getDonationDrives } from "@/lib/api_data";
@@ -16,6 +17,7 @@ export default function DonationsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const searchParams = useSearchParams();
+  const { isSuperAdmin } = useRBAC();
 
   useEffect(() => {
     const querySearch = searchParams.get("search");
@@ -127,11 +129,18 @@ export default function DonationsPage() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-secondary-dark tracking-tight">
-            Donations
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-secondary-dark tracking-tight">
+              Donations
+            </h1>
+            {isSuperAdmin && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#c99335]/10 text-[#c99335] border border-[#c99335]/30 shadow-sm">
+                <Crown className="w-3.5 h-3.5" /> Super Admin Access
+              </span>
+            )}
+          </div>
           <p className="text-gray-500 mt-1">
-            Track and manage all incoming contributions.
+            Track, manage, and audit all incoming contributions.
           </p>
         </div>
 
@@ -176,6 +185,14 @@ export default function DonationsPage() {
       <RecentDonationsTable
         transactions={filteredDonations}
         isLoading={isLoading}
+        onTransactionDeleted={(deletedId) => {
+          setDonations((prev) => prev.filter((d) => d.id !== deletedId));
+        }}
+        onTransactionUpdated={(updatedTx) => {
+          setDonations((prev) =>
+            prev.map((d) => (d.id === updatedTx.id ? { ...d, ...updatedTx } : d)),
+          );
+        }}
       />
     </div>
   );

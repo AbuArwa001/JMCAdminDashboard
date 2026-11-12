@@ -73,6 +73,9 @@ export interface Transaction {
     user_name?: string;
     account_name?: string;
     account_number?: string;
+    transaction_reference?: string;
+    mpesa_receipt?: string;
+    completed_at?: Date | string;
 }
 
 export interface CategoryData {

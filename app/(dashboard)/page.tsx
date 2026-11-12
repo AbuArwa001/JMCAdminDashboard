@@ -502,7 +502,18 @@ export default function Home() {
       {/* Transactions & Ratings Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={item} className="lg:col-span-2">
-          <RecentDonationsTable transactions={recentDonations} isLoading={isLoading} />
+          <RecentDonationsTable
+            transactions={recentDonations}
+            isLoading={isLoading}
+            onTransactionDeleted={(deletedId) => {
+              setRecentDonations((prev) => prev.filter((t) => t.id !== deletedId));
+            }}
+            onTransactionUpdated={(updatedTx) => {
+              setRecentDonations((prev) =>
+                prev.map((t) => (t.id === updatedTx.id ? { ...t, ...updatedTx } : t)),
+              );
+            }}
+          />
         </motion.div>
         <motion.div variants={item}>
           <RatingAnalysis isLoading={isLoading} />

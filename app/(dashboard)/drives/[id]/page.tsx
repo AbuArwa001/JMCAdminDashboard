@@ -138,7 +138,30 @@ export default function DriveDetailsPage({ params }: { params: { id: string } })
                 </div>
 
                 <div className="lg:col-span-2">
-                    <DonorsTable donations={driveDonations} driveTitle={drive.title} />
+                    <DonorsTable
+                        donations={driveDonations}
+                        driveTitle={drive.title}
+                        onDonationDeleted={(deletedId) => {
+                            setDonations((prev) => prev.filter((d) => d.id !== deletedId));
+                            fetchDrive();
+                        }}
+                        onDonationUpdated={(updated) => {
+                            setDonations((prev) =>
+                                prev.map((d) =>
+                                    d.id === updated.id
+                                        ? {
+                                              ...d,
+                                              amount: updated.amount,
+                                              payment_status: updated.status,
+                                              payment_method: updated.paymentMethod,
+                                              account_name: updated.donorName,
+                                          }
+                                        : d,
+                                ),
+                            );
+                            fetchDrive();
+                        }}
+                    />
                 </div>
             </div>
         </div>

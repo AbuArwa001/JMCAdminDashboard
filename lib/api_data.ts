@@ -228,10 +228,20 @@ export const createTransaction = async (transactionData: any) => {
 
 export const updateTransaction = async (transactionId: string, transactionData: any) => {
     try {
-        const response = await api.put(`api/v1/transactions/${transactionId}/`, transactionData);
+        const response = await api.patch(`api/v1/transactions/${transactionId}/`, transactionData);
         return response.data;
     } catch (error) {
         console.error('Error updating transaction:', error);
+        throw error;
+    }
+};
+
+export const deleteTransaction = async (transactionId: string) => {
+    try {
+        const response = await api.delete(`api/v1/transactions/${transactionId}/`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting transaction:', error);
         throw error;
     }
 };
