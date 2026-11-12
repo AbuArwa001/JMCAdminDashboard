@@ -1,35 +1,11 @@
 import * as admin from 'firebase-admin';
+import { getFirebaseCredential } from './firebase-credentials';
 
 if (!admin.apps.length) {
     try {
-        let credential;
-        if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-            // Parse the JSON string from environment variable safely handling unescaped newlines
-            let serviceAccount;
-            try {
-                serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-            } catch {
-                serviceAccount = JSON.parse(
-                    process.env.FIREBASE_SERVICE_ACCOUNT_JSON.replace(/\n/g, "\\n").replace(/\r/g, "\\r")
-                );
-            }
-            if (serviceAccount.private_key) {
-                serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-            }
-            credential = admin.credential.cert(serviceAccount);
-        } else if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
-            // Fallback to individual environment variables
-            credential = admin.credential.cert({
-                projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-            });
-        }
-
+        const credential = getFirebaseCredential();
         if (credential) {
-            admin.initializeApp({
-                credential,
-            });
+            admin.initializeApp({ credential });
             console.log("Firebase Admin initialized successfully");
         } else {
             console.warn("Firebase Admin credentials not found. Server-side verification may fail.");
@@ -40,16 +16,12 @@ if (!admin.apps.length) {
 }
 
 export const verifySession = async (token: string) => {
-    // If Firebase Admin is not initialized (missing credentials), we skip server-side verification
-    // to prevent blocking the user. In production, credentials MUST be provided.
     if (!admin.apps.length) {
         console.warn("⚠️ Firebase Admin not initialized. Skipping server-side token verification.");
         return { uid: "skipped-verification", email: "admin@skipped.com" };
     }
-
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        return decodedToken;
+        return await admin.auth().verifyIdToken(token);
     } catch (error) {
         console.error('Error verifying session:', error);
         return null;

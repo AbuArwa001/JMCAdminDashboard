@@ -1,22 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
-import { getMyAccess, MyAccessResponse, StaffUser } from "@/lib/rbac_api";
+import { getMyAccess, MyAccessResponse } from "@/lib/rbac_api";
 import { useAuth } from "@/hooks/useAuth";
+import { RBACContextType } from "./rbac-types";
+import { getAdminFallbackAccess } from "./rbac-fallback";
 
-interface RBACContextType {
-  staffUser: StaffUser | null;
-  permissions: string[];
-  isSuperAdmin: boolean;
-  isLoading: boolean;
-  error: string | null;
-  hasPermission: (permission: string) => boolean;
-  hasAnyPermission: (...permissions: string[]) => boolean;
-  hasAllPermissions: (...permissions: string[]) => boolean;
-  refreshAccess: () => Promise<void>;
-}
-
-const RBACContext = createContext<RBACContextType | undefined>(undefined);
+export const RBACContext = createContext<RBACContextType | undefined>(undefined);
 
 export function RBACProvider({ children }: { children: React.ReactNode }) {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -30,7 +20,6 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return;
     }
-
     try {
       setIsLoading(true);
       setError(null);
@@ -38,67 +27,28 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
       setAccess(data);
     } catch (err: any) {
       console.error("Failed to load user RBAC access profile:", err);
-      // Fallback: If legacy admin or endpoint error, we check if Firebase claims or email indicates admin
       setError(err?.response?.data?.detail || "Could not load access rights");
-      // Fallback: If legacy admin or endpoint error, check if Firebase claims or email indicates admin
-      const tokenResult = await authUser.getIdTokenResult().catch(() => null);
-      const isClaimAdmin = tokenResult?.claims?.admin === true;
-      if (authUser.email === "admin@jmc.org" || isClaimAdmin) {
-        setAccess({
-          user: {
-            id: authUser.uid,
-            email: authUser.email || "admin@jmc.org",
-            username: authUser.email ? authUser.email.split("@")[0] : "admin",
-            full_name: authUser.displayName || "Executive Administrator",
-            is_active: true,
-            is_admin: true,
-            is_super_admin: authUser.email === "admin@jmc.org",
-            role: { id: "staff", role_name: "Staff Administrator", color: "#c99335", is_system: true },
-          },
-          permissions: ["*"],
-          is_super_admin: authUser.email === "admin@jmc.org",
-        });
-      }
+      const fallback = await getAdminFallbackAccess(authUser);
+      if (fallback) setAccess(fallback);
     } finally {
       setIsLoading(false);
     }
   }, [authUser]);
 
   useEffect(() => {
-    if (!authLoading) {
-      fetchAccess();
-    }
+    if (!authLoading) fetchAccess();
   }, [authLoading, fetchAccess]);
 
   const permissions = useMemo(() => access?.permissions || [], [access]);
-  const isSuperAdmin = useMemo(() => {
-    if (!access) return false;
-    return access.is_super_admin || permissions.includes("*");
-  }, [access, permissions]);
+  const isSuperAdmin = useMemo(() => Boolean(access?.is_super_admin || permissions.includes("*")), [access, permissions]);
 
-  const hasPermission = useCallback(
-    (permission: string) => {
-      if (isSuperAdmin) return true;
-      return permissions.includes(permission);
-    },
-    [isSuperAdmin, permissions]
-  );
-
+  const hasPermission = useCallback((p: string) => isSuperAdmin || permissions.includes(p), [isSuperAdmin, permissions]);
   const hasAnyPermission = useCallback(
-    (...required: string[]) => {
-      if (isSuperAdmin) return true;
-      if (required.length === 0) return true;
-      return required.some((p) => permissions.includes(p));
-    },
+    (...req: string[]) => isSuperAdmin || req.length === 0 || req.some((p) => permissions.includes(p)),
     [isSuperAdmin, permissions]
   );
-
   const hasAllPermissions = useCallback(
-    (...required: string[]) => {
-      if (isSuperAdmin) return true;
-      if (required.length === 0) return true;
-      return required.every((p) => permissions.includes(p));
-    },
+    (...req: string[]) => isSuperAdmin || req.length === 0 || req.every((p) => permissions.includes(p)),
     [isSuperAdmin, permissions]
   );
 
@@ -114,18 +64,7 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
       hasAllPermissions,
       refreshAccess: fetchAccess,
     }),
-    [
-      access,
-      permissions,
-      isSuperAdmin,
-      authLoading,
-      isLoading,
-      error,
-      hasPermission,
-      hasAnyPermission,
-      hasAllPermissions,
-      fetchAccess,
-    ]
+    [access, permissions, isSuperAdmin, authLoading, isLoading, error, hasPermission, hasAnyPermission, hasAllPermissions, fetchAccess]
   );
 
   return <RBACContext.Provider value={value}>{children}</RBACContext.Provider>;
@@ -133,8 +72,6 @@ export function RBACProvider({ children }: { children: React.ReactNode }) {
 
 export function useRBAC() {
   const context = useContext(RBACContext);
-  if (context === undefined) {
-    throw new Error("useRBAC must be used within an RBACProvider");
-  }
+  if (!context) throw new Error("useRBAC must be used within an RBACProvider");
   return context;
 }
