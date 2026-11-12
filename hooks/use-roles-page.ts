@@ -3,12 +3,9 @@ import { RoleDetail, PermissionGroup, getRbacRoles, getRbacPermissions, deleteRb
 import { toast } from "sonner";
 
 export function useRolesPage() {
-  const [roles, setRoles] = useState<RoleDetail[]>([]);
-  const [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [roles, setRoles] = useState<RoleDetail[]>([]), [permissionGroups, setPermissionGroups] = useState<PermissionGroup[]>([]);
+  const [loading, setLoading] = useState(true), [submitting, setSubmitting] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false), [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleDetail | null>(null);
 

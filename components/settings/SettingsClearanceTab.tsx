@@ -5,7 +5,7 @@ interface Props {
   roleColor: string;
   isSuperAdmin: boolean;
   permissions: string[];
-  roleDescription?: string;
+  roleDescription?: string | null;
 }
 
 export function SettingsClearanceTab({

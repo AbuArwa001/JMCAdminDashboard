@@ -6,11 +6,7 @@ export function useRoleForm(onSuccess: () => void) {
   const [roleForm, setRoleForm] = useState({ role_name: "", description: "", color: "#c99335", permissions: [] as string[] });
 
   const resetForm = (role?: RoleDetail | null) => {
-    if (role) {
-      setRoleForm({ role_name: role.role_name, description: role.description || "", color: role.color || "#c99335", permissions: [...role.permissions] });
-    } else {
-      setRoleForm({ role_name: "", description: "", color: "#c99335", permissions: [] });
-    }
+    setRoleForm(role ? { role_name: role.role_name, description: role.description || "", color: role.color || "#c99335", permissions: [...role.permissions] } : { role_name: "", description: "", color: "#c99335", permissions: [] });
   };
 
   const togglePermission = (permKey: string) => {
