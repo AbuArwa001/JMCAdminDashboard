@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Loader2, Trash2 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Transaction } from "@/lib/data";
 
 interface Props {
@@ -14,12 +18,15 @@ interface Props {
 }
 
 export function RecentDonationsManageModal({ manageTx, formData, isSaving, canDelete, onChange, onClose, onSubmit, onDeleteClick }: Props) {
-  if (!manageTx) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!manageTx || !mounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 md:p-8">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+        <div className="absolute inset-0" onClick={onClose} />
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 md:p-8 relative z-10">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <h3 className="text-lg font-bold text-slate-900">Manage Transaction</h3>
             <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
@@ -29,34 +36,30 @@ export function RecentDonationsManageModal({ manageTx, formData, isSaving, canDe
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Donor Name</label>
-                <input value={formData.account_name} onChange={(e) => onChange({ ...formData, account_name: e.target.value })} className="form-input text-xs" />
+                <input value={formData.account_name || ""} onChange={(e) => onChange({ ...formData, account_name: e.target.value })} className="form-input text-xs w-full" placeholder="Donor name" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Amount (KES)</label>
-                <input type="number" min="1" value={formData.amount} onChange={(e) => onChange({ ...formData, amount: Number(e.target.value) })} className="form-input text-xs" />
+                <input type="number" min="1" value={formData.amount || ""} onChange={(e) => onChange({ ...formData, amount: Number(e.target.value) })} className="form-input text-xs w-full" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Status</label>
-                <select value={formData.payment_status} onChange={(e) => onChange({ ...formData, payment_status: e.target.value })} className="form-input text-xs">
-                  <option value="Completed">Completed</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Failed">Failed</option>
+                <select value={formData.payment_status || "Completed"} onChange={(e) => onChange({ ...formData, payment_status: e.target.value })} className="form-input text-xs w-full">
+                  <option value="Completed">Completed</option><option value="Pending">Pending</option><option value="Failed">Failed</option>
                 </select>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Method</label>
-                <select value={formData.payment_method} onChange={(e) => onChange({ ...formData, payment_method: e.target.value })} className="form-input text-xs">
-                  <option value="M-Pesa">M-Pesa</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
+                <select value={formData.payment_method || "M-Pesa"} onChange={(e) => onChange({ ...formData, payment_method: e.target.value })} className="form-input text-xs w-full">
+                  <option value="M-Pesa">M-Pesa</option><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option>
                 </select>
               </div>
             </div>
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
               {canDelete ? (
-                <button type="button" onClick={() => { const target = manageTx; onClose(); onDeleteClick(target); }} className="px-3.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200 flex items-center gap-1.5">
+                <button type="button" onClick={() => { const target = manageTx; onClose(); onDeleteClick(target); }} className="px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200 flex items-center gap-1.5">
                   <Trash2 className="w-3.5 h-3.5" /> Delete
                 </button>
               ) : <div />}
@@ -70,7 +73,7 @@ export function RecentDonationsManageModal({ manageTx, formData, isSaving, canDe
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
-
