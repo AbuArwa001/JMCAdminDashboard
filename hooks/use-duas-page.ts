@@ -10,7 +10,10 @@ export function useDuasPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [c, d] = await Promise.all([api.get("/api/v1/duas/categories/"), api.get("/api/v1/duas/")]);
+      const [c, d] = await Promise.all([
+        api.get("/api/v1/duas/categories/"),
+        api.get("/api/v1/duas/", { params: { published_only: false } })
+      ]);
       const cats = c.data.results || c.data;
       setCategories(cats);
       setDuas(d.data.results || d.data);
@@ -35,4 +38,3 @@ export function useDuasPage() {
 
   return { categories, duas, loading, isSubmittingCat, setIsSubmittingCat, isSubmittingDua, setIsSubmittingDua, selectedCategoryId, setSelectedCategoryId, fetchData, deleteCategory, deleteDua };
 }
-
