@@ -377,7 +377,7 @@ export const getMe = async () => {
 
 export const updateMe = async (userData: any) => {
     try {
-        const response = await api.put(`api/v1/users/${userData.id}/`, userData);
+        const response = await api.put('api/v1/users/me', userData);
         return response.data;
     } catch (error) {
         console.error('Error updating current user:', error);
