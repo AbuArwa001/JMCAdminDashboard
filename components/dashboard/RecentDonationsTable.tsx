@@ -77,7 +77,77 @@ export default function RecentDonationsTable({
 
   useEffect(() => {
     setLocalTransactions(transactions);
+    // Prune selected IDs that are no longer in transactions
+    setSelectedIds((prev) => {
+      const validIds = new Set(transactions.map((t) => t.id));
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (validIds.has(id)) next.add(id);
+      });
+      return next;
+    });
   }, [transactions]);
+
+  // Bulk Selection Helpers
+  const isAllSelected =
+    localTransactions.length > 0 &&
+    localTransactions.every((t) => selectedIds.has(t.id));
+  const isIndeterminate = selectedIds.size > 0 && !isAllSelected;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(localTransactions.map((t) => t.id)));
+    }
+  };
+
+  const toggleSelectRow = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectedTransactions = localTransactions.filter((t) =>
+    selectedIds.has(t.id),
+  );
+  const totalSelectedAmount = selectedTransactions.reduce(
+    (acc, t) => acc + (t.amount || 0),
+    0,
+  );
+
+  const handleBulkDeleteSubmit = async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkDeleting(true);
+    const idsToDelete = Array.from(selectedIds);
+    try {
+      const res = await bulkDeleteTransactions(idsToDelete);
+      setLocalTransactions((prev) =>
+        prev.filter((t) => !selectedIds.has(t.id)),
+      );
+      onTransactionsBulkDeleted?.(idsToDelete);
+      idsToDelete.forEach((id) => onTransactionDeleted?.(id));
+      toast.success(
+        res?.message ||
+          `Successfully deleted ${idsToDelete.length} transaction${idsToDelete.length !== 1 ? "s" : ""}`,
+      );
+      setSelectedIds(new Set());
+      setShowBulkDeleteModal(false);
+    } catch (error: any) {
+      console.error("Bulk delete transactions error:", error);
+      toast.error(
+        error?.response?.data?.detail || "Failed to bulk delete transactions",
+      );
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
 
   const handleCompletePayment = async (id: string) => {
     setProcessingId(id);
@@ -196,6 +266,11 @@ export default function RecentDonationsTable({
     try {
       await deleteTransaction(deleteTx.id);
       setLocalTransactions((prev) => prev.filter((t) => t.id !== deleteTx.id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(deleteTx.id);
+        return next;
+      });
       onTransactionDeleted?.(deleteTx.id);
       toast.success("Transaction permanently deleted");
       setDeleteTx(null);
@@ -251,7 +326,23 @@ export default function RecentDonationsTable({
         <table className="w-full">
           <thead>
             <tr className="text-left text-[10px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-100 bg-slate-50/80">
-              <th className="py-3 pl-4 rounded-l-xl">Donor</th>
+              {canDelete && (
+                <th className="py-3 pl-4 w-10 rounded-l-xl">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = isIndeterminate;
+                      }}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all transactions"
+                      className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer accent-[#c99335]"
+                    />
+                  </div>
+                </th>
+              )}
+              <th className={clsx("py-3", !canDelete && "pl-4 rounded-l-xl")}>Donor</th>
               <th className="py-3">Amount</th>
               <th className="py-3">Category</th>
               <th className="py-3">Method</th>
@@ -264,7 +355,12 @@ export default function RecentDonationsTable({
             {isLoading
               ? Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
-                    <td className="py-4 pl-4">
+                    {canDelete && (
+                      <td className="py-4 pl-4 w-10">
+                        <Skeleton className="w-4 h-4 rounded" />
+                      </td>
+                    )}
+                    <td className={clsx("py-4", !canDelete && "pl-4")}>
                       <div className="flex items-center gap-3">
                         <Skeleton className="w-8 h-8 rounded-xl" />
                         <Skeleton className="h-4 w-28 rounded-lg" />
@@ -314,9 +410,27 @@ export default function RecentDonationsTable({
                   return (
                     <tr
                       key={transaction.id}
-                      className="group hover:bg-amber-500/5 transition-colors"
+                      className={clsx(
+                        "group transition-colors",
+                        selectedIds.has(transaction.id)
+                          ? "bg-amber-500/10 hover:bg-amber-500/15"
+                          : "hover:bg-amber-500/5",
+                      )}
                     >
-                      <td className="py-3.5 pl-4">
+                      {canDelete && (
+                        <td className="py-3.5 pl-4 w-10">
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(transaction.id)}
+                              onChange={() => toggleSelectRow(transaction.id)}
+                              aria-label={`Select transaction ${transaction.id}`}
+                              className="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer accent-[#c99335]"
+                            />
+                          </div>
+                        </td>
+                      )}
+                      <td className={clsx("py-3.5", !canDelete && "pl-4")}>
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center font-extrabold text-slate-950 text-xs shadow-sm shadow-amber-500/20">
                             {initial}
@@ -450,6 +564,50 @@ export default function RecentDonationsTable({
           </p>
         </div>
       )}
+
+      {/* ==================== Floating Bulk Actions Toolbar ==================== */}
+      <AnimatePresence>
+        {canDelete && selectedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="sticky bottom-4 z-30 mt-4 mx-auto w-full max-w-xl bg-slate-900/95 backdrop-blur-md text-white p-3.5 sm:px-5 sm:py-3.5 rounded-2xl shadow-2xl border border-slate-800 flex items-center justify-between gap-3"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 font-extrabold text-sm border border-amber-500/30 shrink-0">
+                {selectedIds.size}
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-bold text-slate-100 truncate">
+                  {selectedIds.size} transaction{selectedIds.size !== 1 ? "s" : ""} selected
+                </p>
+                <p className="text-[11px] font-semibold text-amber-400">
+                  Total: KES {totalSelectedAmount.toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set())}
+                className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBulkDeleteModal(true)}
+                className="px-3.5 py-1.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-lg shadow-rose-600/30 transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Delete Selected
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ==================== Manage Transaction Modal ==================== */}
       <AnimatePresence>
