@@ -188,6 +188,9 @@ export default function DonationsPage() {
         onTransactionDeleted={(deletedId) => {
           setDonations((prev) => prev.filter((d) => d.id !== deletedId));
         }}
+        onTransactionsBulkDeleted={(deletedIds) => {
+          setDonations((prev) => prev.filter((d) => !deletedIds.includes(d.id)));
+        }}
         onTransactionUpdated={(updatedTx) => {
           setDonations((prev) =>
             prev.map((d) => (d.id === updatedTx.id ? { ...d, ...updatedTx } : d)),

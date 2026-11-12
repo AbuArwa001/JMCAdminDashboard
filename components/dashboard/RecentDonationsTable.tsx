@@ -940,6 +940,103 @@ export default function RecentDonationsTable({
           </div>
         )}
       </AnimatePresence>
+
+      {/* ==================== Bulk Delete Confirmation Modal ==================== */}
+      <AnimatePresence>
+        {showBulkDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-lg bg-white rounded-3xl border border-rose-100 shadow-2xl p-6 md:p-8 flex flex-col max-h-[90vh]"
+            >
+              <div className="flex items-center gap-3 text-rose-600 mb-3">
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-100">
+                  <AlertTriangle className="w-6 h-6 text-rose-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">
+                    Bulk Delete Transactions
+                  </h3>
+                  <span className="text-[10px] font-bold text-[#c99335] uppercase tracking-wider flex items-center gap-1">
+                    <Crown className="w-3 h-3" /> Super Admin Authorization
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                Are you sure you want to permanently delete{" "}
+                <strong className="text-rose-600 font-bold">
+                  {selectedIds.size} transactions
+                </strong>{" "}
+                totaling{" "}
+                <strong className="text-slate-900 font-bold">
+                  KES {totalSelectedAmount.toLocaleString()}
+                </strong>
+                ? This action is irreversible and will permanently remove all selected
+                contributions from records and financial ledgers.
+              </p>
+
+              {/* Selected Transactions Scrollable Preview */}
+              <div className="flex-1 overflow-y-auto max-h-48 border border-slate-100 rounded-2xl bg-slate-50/80 p-3 space-y-2 mb-6 custom-scrollbar">
+                {selectedTransactions.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="flex items-center justify-between text-xs py-2 px-3 bg-white rounded-xl border border-slate-100 shadow-2xs"
+                  >
+                    <div className="min-w-0 pr-3">
+                      <span className="font-bold text-slate-900 truncate block">
+                        {tx.user_name || tx.account_name || "Anonymous Donor"}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {tx.transaction_reference || `${tx.id.slice(0, 13)}...`}
+                      </span>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="font-extrabold text-slate-900 block">
+                        KES {tx.amount.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {tx.payment_method} • {tx.payment_status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkDeleteModal(false)}
+                  disabled={isBulkDeleting}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkDeleteSubmit}
+                  disabled={isBulkDeleting}
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md shadow-rose-600/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isBulkDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting {selectedIds.size} Records...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete {selectedIds.size} Permanently
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

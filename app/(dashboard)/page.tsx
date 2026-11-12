@@ -508,6 +508,9 @@ export default function Home() {
             onTransactionDeleted={(deletedId) => {
               setRecentDonations((prev) => prev.filter((t) => t.id !== deletedId));
             }}
+            onTransactionsBulkDeleted={(deletedIds) => {
+              setRecentDonations((prev) => prev.filter((t) => !deletedIds.includes(t.id)));
+            }}
             onTransactionUpdated={(updatedTx) => {
               setRecentDonations((prev) =>
                 prev.map((t) => (t.id === updatedTx.id ? { ...t, ...updatedTx } : t)),
