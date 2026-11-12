@@ -20,7 +20,9 @@ export default function DuasPage() {
 
   if (loading) return <TableSkeleton />;
 
-  const currentDuas = duas.filter((d) => d.category === selectedCategoryId).sort((a, b) => a.display_order - b.display_order);
+  const currentDuas = duas
+    .filter((d) => (d.category_id ?? d.category) === selectedCategoryId)
+    .sort((a, b) => a.display_order - b.display_order);
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8">

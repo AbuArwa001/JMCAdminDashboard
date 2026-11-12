@@ -20,7 +20,7 @@ export function DuaFormModal({ initial, categoryId, onClose, onSuccess, isSubmit
     e.preventDefault();
     setIsSubmittingDua(true);
     try {
-      const payload = { ...duaForm, category: categoryId };
+      const payload = { ...duaForm, category_id: categoryId, category: categoryId };
       if (duaForm.id) await api.put(`/api/v1/duas/${duaForm.id}/`, payload);
       else await api.post("/api/v1/duas/", payload);
       onSuccess();
@@ -48,4 +48,3 @@ export function DuaFormModal({ initial, categoryId, onClose, onSuccess, isSubmit
     </form>
   );
 }
-

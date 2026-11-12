@@ -55,7 +55,12 @@ export function DuaCategoriesSidebar({
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
         {categories.map((cat) => (
           <div key={cat.id} onClick={() => onSelectCategory(cat.id)} className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${selectedCategoryId === cat.id ? "bg-amber-50 border-l-4 border-amber-500" : "hover:bg-gray-50"}`}>
-            <div className="flex items-center gap-2"><span className="text-sm font-semibold">{cat.name}</span><span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{duas.filter((d) => d.category === cat.id).length}</span></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">{cat.name}</span>
+              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                {duas.filter((d) => (d.category_id ?? d.category) === cat.id).length}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <button onClick={(e) => { e.stopPropagation(); setCatForm(cat); setShowCatForm(true); }} className="text-gray-400 hover:text-amber-600"><Edit className="w-4 h-4" /></button>
               <button onClick={(e) => { e.stopPropagation(); onDeleteCategory(cat.id); }} className="text-gray-400 hover:text-red-600"><Trash className="w-4 h-4" /></button>
@@ -68,4 +73,3 @@ export function DuaCategoriesSidebar({
     </div>
   );
 }
-
