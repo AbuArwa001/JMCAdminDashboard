@@ -57,7 +57,7 @@ export default function CategoryPieChart({ data, isLoading }: CategoryPieChartPr
           <p className="text-xs text-slate-400 mt-1 max-w-[240px]">No completed donations recorded under fund categories yet.</p>
         </div>
       ) : (
-        <div className="flex flex-col flex-1 min-h-0 justify-between pt-1">
+        <div className="flex flex-col flex-1 min-h-0 justify-center gap-4 pt-2">
           <CategoryDonutChart data={chartData} grandTotal={grandTotal} />
           <CategoryLegendList data={chartData} grandTotal={grandTotal} />
         </div>
