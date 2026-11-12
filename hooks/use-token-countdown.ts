@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { getRemainingTokenSeconds, DEFAULT_WARNING_SECONDS } from "@/lib/token-utils";
@@ -18,9 +18,7 @@ export function useTokenCountdown() {
       setTimeLeft(remaining);
       setTotalWarningTime((prev) => (isOpen ? prev : Math.max(DEFAULT_WARNING_SECONDS, remaining)));
       setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
+    } else { setIsOpen(false); }
   }, [user, isOpen, logout]);
 
   useEffect(() => {
@@ -35,17 +33,10 @@ export function useTokenCountdown() {
     setIsRefreshing(true);
     try {
       const token = await refreshToken();
-      if (token) {
-        setIsOpen(false);
-        toast.success("Session successfully extended.");
-      } else {
-        logout("session_expired");
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
+      if (token) { setIsOpen(false); toast.success("Session successfully extended."); }
+      else { logout("session_expired"); }
+    } finally { setIsRefreshing(false); }
   };
 
   return { isOpen, timeLeft, totalWarningTime, isRefreshing, handleExtend, handleLogout: () => logout(), isUrgent: timeLeft <= 20 };
 }
-

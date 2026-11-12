@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Donation } from "@/lib/data";
@@ -12,12 +16,15 @@ interface Props {
 }
 
 export function DonorsTableEditModal({ donation, formData, isSaving, onChange, onClose, onSubmit }: Props) {
-  if (!donation) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!donation || !mounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="absolute inset-0" onClick={onClose} />
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-gray-100 relative z-10">
           <div className="flex justify-between items-center pb-4 border-b border-gray-100">
             <h4 className="font-bold text-gray-900 text-base">Edit Donation Record</h4>
             <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg"><X className="w-5 h-5" /></button>
@@ -36,17 +43,13 @@ export function DonorsTableEditModal({ donation, formData, isSaving, onChange, o
               <div>
                 <label className="form-label">Status</label>
                 <select value={formData.payment_status} onChange={(e) => onChange({ ...formData, payment_status: e.target.value })} className="form-input">
-                  <option value="Pending">Pending</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Failed">Failed</option>
+                  <option value="Pending">Pending</option><option value="Completed">Completed</option><option value="Failed">Failed</option>
                 </select>
               </div>
               <div>
                 <label className="form-label">Method</label>
                 <select value={formData.payment_method} onChange={(e) => onChange({ ...formData, payment_method: e.target.value })} className="form-input">
-                  <option value="M-Pesa">M-Pesa</option>
-                  <option value="Bank">Bank</option>
-                  <option value="Cash">Cash</option>
+                  <option value="M-Pesa">M-Pesa</option><option value="Bank">Bank</option><option value="Cash">Cash</option>
                 </select>
               </div>
             </div>
@@ -60,7 +63,7 @@ export function DonorsTableEditModal({ donation, formData, isSaving, onChange, o
           </form>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
-

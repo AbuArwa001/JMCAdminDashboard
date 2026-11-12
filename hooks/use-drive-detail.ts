@@ -4,35 +4,21 @@ import { getCategoryById, getDonationDriveById, getTransactionsByDonationDrive }
 
 export function useDriveDetail(id: string) {
   const [drive, setDrive] = useState<DonationDrive | undefined>();
-  const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState<CategoryData>();
+  const [loading, setLoading] = useState(true), [category, setCategory] = useState<CategoryData>();
   const [donations, setDonations] = useState<Transaction[]>([]);
 
   const fetchDrive = async () => {
-    try {
-      const driveData = await getDonationDriveById(id);
-      setDrive(driveData);
-    } catch {
-      setDrive(undefined);
-    } finally {
-      setLoading(false);
-    }
+    try { const d = await getDonationDriveById(id); setDrive(d); }
+    catch { setDrive(undefined); }
+    finally { setLoading(false); }
   };
 
+  useEffect(() => { if (id) { setLoading(true); fetchDrive(); } }, [id]);
   useEffect(() => {
-    if (id) { setLoading(true); fetchDrive(); }
-  }, [id]);
-
-  useEffect(() => {
-    if (drive?.category) {
-      getCategoryById(drive.category).then((c) => setCategory(c || undefined)).catch(() => {});
-    }
+    if (drive?.category) getCategoryById(drive.category).then((c) => setCategory(c || undefined)).catch(() => {});
   }, [drive]);
-
   useEffect(() => {
-    if (id) {
-      getTransactionsByDonationDrive(id).then((d) => setDonations(d || [])).catch(() => setDonations([]));
-    }
+    if (id) getTransactionsByDonationDrive(id).then((d) => setDonations(d || [])).catch(() => setDonations([]));
   }, [id]);
 
   const driveDonations: Donation[] = (donations || []).map((d) => ({
@@ -48,4 +34,3 @@ export function useDriveDetail(id: string) {
 
   return { drive, loading, category, donations, setDonations, driveDonations, fetchDrive };
 }
-

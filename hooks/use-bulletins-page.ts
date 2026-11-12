@@ -14,11 +14,8 @@ export function useBulletinsPage() {
       setLoading(true);
       const res = await api.get("/api/v1/bulletins/");
       setBulletins(res.data.results || res.data);
-    } catch {
-      toast.error("Failed to load bulletins");
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error("Failed to load bulletins"); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -28,11 +25,8 @@ export function useBulletinsPage() {
       setNotifyingId(id);
       await api.post(`/api/v1/bulletins/${id}/notify`);
       toast.success("Push notification broadcasted to all users successfully!");
-    } catch {
-      toast.error("Failed to send push notification.");
-    } finally {
-      setNotifyingId(null);
-    }
+    } catch { toast.error("Failed to send push notification."); }
+    finally { setNotifyingId(null); }
   };
 
   const deleteBulletin = async (id: number) => {
@@ -41,11 +35,8 @@ export function useBulletinsPage() {
       await api.delete(`/api/v1/bulletins/${id}`);
       toast.success("Bulletin deleted.");
       fetchData();
-    } catch {
-      toast.error("Failed to delete bulletin.");
-    }
+    } catch { toast.error("Failed to delete bulletin."); }
   };
 
   return { bulletins, loading, showForm, setShowForm, notifyingId, isSubmitting, setIsSubmitting, fetchData, handleNotifyBulletin, deleteBulletin };
 }
-

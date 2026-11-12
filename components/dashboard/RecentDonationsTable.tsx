@@ -32,7 +32,7 @@ export default function RecentDonationsTable({ transactions: initialTx, isLoadin
   const {
     transactions, selectedIds, currentPage, manageTx, deleteTx, showBulkModal, isSaving, isDeleting, formData,
     setSelectedIds, setCurrentPage, setManageTx, setDeleteTx, setShowBulkModal, setFormData,
-    handleComplete, handleBulkDelete, handleDelete, openManage,
+    handleComplete, handleSave, handleBulkDelete, handleDelete, openManage,
   } = useRecentDonations(initialTx, onTransactionDeleted, onTransactionsBulkDeleted, onTransactionUpdated);
 
   const totalPages = itemsPerPage ? Math.ceil(transactions.length / itemsPerPage) : 1;
@@ -41,7 +41,7 @@ export default function RecentDonationsTable({ transactions: initialTx, isLoadin
   const selectedAmount = transactions.filter((t) => selectedIds.has(t.id)).reduce((s, t) => s + t.amount, 0);
 
   return (
-    <div className="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="font-extrabold text-slate-900 tracking-tight text-lg flex items-center gap-2">{title || "Recent Contributions"}<ShieldCheck className="w-4 h-4 text-emerald-500" /></h3>
@@ -74,7 +74,7 @@ export default function RecentDonationsTable({ transactions: initialTx, isLoadin
       <RecentDonationsPagination currentPage={currentPage} totalPages={totalPages} totalItems={transactions.length} startIndex={start} itemsPerPage={itemsPerPage || transactions.length} onPageChange={setCurrentPage} />
       <RecentDonationsBulkDeleteModal isOpen={showBulkModal} count={selectedIds.size} totalAmount={selectedAmount} isDeleting={isDeleting} onClose={() => setShowBulkModal(false)} onConfirm={handleBulkDelete} />
       <RecentDonationsSingleDeleteModal deleteTx={deleteTx} isDeleting={isDeleting} onClose={() => setDeleteTx(null)} onConfirm={handleDelete} />
-      <RecentDonationsManageModal manageTx={manageTx} formData={formData} isSaving={isSaving} canDelete={canDelete} onChange={setFormData} onClose={() => setManageTx(null)} onSubmit={(e) => { e.preventDefault(); handleComplete(manageTx!.id); setManageTx(null); }} onDeleteClick={setDeleteTx} />
+      <RecentDonationsManageModal manageTx={manageTx} formData={formData} isSaving={isSaving} canDelete={canDelete} onChange={setFormData} onClose={() => setManageTx(null)} onSubmit={handleSave} onDeleteClick={setDeleteTx} />
     </div>
   );
 }
