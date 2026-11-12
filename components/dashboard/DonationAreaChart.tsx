@@ -37,3 +37,4 @@ export function DonationAreaChart({ data }: { data: any[] }) {
     </div>
   );
 }
+

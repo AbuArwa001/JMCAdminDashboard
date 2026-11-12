@@ -27,3 +27,4 @@ export const themeKeyframes = {
     "50%": { opacity: "1", transform: "scale(1.05)" },
   },
 };
+

@@ -55,3 +55,4 @@ export function RecentDonationsSingleDeleteModal({ deleteTx, isDeleting, onClose
     </AnimatePresence>
   );
 }
+

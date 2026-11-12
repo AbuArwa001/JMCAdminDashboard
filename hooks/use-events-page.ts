@@ -41,3 +41,4 @@ export function useEventsPage() {
 
   return { events, categories, loading, showForm, setShowForm, galleryEvent, setGalleryEvent, isSaving, setIsSaving, fetchData, deleteEvent, notifyEvent };
 }
+

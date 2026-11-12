@@ -33,3 +33,4 @@ export function DriveProgressBar({ collected, target, status }: Props) {
     </div>
   );
 }
+

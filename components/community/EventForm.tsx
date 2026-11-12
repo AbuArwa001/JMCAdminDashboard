@@ -72,3 +72,4 @@ export function EventForm({ initial, categories, onClose, onSuccess, isSaving, s
     </form>
   );
 }
+

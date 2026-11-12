@@ -64,3 +64,4 @@ export function DarsasTable({ darsas, onTogglePublish, onEdit, onDelete }: Props
     </div>
   );
 }
+

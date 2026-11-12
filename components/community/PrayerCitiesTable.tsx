@@ -44,3 +44,4 @@ export function PrayerCitiesTable({ cities, onToggleActive }: Props) {
     </div>
   );
 }
+

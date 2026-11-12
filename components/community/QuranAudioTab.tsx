@@ -72,3 +72,4 @@ export function QuranAudioTab({ audios, reciters, onRefresh, onDelete, isSubmitt
     </div>
   );
 }
+

@@ -36,3 +36,4 @@ export function DonorsTableDeleteModal({ donation, isDeleting, onClose, onConfir
     </AnimatePresence>
   );
 }
+

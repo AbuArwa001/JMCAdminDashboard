@@ -8,3 +8,4 @@ export const COLOR_PRESETS = [
   { name: "Teal Mint", value: "#14b8a6" },
   { name: "Slate Charcoal", value: "#475569" },
 ];
+

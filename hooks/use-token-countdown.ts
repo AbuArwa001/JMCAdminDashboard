@@ -48,3 +48,4 @@ export function useTokenCountdown() {
 
   return { isOpen, timeLeft, totalWarningTime, isRefreshing, handleExtend, handleLogout: () => logout(), isUrgent: timeLeft <= 20 };
 }
+

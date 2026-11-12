@@ -39,3 +39,4 @@ export function AccountsHeader({ searchTerm, onSearchChange }: Props) {
     </div>
   );
 }
+

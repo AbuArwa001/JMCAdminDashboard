@@ -69,3 +69,4 @@ export function BulletinsTable({ bulletins, notifyingId, onNotify, onDelete }: P
     </div>
   );
 }
+

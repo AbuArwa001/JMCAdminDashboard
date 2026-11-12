@@ -29,3 +29,4 @@ export const updateBankAccount = async (id: string, data: any) => {
 export const deleteBankAccount = async (id: string) => {
     await api.delete(`api/v1/bank-accounts/${id}`);
 };
+

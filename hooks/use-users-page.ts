@@ -42,3 +42,4 @@ export function useUsersPage(currentStaff: any) {
 
   return { users, roles, stats, loading, submitting, setSubmitting, resetLinkData, setResetLinkData, fetchData, toggleActive, generateReset, revokeAccess };
 }
+

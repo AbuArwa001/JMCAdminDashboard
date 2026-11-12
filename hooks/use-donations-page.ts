@@ -30,3 +30,4 @@ export function useDonationsPage() {
 
   return { donations, setDonations, isLoading };
 }
+

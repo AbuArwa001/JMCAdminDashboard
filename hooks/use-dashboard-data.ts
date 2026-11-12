@@ -30,3 +30,4 @@ export function useDashboardData(enabled: boolean) {
 
   return { stats, recentDonations, setRecentDonations, categoryStats, donationTrends, drives, isLoading };
 }
+

@@ -24,3 +24,4 @@ export function getFirebaseCredential() {
     }
     return null;
 }
+

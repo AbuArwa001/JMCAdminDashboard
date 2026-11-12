@@ -21,3 +21,4 @@ export function formatTimeMMSS(secs: number): string {
   const s = safe % 60;
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
+

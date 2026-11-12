@@ -49,3 +49,4 @@ export function DonorsTableRow({ donation, canManage, canDelete, processingId, o
     </tr>
   );
 }
+

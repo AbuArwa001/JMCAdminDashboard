@@ -43,3 +43,4 @@ export function RecentDonationsBulkDeleteModal({ isOpen, count, totalAmount, isD
     </AnimatePresence>
   );
 }
+

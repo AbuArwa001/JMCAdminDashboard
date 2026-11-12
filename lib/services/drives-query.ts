@@ -24,3 +24,4 @@ export const getDonationDriveById = async (driveId: string) => {
 export const deleteDonationDrive = async (driveId: string) => {
     await api.delete(`api/v1/donations/${driveId}/`);
 };
+

@@ -35,3 +35,4 @@ export function useDuasPage() {
 
   return { categories, duas, loading, isSubmittingCat, setIsSubmittingCat, isSubmittingDua, setIsSubmittingDua, selectedCategoryId, setSelectedCategoryId, fetchData, deleteCategory, deleteDua };
 }
+

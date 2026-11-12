@@ -21,3 +21,4 @@ export function downloadQrSvg(svg: SVGSVGElement | null, title: string) {
 
   img.src = "data:image/svg+xml;base64," + btoa(svgData);
 }
+

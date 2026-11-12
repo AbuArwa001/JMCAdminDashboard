@@ -41,3 +41,4 @@ export function useLayoutSidebar() {
 
   return { isMobileOpen, isCollapsed, toggleSidebar, toggleCollapse, closeMobile: () => setIsMobileOpen(false) };
 }
+

@@ -42,3 +42,4 @@ export function CategoriesToolbar({ searchTerm, viewMode, onSearchChange, onView
     </div>
   );
 }
+

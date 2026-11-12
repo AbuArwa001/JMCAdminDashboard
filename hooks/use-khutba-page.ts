@@ -46,3 +46,4 @@ export function useKhutbaPage() {
 
   return { khutbas, logs, loading, isSubmitting, setIsSubmitting, activeTab, setActiveTab, showForm, setShowForm, editingKhutba, setEditingKhutba, fetchData, deleteKhutba, notifyKhutba };
 }
+

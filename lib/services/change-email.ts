@@ -39,3 +39,4 @@ export async function executeEmailChange(newEmail: string, currentPass: string, 
     console.warn("Backend user sync notice:", dbErr);
   }
 }
+

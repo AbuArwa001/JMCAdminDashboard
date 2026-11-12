@@ -73,3 +73,4 @@ export function RecentDonationsManageModal({ manageTx, formData, isSaving, canDe
     </AnimatePresence>
   );
 }
+

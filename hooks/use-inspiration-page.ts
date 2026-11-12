@@ -30,3 +30,4 @@ export function useInspirationPage() {
 
   return { items, loading, isSubmitting, setIsSubmitting, showForm, setShowForm, fetchItems, togglePublish, handleDelete };
 }
+

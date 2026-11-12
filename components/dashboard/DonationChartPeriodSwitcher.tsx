@@ -27,3 +27,4 @@ export function DonationChartPeriodSwitcher({ period, onSelect }: Props) {
     </div>
   );
 }
+

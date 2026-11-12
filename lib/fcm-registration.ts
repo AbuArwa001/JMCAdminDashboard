@@ -20,3 +20,4 @@ export async function registerDeviceToken(token: string): Promise<void> {
     console.error("[FCM] Failed to subscribe to admins topic:", err);
   }
 }
+

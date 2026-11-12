@@ -17,3 +17,4 @@ export function NotifIcon({ type }: { type?: string | null }) {
       return <div className="p-2 bg-purple-50 text-purple-600 rounded-lg flex-shrink-0"><Sparkles className="w-4 h-4" /></div>;
   }
 }
+

@@ -23,3 +23,4 @@ export function isFirebaseTokenValid(token?: string): boolean {
         return false;
     }
 }
+

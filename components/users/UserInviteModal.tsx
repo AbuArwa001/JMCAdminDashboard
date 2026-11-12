@@ -60,3 +60,4 @@ export function UserInviteModal({ roles, submitting, onClose, onSubmit }: Props)
     </div>
   );
 }
+

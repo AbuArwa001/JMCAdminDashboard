@@ -37,3 +37,4 @@ export function PrayerCalcSettings({ settings, onSettingsChange, onRefreshPrevie
     </div>
   );
 }
+

@@ -23,3 +23,4 @@ export async function getAdminFallbackAccess(authUser: FirebaseUser): Promise<My
   }
   return null;
 }
+

@@ -50,3 +50,4 @@ export function SidebarBrandHeader({ isCollapsed, onClose, onToggleCollapse, onL
     </div>
   );
 }
+

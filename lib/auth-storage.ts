@@ -14,3 +14,4 @@ export function clearAuthStorage() {
   localStorage.removeItem("firebaseToken");
   localStorage.removeItem("firebaseUser");
 }
+

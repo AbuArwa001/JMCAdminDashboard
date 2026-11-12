@@ -17,3 +17,4 @@ export const OVERVIEW_AND_FINANCE_SECTIONS: MenuSection[] = [
     ],
   },
 ];
+

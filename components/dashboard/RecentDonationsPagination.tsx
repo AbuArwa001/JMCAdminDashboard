@@ -40,3 +40,4 @@ export function RecentDonationsPagination({ currentPage, totalPages, totalItems,
     </div>
   );
 }
+

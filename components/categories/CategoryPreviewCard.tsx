@@ -20,3 +20,4 @@ export function CategoryPreviewCard({ name, color }: Props) {
     </div>
   );
 }
+

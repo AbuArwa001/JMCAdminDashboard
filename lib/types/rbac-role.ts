@@ -36,3 +36,4 @@ export interface RoleInput {
   permissions: string[];
   color?: string;
 }
+

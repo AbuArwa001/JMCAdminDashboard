@@ -19,3 +19,4 @@ export function StatCardTrendBadge({ value, isPositive }: Props) {
     </div>
   );
 }
+

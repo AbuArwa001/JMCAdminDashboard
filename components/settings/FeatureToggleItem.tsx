@@ -29,3 +29,4 @@ export function FeatureToggleItem({ feature, onToggle }: Props) {
     </li>
   );
 }
+

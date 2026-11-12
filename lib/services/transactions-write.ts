@@ -19,3 +19,4 @@ export const bulkDeleteTransactions = async (transactionIds: string[]) => {
     const response = await api.post('api/v1/transactions/bulk-delete/', { transaction_ids: transactionIds });
     return response.data;
 };
+

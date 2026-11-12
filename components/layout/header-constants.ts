@@ -31,3 +31,4 @@ export interface NotificationLog {
   sent_at: string;
   recipient_count: number;
 }
+

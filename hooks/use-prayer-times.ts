@@ -47,3 +47,4 @@ export function usePrayerTimes() {
 
   return { cities, overrides, settings, setSettings, loading, isSubmitting, setIsSubmitting, previewCityId, setPreviewCityId, previewDate, setPreviewDate, previewData, fetchData, loadPreview, toggleCityActive, deleteOverride };
 }
+

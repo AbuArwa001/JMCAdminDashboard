@@ -36,3 +36,4 @@ export function useZakatSettings() {
 
   return { rate, loading, isSubmitting, message, saveNisab };
 }
+

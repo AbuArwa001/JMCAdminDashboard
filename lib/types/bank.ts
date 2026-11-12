@@ -28,3 +28,4 @@ export interface Transfer {
     created_at: string;
     completed_at?: string;
 }
+

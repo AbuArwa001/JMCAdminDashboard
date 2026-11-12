@@ -70,3 +70,4 @@ export function EventGalleryModal({ event, onClose, onRefresh }: Props) {
     </div>
   );
 }
+

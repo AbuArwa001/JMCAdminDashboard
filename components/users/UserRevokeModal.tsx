@@ -30,3 +30,4 @@ export function UserRevokeModal({ user, submitting, onClose, onConfirm }: Props)
     </div>
   );
 }
+

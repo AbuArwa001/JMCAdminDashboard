@@ -58,3 +58,4 @@ export function ZakatNisabForm({ rate, onSave, isSubmitting }: Props) {
     </form>
   );
 }
+

@@ -14,3 +14,4 @@ export interface StaffUser {
   ss_login?: string | null;
   firebase_uid?: string | null;
 }
+

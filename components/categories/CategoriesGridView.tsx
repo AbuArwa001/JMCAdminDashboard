@@ -35,3 +35,4 @@ export function CategoriesGridView({ categories, onDelete }: Props) {
     </div>
   );
 }
+

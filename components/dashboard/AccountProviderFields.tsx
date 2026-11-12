@@ -48,3 +48,4 @@ export function AccountProviderFields({ register, errors }: Props) {
     </div>
   );
 }
+

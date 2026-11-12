@@ -30,3 +30,4 @@ export function RatingFeedbackItem({ rating }: { rating: ApiRating }) {
     </div>
   );
 }
+

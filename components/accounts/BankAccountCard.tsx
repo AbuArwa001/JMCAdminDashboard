@@ -50,3 +50,4 @@ export function BankAccountCard({ account, onDelete }: Props) {
     </div>
   );
 }
+

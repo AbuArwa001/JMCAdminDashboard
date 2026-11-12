@@ -44,3 +44,4 @@ export function ExecutiveStatsGrid({ isSuperAdmin, stats, isLoading }: Props) {
     </div>
   );
 }
+

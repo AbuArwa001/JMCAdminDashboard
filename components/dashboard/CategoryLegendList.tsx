@@ -23,3 +23,4 @@ export function CategoryLegendList({ data, grandTotal }: Props) {
     </div>
   );
 }
+

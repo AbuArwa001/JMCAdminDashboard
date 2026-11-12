@@ -11,3 +11,4 @@ export interface RBACContextType {
   hasAllPermissions: (...permissions: string[]) => boolean;
   refreshAccess: () => Promise<void>;
 }
+

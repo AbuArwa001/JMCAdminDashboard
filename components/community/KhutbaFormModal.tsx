@@ -77,3 +77,4 @@ export function KhutbaFormModal({ initial, onClose, onSuccess, setIsSubmitting, 
     </form>
   );
 }
+

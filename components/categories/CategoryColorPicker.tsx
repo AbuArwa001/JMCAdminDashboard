@@ -47,3 +47,4 @@ export function CategoryColorPicker({ color, onChange }: Props) {
     </div>
   );
 }
+

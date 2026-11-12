@@ -41,3 +41,4 @@ export function CategoryDonutChart({ data, grandTotal }: Props) {
     </div>
   );
 }
+

@@ -64,3 +64,4 @@ export function QuranRecitersTab({ reciters, onRefresh, onDelete, isSubmitting, 
     </div>
   );
 }
+

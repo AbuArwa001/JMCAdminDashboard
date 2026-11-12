@@ -22,3 +22,4 @@ export const getTransactionById = async (transactionId: string) => {
     const response = await api.get(`api/v1/transactions/${transactionId}/`);
     return response.data;
 };
+

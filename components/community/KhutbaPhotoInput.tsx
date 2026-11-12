@@ -28,3 +28,4 @@ export function KhutbaPhotoInput({ photoPreview, onPhotoChange, onClear }: Props
     </div>
   );
 }
+

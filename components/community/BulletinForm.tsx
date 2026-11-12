@@ -67,3 +67,4 @@ export function BulletinForm({ onClose, onSuccess, isSubmitting, setIsSubmitting
     </form>
   );
 }
+

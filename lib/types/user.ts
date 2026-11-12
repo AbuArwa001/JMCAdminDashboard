@@ -10,3 +10,4 @@ export interface User {
     bio?: string;
     defaultDonationAccount?: string;
 }
+

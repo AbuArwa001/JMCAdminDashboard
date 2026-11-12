@@ -52,3 +52,4 @@ export function TransferHistoryTable({ history, isLoading }: Props) {
     </div>
   );
 }
+

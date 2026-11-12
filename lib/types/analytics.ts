@@ -22,3 +22,4 @@ export interface AnalyticsSummary {
     active_drives: number;
     donation_trends: DonationTrend[];
 }
+

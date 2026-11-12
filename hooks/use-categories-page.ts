@@ -42,3 +42,4 @@ export function useCategoriesPage() {
 
   return { categories, isLoading, handleDelete, refresh: fetchCats };
 }
+

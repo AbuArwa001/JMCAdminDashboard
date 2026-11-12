@@ -43,3 +43,4 @@ export function useSettingsPage(staffUser: any) {
 
   return { activeTab, setActiveTab, isFetching, isSavingProfile, initialEmail, isEmailChanged, isEmailModalOpen, setIsEmailModalOpen, formData, setFormData, handleProfileSubmit, confirmEmailChange };
 }
+

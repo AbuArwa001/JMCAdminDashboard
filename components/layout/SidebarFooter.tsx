@@ -66,3 +66,4 @@ export function SidebarFooter({ isCollapsed, displayName, roleName, roleColor, i
     </div>
   );
 }
+

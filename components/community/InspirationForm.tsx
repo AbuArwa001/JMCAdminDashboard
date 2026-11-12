@@ -35,3 +35,4 @@ export function InspirationForm({ onSuccess, isSubmitting, setIsSubmitting }: Pr
     </div>
   );
 }
+

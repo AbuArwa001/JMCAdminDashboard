@@ -65,3 +65,4 @@ export function RoleCard({ role, onEdit, onDelete }: Props) {
     </motion.div>
   );
 }
+

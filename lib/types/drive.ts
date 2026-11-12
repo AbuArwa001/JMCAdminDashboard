@@ -35,3 +35,4 @@ export interface DonationDrive {
     image_urls?: string[];
     is_featured?: boolean;
 }
+

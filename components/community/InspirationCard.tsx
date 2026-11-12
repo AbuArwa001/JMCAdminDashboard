@@ -28,3 +28,4 @@ export function InspirationCard({ item, onTogglePublish, onDelete }: Props) {
     </div>
   );
 }
+

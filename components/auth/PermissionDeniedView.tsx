@@ -59,3 +59,4 @@ export function PermissionDeniedView({ fallbackTitle, fallbackDescription, roleN
     </motion.div>
   );
 }
+

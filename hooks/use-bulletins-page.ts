@@ -48,3 +48,4 @@ export function useBulletinsPage() {
 
   return { bulletins, loading, showForm, setShowForm, notifyingId, isSubmitting, setIsSubmitting, fetchData, handleNotifyBulletin, deleteBulletin };
 }
+

@@ -49,3 +49,4 @@ export function EventCard({ event, onGallery, onNotify, onEdit, onDelete }: Prop
     </div>
   );
 }
+

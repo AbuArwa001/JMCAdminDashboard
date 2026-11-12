@@ -34,3 +34,4 @@ export function mapFirebaseAuthError(code?: string): string {
   if (code === "auth/too-many-requests") return "Too many failed attempts. Please try again later";
   return "Invalid login credentials";
 }
+

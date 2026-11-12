@@ -30,3 +30,4 @@ export function RoleDeleteModal({ role, submitting, onClose, onConfirm }: Props)
     </div>
   );
 }
+

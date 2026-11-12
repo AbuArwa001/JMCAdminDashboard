@@ -41,3 +41,4 @@ export function useAdminNotifications() {
 
   return { notifications, unreadCount, loading, markAllAsRead, refresh: fetchNotifs };
 }
+

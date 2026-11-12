@@ -14,3 +14,4 @@ export const updateMe = async (userData: any) => {
     const response = await api.put('api/v1/users/me', userData);
     return response.data;
 };
+

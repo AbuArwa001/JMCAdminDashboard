@@ -25,3 +25,4 @@ export function RatingScoreHeader({ averageRating, totalRatings }: Props) {
     </div>
   );
 }
+

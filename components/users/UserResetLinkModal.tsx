@@ -31,3 +31,4 @@ export function UserResetLinkModal({ resetData, onClose }: Props) {
     </div>
   );
 }
+

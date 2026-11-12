@@ -31,3 +31,4 @@ export function useQuranPage() {
 
   return { reciters, audios, loading, activeTab, setActiveTab, isSubmittingReciter, setIsSubmittingReciter, isSubmittingAudio, setIsSubmittingAudio, fetchData, deleteReciter, deleteAudio };
 }
+

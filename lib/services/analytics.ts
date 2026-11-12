@@ -32,3 +32,4 @@ export const getDonationTrends = async (period: string = 'week'): Promise<Donati
     });
     return response.data;
 };
+

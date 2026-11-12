@@ -30,3 +30,4 @@ export function DriveImageItem({ img, isDeleting, onDelete }: Props) {
     </div>
   );
 }
+

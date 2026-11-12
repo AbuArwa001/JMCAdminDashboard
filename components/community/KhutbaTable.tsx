@@ -68,3 +68,4 @@ export function KhutbaTable({ khutbas, onNotify, onEdit, onDelete }: Props) {
     </div>
   );
 }
+

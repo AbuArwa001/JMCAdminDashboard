@@ -34,3 +34,4 @@ export const updateRbacRole = async (roleId: string, data: Partial<RoleInput>): 
 export const deleteRbacRole = async (roleId: string): Promise<void> => {
   await api.delete(`api/v1/rbac/roles/${roleId}`);
 };
+

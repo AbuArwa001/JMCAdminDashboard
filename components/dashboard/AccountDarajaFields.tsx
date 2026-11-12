@@ -43,3 +43,4 @@ export function AccountDarajaFields({ register }: { register: UseFormRegister<an
     </div>
   );
 }
+

@@ -60,3 +60,4 @@ export function RecentDonationsTableRow({ tx, isSelected, canManage, canDelete, 
     </tr>
   );
 }
+

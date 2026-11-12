@@ -12,3 +12,4 @@ export const ADMIN_SECTIONS: MenuSection[] = [
     ],
   },
 ];
+

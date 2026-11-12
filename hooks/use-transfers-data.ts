@@ -40,3 +40,4 @@ export function useTransfersData(initialTo: string) {
 
   return { accounts, history, isLoading, isSubmitting, formData, setFormData, handleSend, refresh };
 }
+

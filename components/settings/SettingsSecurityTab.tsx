@@ -65,3 +65,4 @@ export function SettingsSecurityTab({ initialEmail }: Props) {
     </>
   );
 }
+

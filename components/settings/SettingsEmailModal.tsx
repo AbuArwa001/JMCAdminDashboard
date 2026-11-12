@@ -66,3 +66,4 @@ export function SettingsEmailModal({ initialEmail, newEmail, onClose, onConfirm 
     </div>
   );
 }
+

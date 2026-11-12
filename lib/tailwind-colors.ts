@@ -42,3 +42,4 @@ export const themeColors = {
   gold: goldShades,
   grey: { DEFAULT: "#64748B", light: "#F1F5F9" },
 };
+

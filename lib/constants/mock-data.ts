@@ -32,3 +32,4 @@ export const DONATION_STATS = {
     totalCollectedWeek: 275000,
     totalCollectedMonth: 1220000,
 };
+

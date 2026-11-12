@@ -55,3 +55,4 @@ export function NotificationLogsTable({ logs }: Props) {
     </div>
   );
 }
+

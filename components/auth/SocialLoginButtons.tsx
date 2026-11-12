@@ -44,3 +44,4 @@ export function SocialLoginButtons({ isLoading, setIsLoading }: { isLoading: boo
     </div>
   );
 }
+

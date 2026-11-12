@@ -21,3 +21,4 @@ export function shouldShowNotification(notif: NotificationLog): boolean {
   }
   return true;
 }
+

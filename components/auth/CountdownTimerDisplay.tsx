@@ -30,3 +30,4 @@ export function CountdownTimerDisplay({ timeLeft, totalWarningTime, isUrgent }: 
     </div>
   );
 }
+

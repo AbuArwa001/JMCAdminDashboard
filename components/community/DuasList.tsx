@@ -32,3 +32,4 @@ export function DuasList({ duas, onEdit, onDelete }: Props) {
     </div>
   );
 }
+

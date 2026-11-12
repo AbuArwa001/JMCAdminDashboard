@@ -49,3 +49,4 @@ export function CategoriesTableView({ categories, onDelete }: Props) {
     </div>
   );
 }
+

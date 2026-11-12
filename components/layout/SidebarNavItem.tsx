@@ -63,3 +63,4 @@ export function SidebarNavItem({ item, isActive, isCollapsed, onLinkClick }: Pro
     </li>
   );
 }
+
