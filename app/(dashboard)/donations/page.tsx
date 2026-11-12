@@ -185,6 +185,10 @@ export default function DonationsPage() {
       <RecentDonationsTable
         transactions={filteredDonations}
         isLoading={isLoading}
+        itemsPerPage={5}
+        title="Donations Ledger"
+        subtitle="Complete history of community donations"
+        hideLedgerLink={true}
         onTransactionDeleted={(deletedId) => {
           setDonations((prev) => prev.filter((d) => d.id !== deletedId));
         }}
