@@ -22,6 +22,8 @@ import {
   Phone,
   FileText,
   Building2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -35,6 +37,10 @@ interface RecentTransactionsTableProps {
   onTransactionDeleted?: (id: string) => void;
   onTransactionsBulkDeleted?: (ids: string[]) => void;
   onTransactionUpdated?: (updated: Transaction) => void;
+  itemsPerPage?: number;
+  title?: string;
+  subtitle?: string;
+  hideLedgerLink?: boolean;
 }
 
 export default function RecentDonationsTable({
@@ -43,6 +49,10 @@ export default function RecentDonationsTable({
   onTransactionDeleted,
   onTransactionsBulkDeleted,
   onTransactionUpdated,
+  itemsPerPage,
+  title,
+  subtitle,
+  hideLedgerLink,
 }: RecentTransactionsTableProps) {
   const [localTransactions, setLocalTransactions] =
     useState<Transaction[]>(transactions);
@@ -52,6 +62,9 @@ export default function RecentDonationsTable({
   const canManage = isSuperAdmin || hasPermission("donations.manage");
 
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Bulk Selection & Delete State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -77,6 +90,7 @@ export default function RecentDonationsTable({
 
   useEffect(() => {
     setLocalTransactions(transactions);
+    setCurrentPage(1);
     // Prune selected IDs that are no longer in transactions
     setSelectedIds((prev) => {
       const validIds = new Set(transactions.map((t) => t.id));
@@ -88,17 +102,71 @@ export default function RecentDonationsTable({
     });
   }, [transactions]);
 
-  // Bulk Selection Helpers
+  // Pagination Calculations
+  const totalPages = itemsPerPage
+    ? Math.max(1, Math.ceil(localTransactions.length / itemsPerPage))
+    : 1;
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  const startIndex = itemsPerPage ? (currentPage - 1) * itemsPerPage : 0;
+  const paginatedTransactions = itemsPerPage
+    ? localTransactions.slice(startIndex, startIndex + itemsPerPage)
+    : localTransactions;
+
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (currentPage >= totalPages - 3) {
+      return [
+        1,
+        "...",
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+    return [
+      1,
+      "...",
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      "...",
+      totalPages,
+    ];
+  };
+
+  // Bulk Selection Helpers (operates on current visible page)
   const isAllSelected =
-    localTransactions.length > 0 &&
-    localTransactions.every((t) => selectedIds.has(t.id));
-  const isIndeterminate = selectedIds.size > 0 && !isAllSelected;
+    paginatedTransactions.length > 0 &&
+    paginatedTransactions.every((t) => selectedIds.has(t.id));
+  const isIndeterminate =
+    paginatedTransactions.some((t) => selectedIds.has(t.id)) && !isAllSelected;
 
   const toggleSelectAll = () => {
     if (isAllSelected) {
-      setSelectedIds(new Set());
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedTransactions.forEach((t) => next.delete(t.id));
+        return next;
+      });
     } else {
-      setSelectedIds(new Set(localTransactions.map((t) => t.id)));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        paginatedTransactions.forEach((t) => next.add(t.id));
+        return next;
+      });
     }
   };
 
