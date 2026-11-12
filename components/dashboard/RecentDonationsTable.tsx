@@ -1,6 +1,6 @@
 "use client";
 
-import { updateTransaction, deleteTransaction } from "@/lib/api_data";
+import { updateTransaction, deleteTransaction, bulkDeleteTransactions } from "@/lib/api_data";
 import { Transaction } from "@/lib/data";
 import { useRBAC } from "@/hooks/useRBAC";
 import clsx from "clsx";
@@ -33,6 +33,7 @@ interface RecentTransactionsTableProps {
   transactions: Transaction[];
   isLoading?: boolean;
   onTransactionDeleted?: (id: string) => void;
+  onTransactionsBulkDeleted?: (ids: string[]) => void;
   onTransactionUpdated?: (updated: Transaction) => void;
 }
 
@@ -40,6 +41,7 @@ export default function RecentDonationsTable({
   transactions,
   isLoading,
   onTransactionDeleted,
+  onTransactionsBulkDeleted,
   onTransactionUpdated,
 }: RecentTransactionsTableProps) {
   const [localTransactions, setLocalTransactions] =
@@ -50,6 +52,11 @@ export default function RecentDonationsTable({
   const canManage = isSuperAdmin || hasPermission("donations.manage");
 
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // Bulk Selection & Delete State
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // Manage Modal State
   const [manageTx, setManageTx] = useState<Transaction | null>(null);

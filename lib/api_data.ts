@@ -246,6 +246,16 @@ export const deleteTransaction = async (transactionId: string) => {
     }
 };
 
+export const bulkDeleteTransactions = async (transactionIds: string[]) => {
+    try {
+        const response = await api.post('api/v1/transactions/bulk-delete/', { transaction_ids: transactionIds });
+        return response.data;
+    } catch (error) {
+        console.error('Error bulk deleting transactions:', error);
+        throw error;
+    }
+};
+
 // Ratings Data Fetching
 export const getRatings = async () => {
     try {
