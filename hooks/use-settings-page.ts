@@ -6,20 +6,17 @@ import { executeEmailChange } from "@/lib/services/change-email";
 export function useSettingsPage(staffUser: any) {
   const [activeTab, setActiveTab] = useState("profile");
   const [isFetching, setIsFetching] = useState(true);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab && ["profile", "clearance", "security", "notifications"].includes(tab)) {
-        setActiveTab(tab);
-      }
-    }
-  }, []);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [initialEmail, setInitialEmail] = useState("");
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [formData, setFormData] = useState({ userId: "", name: "Admin User", email: "admin@jmc.org", phone: "+254 700 000000" });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const tab = new URLSearchParams(window.location.search).get("tab");
+      if (tab && ["profile", "clearance", "security", "notifications"].includes(tab)) setActiveTab(tab);
+    }
+  }, []);
 
   useEffect(() => {
     setIsFetching(true);
@@ -53,4 +50,3 @@ export function useSettingsPage(staffUser: any) {
 
   return { activeTab, setActiveTab, isFetching, isSavingProfile, initialEmail, isEmailChanged, isEmailModalOpen, setIsEmailModalOpen, formData, setFormData, handleProfileSubmit, confirmEmailChange };
 }
-

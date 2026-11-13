@@ -11,17 +11,14 @@ import { useNotificationPrefs } from "./use-notification-prefs";
 export function useAdminNotifications() {
   const { user } = useAuth();
   const uid = user?.uid || user?.email || "anonymous";
-
   const { raw, loading, refresh } = useNotificationFetch();
-  const { state, markAsRead, markAsUnread, markAllRead, dismiss, clearAll, restore } =
-    useNotificationUserState(uid);
+  const { state, markAsRead, markAsUnread, markAllRead, dismiss, clearAll, restore } = useNotificationUserState(uid);
   const { prefs, updatePrefs } = useNotificationPrefs(uid);
 
   const notifications = useMemo<EnrichedNotificationLog[]>(() => {
-    const filtered = filterUserNotifications(raw, prefs, state.dismissedIds);
     const readSet = new Set(state.readIds);
     const lastRead = state.lastReadTimestamp ? new Date(state.lastReadTimestamp) : null;
-    return filtered.map((n) => ({
+    return filterUserNotifications(raw, prefs, state.dismissedIds).map((n) => ({
       ...n,
       isRead: readSet.has(n.id) || (lastRead ? new Date(n.sent_at) <= lastRead : false),
     }));
@@ -29,11 +26,7 @@ export function useAdminNotifications() {
 
   const displayNotifications = useMemo(() => notifications.slice(0, 5), [notifications]);
   const unreadCount = useMemo(() => notifications.filter((n) => !n.isRead).length, [notifications]);
-
-  const toggleRead = useCallback(
-    (id: number, isRead: boolean) => (isRead ? markAsUnread(id) : markAsRead(id)),
-    [markAsRead, markAsUnread]
-  );
+  const toggleRead = useCallback((id: number, r: boolean) => (r ? markAsUnread(id) : markAsRead(id)), [markAsRead, markAsUnread]);
   const markAllAsRead = useCallback(() => markAllRead(notifications.map((n) => n.id)), [markAllRead, notifications]);
   const clearAllNotifications = useCallback(() => clearAll(notifications.map((n) => n.id)), [clearAll, notifications]);
 
