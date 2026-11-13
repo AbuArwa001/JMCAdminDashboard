@@ -16,3 +16,4 @@ export const SURAH_NAMES: string[] = [
 export function getSurahName(surahNumber: number): string {
   return SURAH_NAMES[surahNumber - 1] || `Surah ${surahNumber}`;
 }
+

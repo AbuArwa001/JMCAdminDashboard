@@ -67,3 +67,4 @@ export function QuranAudioTable({ audios, reciters, onEdit, onDelete }: Props) {
     </div>
   );
 }
+

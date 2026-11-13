@@ -73,3 +73,4 @@ export function QuranAudioModal({ isOpen, onClose, form, setForm, reciters, isSu
     </div>
   );
 }
+
