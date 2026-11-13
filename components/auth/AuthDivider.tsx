@@ -10,3 +10,4 @@ export function AuthDivider({ text = "Or continue with" }: { text?: string }) {
     </div>
   );
 }
+

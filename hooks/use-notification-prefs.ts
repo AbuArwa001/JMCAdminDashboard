@@ -24,3 +24,4 @@ export function useNotificationPrefs(uid: string) {
 
   return { prefs, updatePrefs: update };
 }
+

@@ -47,3 +47,4 @@ export function useNotificationUserState(uid: string) {
 
   return { state, markAsRead, markAsUnread, markAllRead, dismiss, clearAll, restore };
 }
+

@@ -28,3 +28,4 @@ export function filterUserNotifications(
   const dismissedSet = new Set(dismissedIds);
   return list.filter((n) => !dismissedSet.has(n.id) && matchType(n, prefs));
 }
+

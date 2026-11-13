@@ -35,3 +35,4 @@ export const DEFAULT_STATE: UserNotificationState = {
   dismissedIds: [],
   lastReadTimestamp: null,
 };
+

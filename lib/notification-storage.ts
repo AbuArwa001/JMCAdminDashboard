@@ -48,3 +48,4 @@ export function saveUserState(uid: string, s: UserNotificationState): void {
     localStorage.setItem(key("jmc_notif_state", uid), JSON.stringify(s));
   } catch {}
 }
+

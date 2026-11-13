@@ -12,10 +12,8 @@ export function useSettingsPage(staffUser: any) {
   const [formData, setFormData] = useState({ userId: "", name: "Admin User", email: "admin@jmc.org", phone: "+254 700 000000" });
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const tab = new URLSearchParams(window.location.search).get("tab");
-      if (tab && ["profile", "clearance", "security", "notifications"].includes(tab)) setActiveTab(tab);
-    }
+    const tab = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("tab") : null;
+    if (tab && ["profile", "clearance", "security", "notifications"].includes(tab)) setActiveTab(tab);
   }, []);
 
   useEffect(() => {
