@@ -1,217 +1,57 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import api from "@/lib/api";
-import { NotificationLog } from "@/components/layout/header-constants";
+import { useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  UserNotificationPreferences,
-  UserNotificationState,
-  DEFAULT_USER_NOTIFICATION_PREFERENCES,
-  DEFAULT_USER_NOTIFICATION_STATE,
-  getUserNotificationPreferences,
-  saveUserNotificationPreferences,
-  getUserNotificationState,
-  saveUserNotificationState,
-  filterNotificationsForUser,
-} from "@/lib/user-notification-settings";
-
-export interface EnrichedNotificationLog extends NotificationLog {
-  isRead: boolean;
-}
+import { EnrichedNotificationLog } from "@/lib/notification-types";
+import { filterUserNotifications } from "@/lib/notification-filter";
+import { useNotificationFetch } from "./use-notification-fetch";
+import { useNotificationUserState } from "./use-notification-user-state";
+import { useNotificationPrefs } from "./use-notification-prefs";
 
 export function useAdminNotifications() {
   const { user } = useAuth();
-  const userId = user?.uid || user?.email || "anonymous";
+  const uid = user?.uid || user?.email || "anonymous";
 
-  const [rawNotifications, setRawNotifications] = useState<NotificationLog[]>([]);
-  const [userState, setUserState] = useState<UserNotificationState>(DEFAULT_USER_NOTIFICATION_STATE);
-  const [preferences, setPreferences] = useState<UserNotificationPreferences>(
-    DEFAULT_USER_NOTIFICATION_PREFERENCES
-  );
-  const [loading, setLoading] = useState(false);
+  const { raw, loading, refresh } = useNotificationFetch();
+  const { state, markAsRead, markAsUnread, markAllRead, dismiss, clearAll, restore } =
+    useNotificationUserState(uid);
+  const { prefs, updatePrefs } = useNotificationPrefs(uid);
 
-  // Sync state and preferences whenever userId changes
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setUserState(getUserNotificationState(userId));
-      setPreferences(getUserNotificationPreferences(userId));
-    }
-  }, [userId]);
+  const notifications = useMemo<EnrichedNotificationLog[]>(() => {
+    const filtered = filterUserNotifications(raw, prefs, state.dismissedIds);
+    const readSet = new Set(state.readIds);
+    const lastRead = state.lastReadTimestamp ? new Date(state.lastReadTimestamp) : null;
+    return filtered.map((n) => ({
+      ...n,
+      isRead: readSet.has(n.id) || (lastRead ? new Date(n.sent_at) <= lastRead : false),
+    }));
+  }, [raw, prefs, state]);
 
-  const fetchNotifs = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await api.get("/api/v1/khutba/logs?limit=50");
-      const list: NotificationLog[] = Array.isArray(res.data)
-        ? res.data
-        : res.data?.results || [];
-      setRawNotifications(list);
-    } catch {
-      // silently fail on network error
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotifs();
-    const interval = setInterval(fetchNotifs, 45000);
-    return () => clearInterval(interval);
-  }, [fetchNotifs]);
-
-  // Compute filtered notifications for this specific user
-  const notifications: EnrichedNotificationLog[] = useMemo(() => {
-    const filtered = filterNotificationsForUser(
-      rawNotifications,
-      preferences,
-      userState.dismissedIds
-    );
-
-    const readSet = new Set(userState.readIds);
-    const lastReadDate = userState.lastReadTimestamp
-      ? new Date(userState.lastReadTimestamp)
-      : null;
-
-    return filtered.map((n) => {
-      const isExplicitlyRead = readSet.has(n.id);
-      const isPastLastRead = lastReadDate ? new Date(n.sent_at) <= lastReadDate : false;
-      return {
-        ...n,
-        isRead: isExplicitlyRead || isPastLastRead,
-      };
-    });
-  }, [rawNotifications, preferences, userState]);
-
-  // Sliced to AT MOST 5 for the notification icon dropdown
-  const displayNotifications = useMemo(() => {
-    return notifications.slice(0, 5);
-  }, [notifications]);
-
-  const unreadCount = useMemo(() => {
-    return notifications.filter((n) => !n.isRead).length;
-  }, [notifications]);
-
-  // User Actions:
-  const markAsRead = useCallback(
-    (id: number) => {
-      setUserState((prev) => {
-        if (prev.readIds.includes(id)) return prev;
-        const next: UserNotificationState = {
-          ...prev,
-          readIds: [...prev.readIds, id],
-        };
-        saveUserNotificationState(userId, next);
-        return next;
-      });
-    },
-    [userId]
-  );
-
-  const markAsUnread = useCallback(
-    (id: number) => {
-      setUserState((prev) => {
-        const next: UserNotificationState = {
-          ...prev,
-          readIds: prev.readIds.filter((readId) => readId !== id),
-        };
-        saveUserNotificationState(userId, next);
-        return next;
-      });
-    },
-    [userId]
-  );
+  const displayNotifications = useMemo(() => notifications.slice(0, 5), [notifications]);
+  const unreadCount = useMemo(() => notifications.filter((n) => !n.isRead).length, [notifications]);
 
   const toggleRead = useCallback(
-    (id: number, currentStatus: boolean) => {
-      if (currentStatus) {
-        markAsUnread(id);
-      } else {
-        markAsRead(id);
-      }
-    },
+    (id: number, isRead: boolean) => (isRead ? markAsUnread(id) : markAsRead(id)),
     [markAsRead, markAsUnread]
   );
-
-  const markAllAsRead = useCallback(() => {
-    setUserState((prev) => {
-      const visibleIds = notifications.map((n) => n.id);
-      const combined = Array.from(new Set([...prev.readIds, ...visibleIds]));
-      const next: UserNotificationState = {
-        ...prev,
-        readIds: combined,
-        lastReadTimestamp: new Date().toISOString(),
-      };
-      saveUserNotificationState(userId, next);
-      return next;
-    });
-  }, [userId, notifications]);
-
-  const dismissNotification = useCallback(
-    (id: number) => {
-      setUserState((prev) => {
-        if (prev.dismissedIds.includes(id)) return prev;
-        const next: UserNotificationState = {
-          ...prev,
-          dismissedIds: [...prev.dismissedIds, id],
-        };
-        saveUserNotificationState(userId, next);
-        return next;
-      });
-    },
-    [userId]
-  );
-
-  const clearAllNotifications = useCallback(() => {
-    setUserState((prev) => {
-      const allVisibleIds = notifications.map((n) => n.id);
-      const nextDismissed = Array.from(new Set([...prev.dismissedIds, ...allVisibleIds]));
-      const next: UserNotificationState = {
-        ...prev,
-        dismissedIds: nextDismissed,
-      };
-      saveUserNotificationState(userId, next);
-      return next;
-    });
-  }, [userId, notifications]);
-
-  const restoreDismissed = useCallback(() => {
-    setUserState((prev) => {
-      const next: UserNotificationState = {
-        ...prev,
-        dismissedIds: [],
-      };
-      saveUserNotificationState(userId, next);
-      return next;
-    });
-  }, [userId]);
-
-  const updatePreferences = useCallback(
-    (partial: Partial<UserNotificationPreferences>) => {
-      setPreferences((prev) => {
-        const next = { ...prev, ...partial };
-        saveUserNotificationPreferences(userId, next);
-        return next;
-      });
-    },
-    [userId]
-  );
+  const markAllAsRead = useCallback(() => markAllRead(notifications.map((n) => n.id)), [markAllRead, notifications]);
+  const clearAllNotifications = useCallback(() => clearAll(notifications.map((n) => n.id)), [clearAll, notifications]);
 
   return {
     notifications,
-    displayNotifications, // Maximum of 5 notifications
+    displayNotifications,
     unreadCount,
-    dismissedCount: userState.dismissedIds.length,
+    dismissedCount: state.dismissedIds.length,
     loading,
-    preferences,
+    preferences: prefs,
     markAsRead,
     markAsUnread,
     toggleRead,
     markAllAsRead,
-    dismissNotification,
+    dismissNotification: dismiss,
     clearAllNotifications,
-    restoreDismissed,
-    updatePreferences,
-    refresh: fetchNotifs,
+    restoreDismissed: restore,
+    updatePreferences: updatePrefs,
+    refresh,
   };
 }
