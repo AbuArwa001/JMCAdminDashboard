@@ -6,6 +6,16 @@ import { executeEmailChange } from "@/lib/services/change-email";
 export function useSettingsPage(staffUser: any) {
   const [activeTab, setActiveTab] = useState("profile");
   const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab && ["profile", "clearance", "security", "notifications"].includes(tab)) {
+        setActiveTab(tab);
+      }
+    }
+  }, []);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [initialEmail, setInitialEmail] = useState("");
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
