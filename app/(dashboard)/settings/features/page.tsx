@@ -43,7 +43,7 @@ export default function FeaturesSettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-[#1a1512] tracking-tight" style={{ fontFamily: "var(--font-cinzel), serif" }}>Application Feature Toggles</h1>
-            <p className="text-sm text-gray-500 font-medium mt-0.5">Live feature control switches for JamiaGive mobile application</p>
+            <p className="text-sm text-gray-500 font-medium mt-0.5">Live feature control switches for Jamia Mosque mobile application</p>
           </div>
         </div>
 

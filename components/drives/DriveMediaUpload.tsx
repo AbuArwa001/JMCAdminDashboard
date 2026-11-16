@@ -70,7 +70,7 @@ export function DriveMediaUpload({
           </label>
           <div>
             <div className="flex items-center gap-2"><Star className="w-4 h-4 text-[#c99335]" /><span className="text-sm font-bold text-gray-900">Feature this Drive</span></div>
-            <p className="text-xs text-gray-500 mt-0.5">Featured drives appear on the JamiaGive App Home Page.</p>
+            <p className="text-xs text-gray-500 mt-0.5">Featured drives appear on the Jamia Mosque App Home Page.</p>
           </div>
         </div>
       </div>

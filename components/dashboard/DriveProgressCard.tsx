@@ -69,7 +69,7 @@ export default function DriveProgressCard({ drive, onUpdate, isLoading }: DriveP
 
       <DriveProgressBar collected={drive.collected_amount} target={drive.target_amount} status={drive.status} />
       <DriveCardActions driveId={drive.id} isFeatured={drive.is_featured} status={drive.status} isUpdating={isUpdating} isDeleting={isDeleting} onToggleFeatured={handleToggleFeatured} onOpenQR={() => setIsQRModalOpen(true)} onToggleStatus={handleToggleStatus} onDelete={handleDelete} />
-      <QRCodeModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} value={`jamiagive://donate/${drive.id}`} title={drive.title} />
+      <QRCodeModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} value={`jamiamosque://donate/${drive.id}`} title={drive.title} />
     </div>
   );
 }
