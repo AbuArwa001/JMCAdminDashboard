@@ -37,3 +37,4 @@ export function AuthLoadingOverlay({ show }: Props) {
     </AnimatePresence>
   );
 }
+
