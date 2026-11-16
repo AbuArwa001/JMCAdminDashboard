@@ -41,7 +41,7 @@ export function AccountProviderFields({ register, errors }: Props) {
             <label className="form-label">
               Paybill Number <span className="text-gray-400 font-normal lowercase">(optional)</span>
             </label>
-            <input {...register("paybill_number")} placeholder="e.g. 522522" className="form-input font-mono" />
+            <input {...register("paybill_number")} placeholder="e.g. 150770" className="form-input font-mono" />
           </div>
         </div>
       </div>
