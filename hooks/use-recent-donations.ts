@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Transaction } from "@/lib/data";
 import { updateTransaction, deleteTransaction, bulkDeleteTransactions } from "@/lib/api_data";
+import { resolveDonorName } from "@/lib/donor-utils";
 import { toast } from "sonner";
 
 export function useRecentDonations(initialTx: Transaction[], onDel?: (id: string) => void, onBulkDel?: (ids: string[]) => void, onUp?: (tx: Transaction) => void) {
@@ -11,7 +12,6 @@ export function useRecentDonations(initialTx: Transaction[], onDel?: (id: string
   const [isSaving, setIsSaving] = useState(false), [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => { setTransactions(initialTx); }, [initialTx]);
-
   const handleComplete = async (id: string) => {
     const res = await updateTransaction(id, { payment_status: "Completed" });
     setTransactions((p) => p.map((t) => (t.id === id ? { ...t, payment_status: "Completed", ...res } : t)));
@@ -44,7 +44,7 @@ export function useRecentDonations(initialTx: Transaction[], onDel?: (id: string
     } finally { setIsDeleting(false); }
   };
 
-  const openManage = (tx: Transaction) => { setManageTx(tx); setFormData({ account_name: tx.user_name || tx.account_name || "", amount: tx.amount, payment_status: tx.payment_status || "Pending", payment_method: tx.payment_method || "M-Pesa" }); };
+  const openManage = (tx: Transaction) => { setManageTx(tx); setFormData({ account_name: resolveDonorName(tx, "Anonymous"), amount: tx.amount, payment_status: tx.payment_status || "Pending", payment_method: tx.payment_method || "M-Pesa" }); };
 
   return { transactions, selectedIds, currentPage, manageTx, deleteTx, showBulkModal, isSaving, isDeleting, formData, setSelectedIds, setCurrentPage, setManageTx, setDeleteTx, setShowBulkModal, setFormData, handleComplete, handleSave, handleBulkDelete, handleDelete, openManage };
 }
