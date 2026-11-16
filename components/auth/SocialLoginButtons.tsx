@@ -13,6 +13,7 @@ import { GoogleIcon, GithubIcon } from "./SocialBrandIcons";
 interface Props {
   isLoading: boolean;
   setIsLoading: (l: boolean) => void;
+  onSuccess?: () => void;
 }
 
 const btnClass =
@@ -22,7 +23,7 @@ const btnClass =
   "hover:text-gray-900 shadow-sm hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 " +
   "active:translate-y-0 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none";
 
-export function SocialLoginButtons({ isLoading, setIsLoading }: Props) {
+export function SocialLoginButtons({ isLoading, setIsLoading, onSuccess }: Props) {
   const router = useRouter();
   const [active, setActive] = useState<"google" | "github" | null>(null);
 
@@ -38,6 +39,7 @@ export function SocialLoginButtons({ isLoading, setIsLoading }: Props) {
         toast.error("Access denied. Executive privileges required.");
         return;
       }
+      onSuccess?.();
       finalizeLogin(cred.user, token);
       toast.success("Welcome back! Redirecting...");
       router.push("/");

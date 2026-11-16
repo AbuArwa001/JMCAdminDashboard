@@ -1,9 +1,4 @@
-import {
-  UserNotificationPreferences,
-  UserNotificationState,
-  DEFAULT_PREFS,
-  DEFAULT_STATE,
-} from "./notification-types";
+import { UserNotificationPreferences, UserNotificationState, DEFAULT_PREFS, DEFAULT_STATE } from "./notification-types";
 
 function key(prefix: string, uid: string): string {
   return `${prefix}_${(uid || "guest").replace(/[^a-zA-Z0-9_-]/g, "_")}`;
@@ -48,4 +43,3 @@ export function saveUserState(uid: string, s: UserNotificationState): void {
     localStorage.setItem(key("jmc_notif_state", uid), JSON.stringify(s));
   } catch {}
 }
-

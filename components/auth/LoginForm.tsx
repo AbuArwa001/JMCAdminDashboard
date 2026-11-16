@@ -11,13 +11,12 @@ import { checkStaffAccess, finalizeLogin, mapFirebaseAuthError } from "@/lib/aut
 import { clearAuthStorage } from "@/lib/auth-storage";
 import { SocialLoginButtons } from "./SocialLoginButtons";
 import { AuthDivider } from "./AuthDivider";
+import { AuthLoadingOverlay } from "./AuthLoadingOverlay";
 
 export function LoginForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false), [loginSuccess, setLoginSuccess] = useState(false);
+  const [email, setEmail] = useState(""), [password, setPassword] = useState(""), [showPassword, setShowPassword] = useState(false);
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +30,7 @@ export function LoginForm() {
         toast.error("Access denied. Executive privileges required.");
         return;
       }
+      setLoginSuccess(true);
       finalizeLogin(cred.user, token);
       toast.success("Welcome back! Redirecting...");
       router.push("/");
@@ -44,6 +44,7 @@ export function LoginForm() {
 
   return (
     <div className="space-y-5">
+      <AuthLoadingOverlay show={loginSuccess} />
       <form onSubmit={handleCredentialsLogin} className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Email Address</label>
@@ -70,7 +71,7 @@ export function LoginForm() {
         </button>
       </form>
       <AuthDivider />
-      <SocialLoginButtons isLoading={isLoading} setIsLoading={setIsLoading} />
+      <SocialLoginButtons isLoading={isLoading} setIsLoading={setIsLoading} onSuccess={() => setLoginSuccess(true)} />
     </div>
   );
 }
