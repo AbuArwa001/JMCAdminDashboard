@@ -1,7 +1,7 @@
 export async function registerDeviceToken(token: string): Promise<void> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    await fetch(`${apiUrl}api/v1/khutba/register-device/`, {
+    await fetch(`${apiUrl}/api/v1/khutba/register-device/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fcm_token: token, platform: "web" }),
