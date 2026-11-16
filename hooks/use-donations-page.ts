@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getTransactions, getCategories, getDonationDrives } from "@/lib/api_data";
 import { Transaction } from "@/lib/data";
+import { resolveDonorName } from "@/lib/donor-utils";
 import { toast } from "sonner";
 
 export function useDonationsPage() {
@@ -20,8 +21,7 @@ export function useDonationsPage() {
         const drive = t.donation && typeof t.donation === "object" ? t.donation : driveMap[t.donation_id || t.donation];
         const catId = drive?.category_id || drive?.category;
         const name = (catId && catMap[catId]) || drive?.categoryName || (typeof t.category === "string" ? t.category : "General");
-        const rawName = t.user_name || t.user?.full_name;
-        const donorName = (rawName && rawName.toLowerCase() !== "anonymous") ? rawName.trim() : (t.account_name && t.account_name !== drive?.title ? t.account_name.trim() : "Anonymous Donor");
+        const donorName = resolveDonorName({ ...t, donation: drive }, "Anonymous");
         return { ...t, donation: drive || t.donation, category: name, user_name: donorName };
       });
       setDonations(mapped);
@@ -30,4 +30,3 @@ export function useDonationsPage() {
 
   return { donations, setDonations, isLoading };
 }
-

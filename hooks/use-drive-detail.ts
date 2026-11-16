@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CategoryData, Donation, DonationDrive, Transaction } from "@/lib/data";
 import { getCategoryById, getDonationDriveById, getTransactionsByDonationDrive } from "@/lib/api_data";
+import { resolveDonorName } from "@/lib/donor-utils";
 
 export function useDriveDetail(id: string) {
   const [drive, setDrive] = useState<DonationDrive | undefined>();
@@ -23,7 +24,7 @@ export function useDriveDetail(id: string) {
 
   const driveDonations: Donation[] = (donations || []).map((d) => ({
     id: d.id,
-    donorName: d.user?.full_name || d.user_name || d.account_name || "Anonymous",
+    donorName: resolveDonorName({ ...d, drive }, "Anonymous"),
     amount: d.amount,
     category: d.category || (category ? category.category_name : "General"),
     driveId: d.donation?.id || d.donation_id || id,

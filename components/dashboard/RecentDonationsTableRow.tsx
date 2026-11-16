@@ -1,6 +1,7 @@
 import clsx from "clsx";
-import { CheckCircle, CreditCard, Wallet, Smartphone, ShieldCheck, Trash2, SlidersHorizontal, Loader2 } from "lucide-react";
+import { CheckCircle, CreditCard, Wallet, Smartphone, Trash2, SlidersHorizontal, Loader2 } from "lucide-react";
 import { Transaction } from "@/lib/data";
+import { resolveDonorName } from "@/lib/donor-utils";
 
 interface Props {
   tx: Transaction;
@@ -22,7 +23,7 @@ function MethodIcon({ method }: { method?: string }) {
 
 export function RecentDonationsTableRow({ tx, isSelected, canManage, canDelete, processingId, onToggleSelect, onComplete, onManage, onDelete }: Props) {
   const isCompleted = tx.payment_status === "Completed";
-  const name = tx.user_name || tx.account_name || tx.user?.full_name || "Anonymous Donor";
+  const name = resolveDonorName(tx, "Anonymous");
 
   return (
     <tr className={clsx("transition-colors group", isSelected ? "bg-amber-500/10" : "hover:bg-slate-50/80")}>
@@ -60,4 +61,3 @@ export function RecentDonationsTableRow({ tx, isSelected, canManage, canDelete, 
     </tr>
   );
 }
-

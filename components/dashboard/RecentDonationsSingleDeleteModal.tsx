@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AlertTriangle, Loader2, Crown } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Transaction } from "@/lib/data";
+import { resolveDonorName } from "@/lib/donor-utils";
 
 interface Props {
   deleteTx: Transaction | null;
@@ -34,7 +35,7 @@ export function RecentDonationsSingleDeleteModal({ deleteTx, isDeleting, onClose
           </div>
           <p className="text-xs text-slate-500 leading-relaxed mb-4">Are you sure you want to permanently delete this transaction? This action is irreversible.</p>
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 mb-6 space-y-2 text-xs">
-            <div className="flex justify-between"><span className="text-slate-400 font-medium">Donor:</span><span className="font-bold text-slate-900">{deleteTx.user_name || deleteTx.account_name || "Anonymous Donor"}</span></div>
+            <div className="flex justify-between"><span className="text-slate-400 font-medium">Donor:</span><span className="font-bold text-slate-900">{resolveDonorName(deleteTx, "Anonymous")}</span></div>
             <div className="flex justify-between"><span className="text-slate-400 font-medium">Amount:</span><span className="font-extrabold text-slate-900">KES {deleteTx.amount.toLocaleString()}</span></div>
             <div className="flex justify-between"><span className="text-slate-400 font-medium">Reference:</span><span className="font-mono text-slate-700">{deleteTx.transaction_reference || deleteTx.id.slice(0, 16)}</span></div>
           </div>

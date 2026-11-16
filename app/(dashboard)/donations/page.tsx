@@ -8,6 +8,7 @@ import { useRBAC } from "@/hooks/useRBAC";
 import { useDonationsPage } from "@/hooks/use-donations-page";
 import { DonationsToolbar } from "@/components/donations/DonationsToolbar";
 import RecentDonationsTable from "@/components/dashboard/RecentDonationsTable";
+import { resolveDonorName } from "@/lib/donor-utils";
 
 export default function DonationsPage() {
   const { donations, setDonations, isLoading } = useDonationsPage();
@@ -23,14 +24,15 @@ export default function DonationsPage() {
 
   const filtered = donations.filter((d) => {
     const term = searchTerm.toLowerCase();
-    const matchesSearch = d.user_name?.toLowerCase().includes(term) || d.account_name?.toLowerCase().includes(term) || d.amount.toString().includes(searchTerm) || d.category?.toLowerCase().includes(term);
+    const donor = resolveDonorName(d, "Anonymous").toLowerCase();
+    const matchesSearch = donor.includes(term) || d.amount.toString().includes(searchTerm) || d.category?.toLowerCase().includes(term);
     const matchesStatus = statusFilter === "All" || d.payment_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const handleExport = () => {
     exportToCSV(
-      filtered.map((item) => ({ "Full Name": item.user_name || item.account_name || "Anonymous", donation_title: item.donation?.title || "Drive", amount: item.amount, donated_at: item.donated_at, payment_method: item.payment_method, payment_status: item.payment_status, category: item.category })),
+      filtered.map((item) => ({ "Full Name": resolveDonorName(item, "Anonymous"), donation_title: item.donation?.title || "Drive", amount: item.amount, donated_at: item.donated_at, payment_method: item.payment_method, payment_status: item.payment_status, category: item.category })),
       "donations_report"
     );
   };
