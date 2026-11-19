@@ -46,3 +46,7 @@ next-env.d.ts
 .env.test
 seed-firebase-users.mjs
 seed-firebase-admin.mjs
+__pycache__/
+scripts/
+.venv/
+seed_campaigns.json

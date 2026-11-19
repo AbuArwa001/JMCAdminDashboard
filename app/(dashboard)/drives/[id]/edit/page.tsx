@@ -10,7 +10,7 @@ import { DriveEditPayment } from "@/components/drives/DriveEditPayment";
 export default function EditDrivePage({ params }: { params: { id: string } }) {
   const {
     loading, error, categories, formData, paymentMethod, selectedImages,
-    setSelectedImages, setPaymentMethod, handleChange, handleSubmit
+    setSelectedImages, setPaymentMethod, handleChange, handleDescriptionChange, handleSubmit
   } = useDriveEdit(params.id);
 
   if (loading) return <div className="p-8 text-center">Loading drive details...</div>;
@@ -27,7 +27,12 @@ export default function EditDrivePage({ params }: { params: { id: string } }) {
 
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <DriveEditFields formData={formData} categories={categories} onChange={handleChange} />
+          <DriveEditFields
+            formData={formData}
+            categories={categories}
+            onChange={handleChange}
+            onDescriptionChange={handleDescriptionChange}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Add New Images (Max 4)</label>
