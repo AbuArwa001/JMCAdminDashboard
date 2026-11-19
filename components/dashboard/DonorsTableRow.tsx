@@ -12,8 +12,39 @@ interface Props {
   onDelete: (d: Donation) => void;
 }
 
+function getStatusConfig(status?: string) {
+  const s = (status || "Pending").toLowerCase();
+  if (s === "completed" || s === "success") {
+    return {
+      label: status || "Completed",
+      badgeCls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+      dotCls: "bg-emerald-500",
+    };
+  }
+  if (s === "failed") {
+    return {
+      label: status || "Failed",
+      badgeCls: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+      dotCls: "bg-rose-500",
+    };
+  }
+  if (s === "cancelled" || s === "canceled") {
+    return {
+      label: status || "Cancelled",
+      badgeCls: "bg-slate-500/10 text-slate-600 border-slate-500/30",
+      dotCls: "bg-slate-400",
+    };
+  }
+  return {
+    label: status || "Pending",
+    badgeCls: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+    dotCls: "bg-amber-500 animate-pulse",
+  };
+}
+
 export function DonorsTableRow({ donation, canManage, canDelete, processingId, onComplete, onEdit, onDelete }: Props) {
-  const isCompleted = donation.status === "Completed";
+  const statusInfo = getStatusConfig(donation.status);
+  const isCompleted = (donation.status || "").toLowerCase() === "completed";
 
   return (
     <tr className="hover:bg-amber-500/5 transition-colors group">
@@ -22,9 +53,9 @@ export function DonorsTableRow({ donation, canManage, canDelete, processingId, o
       <td className="py-3.5 text-xs font-semibold text-gray-600">{donation.paymentMethod}</td>
       <td className="py-3.5 text-xs text-gray-400 font-mono">{new Date(donation.date).toLocaleDateString()}</td>
       <td className="py-3.5">
-        <span className={clsx("text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm inline-flex items-center gap-1", isCompleted ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : "bg-amber-500/10 text-amber-600 border-amber-500/30")}>
-          <span className={clsx("w-1.5 h-1.5 rounded-full animate-pulse", isCompleted ? "bg-emerald-500" : "bg-amber-500")} />
-          {donation.status}
+        <span className={clsx("text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-sm inline-flex items-center gap-1", statusInfo.badgeCls)}>
+          <span className={clsx("w-1.5 h-1.5 rounded-full", statusInfo.dotCls)} />
+          {statusInfo.label}
         </span>
       </td>
       <td className="py-3.5 pr-2 text-right">

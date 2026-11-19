@@ -32,6 +32,7 @@ export function DonationsToolbar({ searchTerm, statusFilter, onSearchChange, onS
           <option value="Completed">Completed</option>
           <option value="Pending">Pending</option>
           <option value="Failed">Failed</option>
+          <option value="Cancelled">Cancelled</option>
         </select>
         <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
       </div>

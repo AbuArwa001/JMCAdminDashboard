@@ -21,8 +21,39 @@ function MethodIcon({ method }: { method?: string }) {
   return <Smartphone className="w-3.5 h-3.5 text-emerald-500" />;
 }
 
+function getStatusConfig(status?: string) {
+  const s = (status || "Pending").toLowerCase();
+  if (s === "completed" || s === "success") {
+    return {
+      label: status || "Completed",
+      badgeCls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+      dotCls: "bg-emerald-500",
+    };
+  }
+  if (s === "failed") {
+    return {
+      label: status || "Failed",
+      badgeCls: "bg-rose-500/10 text-rose-600 border-rose-500/30",
+      dotCls: "bg-rose-500",
+    };
+  }
+  if (s === "cancelled" || s === "canceled") {
+    return {
+      label: status || "Cancelled",
+      badgeCls: "bg-slate-500/10 text-slate-600 border-slate-500/30",
+      dotCls: "bg-slate-400",
+    };
+  }
+  return {
+    label: status || "Pending",
+    badgeCls: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+    dotCls: "bg-amber-500 animate-pulse",
+  };
+}
+
 export function RecentDonationsTableRow({ tx, isSelected, canManage, canDelete, processingId, onToggleSelect, onComplete, onManage, onDelete }: Props) {
-  const isCompleted = tx.payment_status === "Completed";
+  const statusInfo = getStatusConfig(tx.payment_status);
+  const isCompleted = (tx.payment_status || "").toLowerCase() === "completed";
   const name = resolveDonorName(tx, "Anonymous");
 
   return (
@@ -43,8 +74,8 @@ export function RecentDonationsTableRow({ tx, isSelected, canManage, canDelete, 
       <td className="py-3.5 px-4 text-xs text-slate-500 flex items-center gap-1.5 pt-4"><MethodIcon method={tx.payment_method} /><span>{tx.payment_method || "M-Pesa"}</span></td>
       <td className="py-3.5 px-4 text-xs text-slate-400 font-mono">{new Date(tx.donated_at || tx.date || Date.now()).toLocaleDateString()}</td>
       <td className="py-3.5 px-4">
-        <span className={clsx("text-[10px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center gap-1", isCompleted ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : "bg-amber-500/10 text-amber-600 border-amber-500/30")}>
-          <span className={clsx("w-1.5 h-1.5 rounded-full", isCompleted ? "bg-emerald-500" : "bg-amber-500 animate-pulse")} />{tx.payment_status || "Pending"}
+        <span className={clsx("text-[10px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center gap-1", statusInfo.badgeCls)}>
+          <span className={clsx("w-1.5 h-1.5 rounded-full", statusInfo.dotCls)} />{statusInfo.label}
         </span>
       </td>
       <td className="py-3.5 px-4 text-right">

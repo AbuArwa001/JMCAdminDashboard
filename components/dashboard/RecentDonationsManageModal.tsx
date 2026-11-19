@@ -47,7 +47,7 @@ export function RecentDonationsManageModal({ manageTx, formData, isSaving, canDe
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Status</label>
                 <select value={formData.payment_status || "Completed"} onChange={(e) => onChange({ ...formData, payment_status: e.target.value })} className="form-input text-xs w-full">
-                  <option value="Completed">Completed</option><option value="Pending">Pending</option><option value="Failed">Failed</option>
+                  <option value="Completed">Completed</option><option value="Pending">Pending</option><option value="Failed">Failed</option><option value="Cancelled">Cancelled</option>
                 </select>
               </div>
               <div>
