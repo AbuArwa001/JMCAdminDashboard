@@ -5,8 +5,13 @@ export const PUBLIC_PATHS = [
     '/signup',
     '/reset-password',
     '/forgot-password',
+    '/privacy-policy',
+    '/privacy',
+    '/delete-account',
+    '/request-account-deletion',
     '/logo.png',
-    '/api/auth'
+    '/api/auth',
+    '/api/account-deletion-request'
 ];
 
 export function isPathPublic(pathname: string): boolean {
