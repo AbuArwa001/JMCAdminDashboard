@@ -35,8 +35,9 @@ export default function RecentDonationsTable({ transactions: initialTx, isLoadin
     handleComplete, handleSave, handleBulkDelete, handleDelete, openManage,
   } = useRecentDonations(initialTx, onTransactionDeleted, onTransactionsBulkDeleted, onTransactionUpdated);
 
-  const totalPages = itemsPerPage ? Math.ceil(transactions.length / itemsPerPage) : 1;
-  const start = itemsPerPage ? (currentPage - 1) * itemsPerPage : 0;
+  const totalPages = itemsPerPage ? Math.max(1, Math.ceil(transactions.length / itemsPerPage)) : 1;
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = itemsPerPage ? (safePage - 1) * itemsPerPage : 0;
   const list = itemsPerPage ? transactions.slice(start, start + itemsPerPage) : transactions;
   const selectedAmount = transactions.filter((t) => selectedIds.has(t.id)).reduce((s, t) => s + t.amount, 0);
 
@@ -65,13 +66,28 @@ export default function RecentDonationsTable({ transactions: initialTx, isLoadin
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {isLoading ? Array.from({ length: 4 }).map((_, i) => (<tr key={i}><td colSpan={8} className="p-4"><Skeleton className="h-6 w-full" /></td></tr>)) : list.map((tx) => (
-              <RecentDonationsTableRow key={tx.id} tx={tx} isSelected={selectedIds.has(tx.id)} canManage={canManage} canDelete={canDelete} processingId={null} onToggleSelect={(id) => { const n = new Set(selectedIds); if (n.has(id)) n.delete(id); else n.add(id); setSelectedIds(n); }} onComplete={handleComplete} onManage={openManage} onDelete={setDeleteTx} />
-            ))}
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <tr key={i}><td colSpan={8} className="p-4"><Skeleton className="h-6 w-full" /></td></tr>
+              ))
+            ) : list.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-12 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    <p className="text-sm font-semibold text-slate-600">No donations found</p>
+                    <p className="text-xs text-slate-400">Try adjusting your search terms or status filter</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              list.map((tx) => (
+                <RecentDonationsTableRow key={tx.id} tx={tx} isSelected={selectedIds.has(tx.id)} canManage={canManage} canDelete={canDelete} processingId={null} onToggleSelect={(id) => { const n = new Set(selectedIds); if (n.has(id)) n.delete(id); else n.add(id); setSelectedIds(n); }} onComplete={handleComplete} onManage={openManage} onDelete={setDeleteTx} />
+              ))
+            )}
           </tbody>
         </table>
       </div>
-      <RecentDonationsPagination currentPage={currentPage} totalPages={totalPages} totalItems={transactions.length} startIndex={start} itemsPerPage={itemsPerPage || transactions.length} onPageChange={setCurrentPage} />
+      <RecentDonationsPagination currentPage={safePage} totalPages={totalPages} totalItems={transactions.length} startIndex={start} itemsPerPage={itemsPerPage || transactions.length} onPageChange={setCurrentPage} />
       <RecentDonationsBulkDeleteModal isOpen={showBulkModal} count={selectedIds.size} totalAmount={selectedAmount} isDeleting={isDeleting} onClose={() => setShowBulkModal(false)} onConfirm={handleBulkDelete} />
       <RecentDonationsSingleDeleteModal deleteTx={deleteTx} isDeleting={isDeleting} onClose={() => setDeleteTx(null)} onConfirm={handleDelete} />
       <RecentDonationsManageModal manageTx={manageTx} formData={formData} isSaving={isSaving} canDelete={canDelete} onChange={setFormData} onClose={() => setManageTx(null)} onSubmit={handleSave} onDeleteClick={setDeleteTx} />

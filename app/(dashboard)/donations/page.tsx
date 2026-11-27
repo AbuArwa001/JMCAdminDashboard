@@ -22,11 +22,34 @@ export default function DonationsPage() {
     if (q) setSearchTerm(q);
   }, [searchParams]);
 
+  const normalizeStatus = (s?: string) => {
+    if (!s) return "";
+    const lower = s.toLowerCase().trim();
+    if (lower === "canceled") return "cancelled";
+    if (lower === "success") return "completed";
+    return lower;
+  };
+
   const filtered = donations.filter((d) => {
-    const term = searchTerm.toLowerCase();
+    const term = searchTerm.toLowerCase().trim();
     const donor = resolveDonorName(d, "Anonymous").toLowerCase();
-    const matchesSearch = donor.includes(term) || d.amount.toString().includes(searchTerm) || d.category?.toLowerCase().includes(term);
-    const matchesStatus = statusFilter === "All" || d.payment_status === statusFilter;
+    const amountStr = (d.amount ?? "").toString();
+    const category = (d.category || "").toLowerCase();
+    const campaignTitle = (d.donation?.title || "").toLowerCase();
+    const reference = (d.transaction_reference || d.mpesa_receipt || "").toLowerCase();
+
+    const matchesSearch =
+      !term ||
+      donor.includes(term) ||
+      amountStr.includes(term) ||
+      category.includes(term) ||
+      campaignTitle.includes(term) ||
+      reference.includes(term);
+
+    const matchesStatus =
+      statusFilter === "All" ||
+      normalizeStatus(d.payment_status) === normalizeStatus(statusFilter);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -55,6 +78,7 @@ export default function DonationsPage() {
       </div>
 
       <RecentDonationsTable
+        key={`${statusFilter}-${searchTerm}`}
         transactions={filtered}
         isLoading={isLoading}
         itemsPerPage={10}

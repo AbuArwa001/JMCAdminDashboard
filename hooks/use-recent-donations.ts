@@ -11,7 +11,10 @@ export function useRecentDonations(initialTx: Transaction[], onDel?: (id: string
   const [showBulkModal, setShowBulkModal] = useState(false), [formData, setFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false), [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => { setTransactions(initialTx); }, [initialTx]);
+  useEffect(() => {
+    setTransactions(initialTx);
+    setCurrentPage(1);
+  }, [initialTx]);
   const handleComplete = async (id: string) => {
     const res = await updateTransaction(id, { payment_status: "Completed" });
     setTransactions((p) => p.map((t) => (t.id === id ? { ...t, payment_status: "Completed", ...res } : t)));
