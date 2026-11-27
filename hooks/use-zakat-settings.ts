@@ -9,7 +9,16 @@ export function useZakatSettings() {
 
   const fetchNisab = async () => {
     try {
-      const response = await api.get("/api/v1/zakat/nisab-rate/");
+      let response;
+      try {
+        response = await api.get("/api/v1/zakat/nisab");
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          response = await api.get("/api/v1/zakat/nisab-rate/");
+        } else {
+          throw err;
+        }
+      }
       setRate(response.data);
     } catch (e) {
       console.error(e);
@@ -24,7 +33,15 @@ export function useZakatSettings() {
     setIsSubmitting(true);
     setMessage(null);
     try {
-      await api.patch("/api/v1/zakat/nisab-rate/", data);
+      try {
+        await api.patch("/api/v1/zakat/nisab", data);
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          await api.patch("/api/v1/zakat/nisab-rate/", data);
+        } else {
+          throw err;
+        }
+      }
       setMessage({ type: "success", text: "Nisab rates updated successfully." });
       fetchNisab();
     } catch {
