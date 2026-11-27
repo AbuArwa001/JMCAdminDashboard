@@ -22,14 +22,23 @@ export const getAnalyticsCategories = async (): Promise<CategoryData[]> => {
 };
 
 export const getAnalyticsSummary = async (): Promise<AnalyticsSummary> => {
-    const response = await api.get<AnalyticsSummary>('api/v1/analytics/summary');
-    return response.data;
+    try {
+        const response = await api.get<AnalyticsSummary>('api/v1/analytics/summary');
+        return response.data;
+    } catch {
+        const response = await api.get<AnalyticsSummary>('api/v1/analytics/overview');
+        return response.data;
+    }
 };
 
 export const getDonationTrends = async (period: string = 'week'): Promise<DonationTrend[]> => {
-    const response = await api.get<DonationTrend[]>('api/v1/analytics/trends', {
-        params: { period }
-    });
-    return response.data;
+    try {
+        const response = await api.get<DonationTrend[]>('api/v1/analytics/trends', {
+            params: { period }
+        });
+        return response.data;
+    } catch {
+        return [];
+    }
 };
 

@@ -41,6 +41,7 @@ export default function Home() {
           <RecentDonationsTable
             transactions={recentDonations}
             isLoading={isLoading}
+            itemsPerPage={10}
             onTransactionDeleted={(id) => setRecentDonations((p) => p.filter((t) => t.id !== id))}
             onTransactionsBulkDeleted={(ids) => setRecentDonations((p) => p.filter((t) => !ids.includes(t.id)))}
             onTransactionUpdated={(up) => setRecentDonations((p) => p.map((t) => (t.id === up.id ? { ...t, ...up } : t)))}

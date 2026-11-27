@@ -23,7 +23,7 @@ export function useDashboardData(enabled: boolean) {
       setDonationTrends(summary?.donation_trends || []);
       const catMap = (cats || []).reduce((acc: any, c: any) => ({ ...acc, [c.id]: c.category_name }), {});
       setCategoryStats(aCats?.length ? aCats : cats);
-      setRecentDonations((txs || []).slice(0, 5).map((t: any) => ({ ...t, category: catMap[t.donation?.category_id] || "General" })));
+      setRecentDonations((txs || []).slice(0, 10).map((t: any) => ({ ...t, category: catMap[t.donation?.category_id] || "General" })));
       setDrives((rawDrives || []).map((d: any) => ({ ...d, categoryName: catMap[d.category_id || d.category] || "General" })));
     }).finally(() => setIsLoading(false));
   }, [enabled]);

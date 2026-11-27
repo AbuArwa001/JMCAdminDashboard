@@ -57,7 +57,7 @@ export default function DonationsPage() {
       <RecentDonationsTable
         transactions={filtered}
         isLoading={isLoading}
-        itemsPerPage={5}
+        itemsPerPage={10}
         title="Donations Ledger"
         subtitle="Complete history of community donations"
         hideLedgerLink={true}
