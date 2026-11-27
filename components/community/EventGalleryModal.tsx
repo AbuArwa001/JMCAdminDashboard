@@ -22,7 +22,7 @@ export function EventGalleryModal({ event, onClose, onRefresh }: Props) {
       data.append("event", currentEvent.id);
       data.append("image", file);
       if (caption) data.append("caption", caption);
-      await api.post("/api/v1/events/images/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post("/api/v1/events/images/", data);
       setFile(null);
       setCaption("");
       const updated = (await api.get(`/api/v1/events/${currentEvent.id}/`)).data;

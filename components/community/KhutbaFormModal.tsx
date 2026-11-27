@@ -30,7 +30,7 @@ export function KhutbaFormModal({ initial, onClose, onSuccess, setIsSubmitting, 
       Object.keys(form).forEach((k) => { if (form[k] !== null && form[k] !== "") data.append(k, form[k]); });
       if (photo) data.append("imam_photo", photo);
       const url = form.id ? `/api/v1/khutba/${form.id}/` : "/api/v1/khutba/";
-      await api[form.id ? "patch" : "post"](url, data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api[form.id ? "patch" : "post"](url, data);
       toast.success(`Khutba ${form.id ? "updated" : "created"} successfully.`);
       onSuccess();
     } catch { toast.error("Failed to save khutba."); } finally { setIsSubmitting(false); }

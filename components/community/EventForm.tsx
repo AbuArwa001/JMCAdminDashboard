@@ -43,7 +43,7 @@ export function EventForm({ initial, categories, onClose, onSuccess, isSaving, s
       if (coverImage) data.append("cover_image", coverImage);
       if (guestPhoto) data.append("guest_photo", guestPhoto);
       const url = form.id ? `/api/v1/events/${form.id}/` : "/api/v1/events/";
-      await api[form.id ? "patch" : "post"](url, data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api[form.id ? "patch" : "post"](url, data);
       onSuccess();
     } catch (err) { console.error(err); } finally { setIsSaving(false); }
   };

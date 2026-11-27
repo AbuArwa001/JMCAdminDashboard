@@ -30,7 +30,7 @@ export function BulletinForm({ onClose, onSuccess, isSubmitting, setIsSubmitting
       data.append("is_active", form.is_active ? "true" : "false");
       data.append("pdf_file", pdfFile);
       if (coverPhoto) data.append("cover_image", coverPhoto);
-      await api.post("/api/v1/bulletins/", data, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post("/api/v1/bulletins/", data);
       toast.success("Bulletin uploaded successfully.");
       onSuccess();
     } catch { toast.error("Failed to upload bulletin."); } finally { setIsSubmitting(false); }
