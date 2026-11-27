@@ -16,7 +16,7 @@ export function EventCard({ event, onGallery, onNotify, onEdit, onDelete }: Prop
     <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col relative">
       <div className="h-48 bg-gray-100 relative">
         {event.cover_image ? (
-          <Image src={event.cover_image} alt={event.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+          <Image src={getMediaUrl(event.cover_image)} alt={event.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center">
             <ImageIcon className="w-10 h-10 text-amber-300" />
