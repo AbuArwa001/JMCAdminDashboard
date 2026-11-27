@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { format } from "date-fns";
 import { Mic, Bell, Edit, Trash } from "lucide-react";
+import { getMediaUrl } from "@/lib/media-utils";
 
 interface Props {
   khutbas: any[];
@@ -32,7 +33,7 @@ export function KhutbaTable({ khutbas, onNotify, onEdit, onDelete }: Props) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    {k.imam_photo && <Image src={k.imam_photo} alt={k.imam_name} width={28} height={28} className="rounded-lg object-cover border border-gray-200" />}
+                    {k.imam_photo && <Image src={getMediaUrl(k.imam_photo)} alt={k.imam_name} width={28} height={28} className="rounded-lg object-cover border border-gray-200" />}
                     <span className="text-sm font-medium text-gray-700">{k.imam_name}</span>
                   </div>
                 </td>

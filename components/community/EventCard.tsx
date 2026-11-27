@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { format } from "date-fns";
 import { Image as ImageIcon, Bell, Edit, Trash } from "lucide-react";
+import { getMediaUrl } from "@/lib/media-utils";
 
 interface Props {
   event: any;
